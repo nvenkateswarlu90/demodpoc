@@ -13,7 +13,7 @@ public class DistrictWiseNormalLoadCapacity {
 
 	 @Id
 	 @Column(name="distNo")
-	 @GeneratedValue(strategy = GenerationType.AUTO)
+	 @GeneratedValue(strategy = GenerationType.IDENTITY)
 	 private Integer id;
 	 @Column(name="district_name")
 	 private String districtName;

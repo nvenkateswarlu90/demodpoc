@@ -34,7 +34,7 @@ public class ShippingOrderImpl implements IShippingOrder {
 
 	@Override
 	public List<ShippingDetails1> getAllShippingOrders() {
-		List<ShippingEntity> shippingOrdersList = shippingOrderDao.getAllShippingOrders();
+		List<ShippingEntity> shippingOrdersList = shippingOrderDao.listAllData(ShippingEntity.class);
 		List<ShippingDetails1> shippingOrderList = new ArrayList<>();
 		ShippingDetails1 shippingDetails = null;
 		for (ShippingEntity shippingEntity : shippingOrdersList) {
@@ -70,7 +70,7 @@ public class ShippingOrderImpl implements IShippingOrder {
 	@Override
 	public List<TruckHistoryDetailsEntity> getAllTrucksHistoryDetails() {
 
-		return shippingOrderDao.getAllTrucksHistoryDetails();
+		return shippingOrderDao.listAllData(TruckHistoryDetailsEntity.class);
 	/*List<TruckHistoryDetailsEntity> truckEntityDetailsList = shippingOrderDao.getAllTrucksHistoryDetails();
 	List<TruckHistoryDetail> truckHistoryDetailList = new ArrayList<>();
 	TruckHistoryDetail truckDetailsObj = null;
@@ -128,7 +128,7 @@ public class ShippingOrderImpl implements IShippingOrder {
 
 	@Override
 	public List<TruckDetails> getAllTruckInfo() {
-		List<TruckDetailsEntity> truckDetailsEntity = shippingOrderDao.getAllTruckInfo();
+		List<TruckDetailsEntity> truckDetailsEntity = shippingOrderDao.listAllData(TruckDetailsEntity.class);
 		List<TruckDetails> truckDetailsList = new ArrayList<>();
 		TruckDetails truckDetailObj = null;
 		for (TruckDetailsEntity truckDtlsEntity : truckDetailsEntity) {
@@ -170,7 +170,7 @@ public class ShippingOrderImpl implements IShippingOrder {
 
 	@Override
 	public List<OrderGroup> getAllGroupOrderList() {
-		List<OrderGroupEntity> orderGroupEntityList = shippingOrderDao.getALLGroupOrders();
+		List<OrderGroupEntity> orderGroupEntityList = shippingOrderDao.listAllData(OrderGroupEntity.class);
 		List<OrderGroup> orderGroupList = new ArrayList<>();
 		OrderGroup orderGroup = null;
 		for (OrderGroupEntity ordGrpEntity : orderGroupEntityList) {
@@ -278,7 +278,7 @@ public class ShippingOrderImpl implements IShippingOrder {
 
 	@Override
 	public List<DistrictWiseNormalLoadCapacity> getAllDistrictWiseLoads() {
-		return shippingOrderDao.getAllDistrictWiseLoads();
+		return shippingOrderDao.listAllData(DistrictWiseNormalLoadCapacity.class);
 	}
 		
 
@@ -345,7 +345,7 @@ public class ShippingOrderImpl implements IShippingOrder {
 	@Override
 	public List<DistrictClubOrdByPass> getAllDistrictClubOrdByPass() {
 		
-		List<DistrictClubOrdByPassEntity> distList =  shippingOrderDao.getAllDistrictClubOrdByPass();
+		List<DistrictClubOrdByPassEntity> distList =  shippingOrderDao.listAllData(DistrictClubOrdByPassEntity.class);
 		List<DistrictClubOrdByPass> districtBypassList = new ArrayList<>();
 		DistrictClubOrdByPass distObj = null;
 		for (DistrictClubOrdByPassEntity districtClubOrdByPassEntity : distList) {
@@ -370,7 +370,7 @@ public class ShippingOrderImpl implements IShippingOrder {
 	@Override
 	public List<AxleWheelTypeEntity> getAllAxleWheelTypeEntity() {
 		// TODO Auto-generated method stub
-		return shippingOrderDao.getAllAxleWheelTypeEntity();
+		return shippingOrderDao.listAllData(AxleWheelTypeEntity.class);
 	}
 
 

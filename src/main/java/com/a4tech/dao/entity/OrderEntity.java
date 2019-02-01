@@ -24,7 +24,7 @@ public class OrderEntity implements Serializable{
 	private static final long serialVersionUID = 1L;
 	@Id
 	@Column(name="id")
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int shippingID;
 	
 	

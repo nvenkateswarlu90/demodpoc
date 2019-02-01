@@ -324,7 +324,7 @@ public class ShippingDetailController {
 
 
 
-/*@RequestMapping(value="/updateTruckHistoryDetails", method = RequestMethod.POST)
+@RequestMapping(value="/updateTruckHistoryDetails", method = RequestMethod.POST)
 public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model) throws IOException {
 	  int countTruckDetailsFile=5;
 	  int numberOfCells=0;
@@ -360,7 +360,7 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 	}
 	
 	
-	/*@RequestMapping(value = "/searchByVehicleNo" ,produces = "application/json")
+	@RequestMapping(value = "/searchByVehicleNo" ,produces = "application/json")
 	@ResponseBody
 	public  List<TruckHistoryDetailsEntity> getSearch(HttpServletRequest req,Model model) {
 
@@ -379,7 +379,7 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return searchHistoryList;
 	
 	}
-*/	
+
 	@RequestMapping(value = "/searchByVehicleNoDistrictName")
 	public ModelAndView getSearch1(HttpServletRequest req, Model model) {
 
@@ -497,7 +497,9 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 
 	
 	@RequestMapping(value = "/axelWheelConfiguration", method = RequestMethod.GET)
-	public ModelAndView showAxelWheelConfiguration() {
+	public ModelAndView showAxelWheelConfiguration(Model model) {
+		 List<AxleWheelTypeEntity> listOfAxleWheller = shippingOrderService.getAllAxleWheelTypeEntity();
+		 model.addAttribute("axleWhllerList", listOfAxleWheller);
 		return new ModelAndView("axleWheelConfig", "axelWheelConfig",
 				new NormalLoadConfiguration());
 		/*return "configure_districtWise_Normal_load";*/
@@ -519,6 +521,8 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		 model.addAttribute("showMessage", "success");
 		 shippingOrderService.saveAxleWheelConfiguration(axleWheelConfig);
 		}
+		 List<AxleWheelTypeEntity> listOfAxleWheller = shippingOrderService.getAllAxleWheelTypeEntity();
+		 model.addAttribute("axleWhllerList", listOfAxleWheller);
 		return "axleWheelConfig";
 			
 	}

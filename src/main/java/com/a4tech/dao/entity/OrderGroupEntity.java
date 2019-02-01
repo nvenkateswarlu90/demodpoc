@@ -17,7 +17,7 @@ import javax.persistence.TemporalType;
 @Table(name="ordergroup")
 public class OrderGroupEntity {
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="Order_Group_Id")
 	private Integer orderGroupId;
 	@Column(name="Delivary_No")

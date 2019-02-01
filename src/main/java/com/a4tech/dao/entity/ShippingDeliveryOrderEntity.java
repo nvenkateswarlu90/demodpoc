@@ -15,7 +15,7 @@ import javax.persistence.TemporalType;
 @Table(name = "shipping_delivery_order")
 public class ShippingDeliveryOrderEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "shipping_delivery_id")
 	private Integer id;
 	@Column(name = "truck_no")

@@ -1,4 +1,4 @@
-package com.a4tech.shipping.shippingDaoImpl;
+/*package com.a4tech.shipping.shippingDaoImpl;
 
 
 import java.util.ArrayList;
@@ -34,10 +34,10 @@ import com.mysql.cj.x.protobuf.MysqlxCrud.CreateViewOrBuilder;
 
 
 @Transactional
-public class ShippingDao implements IshippingOrderDao{ 
+public class ShippingDao_old implements IshippingOrderDao{ 
 
 	SessionFactory sessionFactory;
-     private Logger _LOGGER = Logger.getLogger(ShippingDao.class);
+     private Logger _LOGGER = Logger.getLogger(ShippingDao_old.class);
 	public void saveShippingEntity(ShippingEntity shippingEntityBean) {
 		Session session = null;
 		Transaction transaction = null;
@@ -69,9 +69,9 @@ public class ShippingDao implements IshippingOrderDao{
 		try {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
-			/*Criteria criteria = session.createCriteria(ShippingEntity.class);
+			Criteria criteria = session.createCriteria(ShippingEntity.class);
 			criteria.add(Restrictions.eq("isOrderGroup", "No"));
-			List<ShippingEntity> shippingData = criteria.list();*/
+			List<ShippingEntity> shippingData = criteria.list();
 			List<ShippingEntity> shippingData = session.createCriteria(ShippingEntity.class).list();
 			//transaction.commit();
 			return shippingData;
@@ -326,9 +326,9 @@ public class ShippingDao implements IshippingOrderDao{
 			return finalDelivaryOrdsList;
 		} catch (Exception ex) {
 			_LOGGER.error("unable to get shipping order data from DB based on date: "+ex.getCause());
-			/*if (transaction != null) {
+			if (transaction != null) {
 				transaction.rollback();
-			}*/
+			}
 		} finally {
 			if (session != null) {
 				try {
@@ -353,9 +353,9 @@ public class ShippingDao implements IshippingOrderDao{
 			query.setParameter("delivery", delivaryNo);
 			query.executeUpdate();
 			
-			/*ShippingEntity shippingEntity = (ShippingEntity) session.get(ShippingEntity.class, delivaryNo);
+			ShippingEntity shippingEntity = (ShippingEntity) session.get(ShippingEntity.class, delivaryNo);
 			shippingEntity.setIsOrderGroup("Yes");
-			session.saveOrUpdate(shippingEntity);*/
+			session.saveOrUpdate(shippingEntity);
 			transaction.commit();
 			_LOGGER.info("Order Details data has been updated successfully in db");
 		} catch (Exception ex) {
@@ -405,12 +405,12 @@ public class ShippingDao implements IshippingOrderDao{
 		Session session = null;
 		Transaction transaction = null;
 		try {
-			/*session = sessionFactory.openSession();
+			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();			
 			Query q2 = session.createQuery ("TRUNCATE table OrderGroupEntity");
             int deleted = q2.executeUpdate ();
 			
-			transaction.commit();*/
+			transaction.commit();
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
 			String hql = String.format("delete from %s","OrderGroupEntity");
@@ -501,7 +501,7 @@ public class ShippingDao implements IshippingOrderDao{
 		}
 		return null;
 	}
-/*	@Override
+	@Override
 	public List<TruckHistoryDetails> getAllTrucksHistoryDetails() {
 		Session session = null;
 		try {
@@ -521,7 +521,7 @@ public class ShippingDao implements IshippingOrderDao{
 				}
 			}
 		}
-		return new ArrayList<>();}*/
+		return new ArrayList<>();}
 	
 	@Override
 	public void saveTruckhistory(TruckHistoryDetailsEntity truckHistory) {
@@ -626,10 +626,10 @@ public class ShippingDao implements IshippingOrderDao{
 		Session session = null;
 		Transaction transaction = null;
 		try {
-			/*session = sessionFactory.openSession();
+			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
 			session.update(normalLoad);
-			transaction.commit();*/
+			transaction.commit();
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
 			
@@ -899,22 +899,6 @@ public class ShippingDao implements IshippingOrderDao{
 		}
 		return null;
 	}
-	@Override
-	public <T> List<T> listAllDataById(Class<T> clazz, String variableName, T val) {
-		Session session = null;
-		try {
-			session = sessionFactory.openSession();
-		    CriteriaBuilder builder=	session.getCriteriaBuilder();
-	        CriteriaQuery<T> query= builder.createQuery(clazz);
-	       Root<T> rootEntry =  query.from(clazz);
-	       query.select(rootEntry).where(builder.equal(rootEntry.get(variableName), val));
-	      TypedQuery<T> q = session.createQuery(query);
-	     return  q.getResultList();
-		}catch (Exception ex) {
-			_LOGGER.error("unable to fetch list of data by id"+ex.getCause());
-		}
-		return new ArrayList<>();
-	}
 
 	
 	
@@ -925,3 +909,4 @@ public class ShippingDao implements IshippingOrderDao{
 	
 	
 }
+*/
