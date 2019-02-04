@@ -65,6 +65,7 @@
 				<value>com.a4tech.dao.entity.TruckHistoryDetailsEntity</value>
 	            <value>com.a4tech.dao.entity.AxleWheelTypeEntity</value>
 				<value>com.a4tech.dao.entity.DistrictClubOrdByPassEntity</value>
+				<value>com.a4tech.dao.entity.AxleWheelnfoEntity</value>
 				
 			</list>
 		</property>

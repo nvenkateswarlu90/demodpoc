@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -40,6 +41,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -49,6 +51,7 @@ import org.springframework.web.servlet.ModelAndView;
 import saveShipping.StoreSpDetails;
 
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
+import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.map.model.Address;
@@ -525,6 +528,17 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		 model.addAttribute("axleWhllerList", listOfAxleWheller);
 		return "axleWheelConfig";
 			
+	}
+	
+		
+	
+	@RequestMapping(value = "axelWheelValue")
+	@ResponseBody
+	public List<AxleWheelnfoEntity> getDropdownValue(HttpServletRequest req){
+		String name=req.getParameter("optionValue");
+		  List<AxleWheelnfoEntity> infoList=shippingOrderService.getWheelTypeInfo(name);
+		return infoList;
+
 	}
 	
 	

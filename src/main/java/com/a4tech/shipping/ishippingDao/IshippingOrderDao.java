@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
+import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.OrderGroupEntity;
@@ -42,6 +43,7 @@ public interface IshippingOrderDao {
   public AxleWheelTypeEntity getAxlewheel(String wheelType);
   public List<AxleWheelTypeEntity> getAllAxleWheelTypeEntity();
   public void updateTruckhistory(TruckHistoryDetailsEntity historyObj);
+  public List<AxleWheelnfoEntity> getWheelTypeInfo(String name);
   
   public <T> List<T> listAllData(Class<T> clazz); 
   public <T> List<T> listAllDataById(Class<T> clazz,String variableName,T val);

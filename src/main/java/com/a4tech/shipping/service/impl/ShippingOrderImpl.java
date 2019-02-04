@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
@@ -372,6 +373,15 @@ public class ShippingOrderImpl implements IShippingOrder {
 		// TODO Auto-generated method stub
 		return shippingOrderDao.listAllData(AxleWheelTypeEntity.class);
 	}
+
+
+	@Override
+	public List<AxleWheelnfoEntity> getWheelTypeInfo(String name) {
+		// TODO Auto-generated method stub
+		return shippingOrderDao.getWheelTypeInfo(name);
+	}
+
+
 
 
 

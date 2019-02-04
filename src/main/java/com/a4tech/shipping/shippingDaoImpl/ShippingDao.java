@@ -2,6 +2,8 @@ package com.a4tech.shipping.shippingDaoImpl;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.TypedQuery;
@@ -22,6 +24,7 @@ import org.hibernate.query.criteria.internal.compile.CriteriaQueryTypeQueryAdapt
 import org.springframework.transaction.annotation.Transactional;
 
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
+import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.OrderGroupEntity;
@@ -856,6 +859,40 @@ public class ShippingDao implements IshippingOrderDao{
 		}		
 	
 	}
+	@Override
+	public List<AxleWheelnfoEntity> getWheelTypeInfo(String name) {
+
+
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+					
+			Criteria cq= session.createCriteria(AxleWheelnfoEntity.class);
+			List<AxleWheelnfoEntity> wheelrList = cq.add(Restrictions.eq("no",Integer.parseInt(name))).list();
+		
+			transaction.commit();
+			return wheelrList;
+		} catch (Exception ex) {
+			_LOGGER.error("unable to get wheelnfoEntity data from DB  "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} finally {
+			if (session != null) {
+				try {
+					session.close();
+				} catch (Exception ex) {
+				}
+			}
+		}
+		return new ArrayList<>();
+	
+	}
+	
+	
+	
 	@Override
 	public <T> List<T> listAllData(Class<T> clazz) {
 		Session session = null;

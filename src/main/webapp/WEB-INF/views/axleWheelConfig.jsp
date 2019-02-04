@@ -142,47 +142,59 @@
       </div>
      
             <div class="row">
-                <div class="col-lg-10">
-                   <form:form method="POST" action="/DropdownExample">
+                <div class="col-lg-11">
+                   <form:form method="POST" action="/test">
                     <div class="ibox float-e-margins">
                         <div class="ibox-title">
                      
 							<div class="form-group"> <h5>Axle/Wheeler type  </h5>
 
-                                    <div class="col-sm-2">
-                                    <select class="form-control"> 
-                 <%--                    <option value="Select" label="Select Axle Wheeler Type">
-                            
-                       <options items="${dropDwnList}" /> 
-                        --%>
-                        <label path = "axlewheelertype">axlewheelertype</label>
-                           <select path = "axlewheelertype">
-                     <option value = "NONE" label = "Select"/>
-                     <options items = "${dropDwnList}" />
-                  </select>        
-                                    
-					<!-- 	<option value="Junior Developer" label="Junior Developer"/>
-						<option value="Developer" label="Developer"/>
-						<option value="Senior Developer" label="Senior Developer"/>
-						<option value="Manager" label="Manager"/> -->
-         
-                                    </option>
-                                    
-                                    </select>				
+                                  <div class="col-sm-3">
+                                  <select id="mySelect" class="form-control" style="color:#000 !important; margin-top:-7px;"> 
+                                  <option value="Select" label="Select Axle Wheeler Type" name="vu">
+				    					<option value="6" label="6 Wheeler"/>
+										<option value="10" label="10 Wheeler"/>
+										<option value="12" label="12 Wheeler"/>
+										<option value="14" label="14 Wheeler"/>
+         								<option value="18" label="18 Wheeler"/>
+                               </select>				
                                        
-                                    </div>
-                                </div>
-					</div>
-
-                        </div>
-                        </form:form>
+                                     </div>
+                                     </div>
+					                 </div>
+                                      </div>
+                                  </form:form>
                         
                         
                         <div class="ibox-content">
 						
-                        <button type="button" class="btn btn-info add-new pull-right"><i class="fa fa-plus"></i> Add New</button>
-                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#create" onClick="fnClear()">Create Axle/Wheel</button>
-                      
+                      <button type="button" class="btn btn-info add-new pull-right"><i class="fa fa-plus"></i> Add New</button>
+ <!--                          <button type="button" class="btn btn-info" data-toggle="modal" data-target="#create" onClick="fnClear()">Create Axle/Wheel</button>
+ -->    
+                        <table class="table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Sl.No</th>
+                                    <th>Lead from 1st order</th>
+                                    <th>Clubbing forward</th>
+                                  <!--   <th>Action</th> -->
+                                   
+                                </tr>
+                                </thead>
+                                <tbody id="axleWhel">
+                                <tr>
+                                   <!--  <td>1</td>
+                                    <td>Upto 50 kms</td>
+                                    <td>Any next order </td>
+                                    <td>
+							<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                            <a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>
+                            <a class="delete" title="Delete" data-toggle="tooltip"><i class="material-icons">&#xE872;</i></a>
+                        </td> -->
+                                </tr>
+                                    </tbody>
+                            </table>
+                                          
                       
                         
             <div id="create" class="modal fade" role="dialog">
@@ -257,6 +269,85 @@ function fnClear()
 $('#errExist').hide();
 }
 
+
+$(document).ready(function()
+		{
+	  $("#mySelect").change(function()
+			  {
+				 var value = $("#mySelect option:selected").val(); 
+				var srNo = 1 ;
+				 $.ajax({
+	    				type : "GET",
+	    				url : "axelWheelValue",
+	    				data : "optionValue=" + value,
+	    				success : function(response) {
+	    					var json = JSON.stringify(response);
+	    					$("#axleWhel").empty();
+	    					$.each(response, function(i, value) {
+	     						 $("#axleWhel").append("<tr><td>" + value.id + "</td><td>" + value.order + "</td><td>" + value.club + "</td></tr>");  
+	     						//srNo = srNo+1;
+	     					});
+	  	    				},
+	    				error : function(e) {
+	    					 alert('Error: ' + e); 
+	    				}
+	    			});
+			   });
+		});
+
+
+$(document).ready(function(){
+	$('[data-toggle="tooltip"]').tooltip();
+	var actions = $("table td:last-child").html();
+	// Append table with add row form on add new button click
+    $(".add-new").click(function(){
+		$(this).attr("disabled", "disabled");
+		var index = $("table tbody tr:last-child").index();
+        var row = '<tr>' +
+            '<td><input type="text" class="form-control" name="name" id="name"></td>' +
+            '<td><input type="text" class="form-control" name="department" id="department"></td>' +
+            '<td><input type="text" class="form-control" name="phone" id="phone"></td>' +
+			'<td>' + actions + '</td>' +
+        '</tr>';
+    	$("table").append(row);		
+		$("table tbody tr").eq(index + 1).find(".add, .edit").toggle();
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+	// Add row on add button click
+	$(document).on("click", ".add", function(){
+		var empty = false;
+		var input = $(this).parents("tr").find('input[type="text"]');
+        input.each(function(){
+			if(!$(this).val()){
+				$(this).addClass("error");
+				empty = true;
+			} else{
+                $(this).removeClass("error");
+            }
+		});
+		$(this).parents("tr").find(".error").first().focus();
+		if(!empty){
+			input.each(function(){
+				$(this).parent("td").html($(this).val());
+			});			
+			$(this).parents("tr").find(".add, .edit").toggle();
+			$(".add-new").removeAttr("disabled");
+		}		
+    });
+	// Edit row on edit button click
+	$(document).on("click", ".edit", function(){		
+        $(this).parents("tr").find("td:not(:last-child)").each(function(){
+			$(this).html('<input type="text" class="form-control" value="' + $(this).text() + '">');
+		});		
+		$(this).parents("tr").find(".add, .edit").toggle();
+		$(".add-new").attr("disabled", "disabled");
+    });
+	// Delete row on delete button click
+	$(document).on("click", ".delete", function(){
+        $(this).parents("tr").remove();
+		$(".add-new").removeAttr("disabled");
+    });
+});
 
 
 </script>
