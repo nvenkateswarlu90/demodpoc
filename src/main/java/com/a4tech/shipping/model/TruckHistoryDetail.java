@@ -1,7 +1,5 @@
 package com.a4tech.shipping.model;
 
-import java.util.Date;
-
 public class TruckHistoryDetail {
 
 	
@@ -11,8 +9,7 @@ public class TruckHistoryDetail {
 	private String districtName;
 	private Integer ratedLoad;
 	private Integer normalLoad;
-	//private Date lastTransactionOfNormalLoad;
-
+    private String wheelerType;	
 	
 	public Integer getSr_No() {
 		return Sr_No;
@@ -50,13 +47,12 @@ public class TruckHistoryDetail {
 	public void setNormalLoad(Integer normalLoad) {
 		this.normalLoad = normalLoad;
 	}
-/*	public Date getLastTransactionOfNormalLoad() {
-		return lastTransactionOfNormalLoad;
+	public String getWheelerType() {
+		return wheelerType;
 	}
-	public void setLastTransactionOfNormalLoad(Date lastTransactionOfNormalLoad) {
-		this.lastTransactionOfNormalLoad = lastTransactionOfNormalLoad;
-	}*/
-	
+	public void setWheelerType(String wheelerType) {
+		this.wheelerType = wheelerType;
+	}
 
 	
 	

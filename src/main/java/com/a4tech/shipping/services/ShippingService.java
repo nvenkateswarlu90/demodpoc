@@ -3,7 +3,6 @@ package com.a4tech.shipping.services;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,12 +11,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.a4tech.dao.entity.AxleWheelnfoEntity;
+import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.map.service.MapService;
 import com.a4tech.shipping.iservice.IShippingOrder;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
@@ -26,7 +29,9 @@ import com.a4tech.shipping.model.OrderGroup;
 import com.a4tech.shipping.model.PlantDetails;
 import com.a4tech.shipping.model.ShippingDeliveryOrder;
 import com.a4tech.shipping.model.ShippingDetails1;
-import com.a4tech.shipping.model.TruckDetails;
+import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
+import com.a4tech.shipping.model.AvailableTrucksModel;
+import com.a4tech.shipping.model.TruckHistoryDetail;
 import com.a4tech.util.TruckTypeInfo;
 
 import saveShipping.StoreSpDetails;
@@ -37,6 +42,7 @@ public class ShippingService {
 	StoreSpDetails sd = new StoreSpDetails();
 	@Autowired
 	private IShippingOrder shippingOrderService;
+	private Logger _LOGGER = Logger.getLogger(ShippingService.class);
 
 	public Map<String, Map<String, Map<Integer, List<ShippingDetails1>>>> getOrdersBasedOnDistence(
 			Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrd) {
@@ -68,7 +74,7 @@ public class ShippingService {
 						}
 
 					} catch (IOException e) {
-						System.out.println("Unbale to calculate distence :" + e.getCause());
+						System.out.println("Unbale to calculate distence :" + e.getCause());  
 						e.printStackTrace();
 					}
 
@@ -99,22 +105,22 @@ public class ShippingService {
 		}
 		return distanceBand;
 	}
-	public Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> getOrdersFitIntoTruck(
+	public Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> getOrdersFitIntoTruck(
 			Map<String, Map<String, Map<Integer, List<ShippingDetails1>>>> groupByDistance) {
 		// List<TruckDetails> initialTruckInfoList =
 		// shippingOrder.getAllTruckInfo();
 		List<ShippingDetails1> unGroupOrderList = new ArrayList<>();
-		List<TruckDetails> allAssignedTrucksList = new ArrayList<>();
-		Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> finalTruckDetails = new HashMap<>();
+		List<AvailableTrucksModel> allAssignedTrucksList = new ArrayList<>();
+		Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails = new HashMap<>();
 		for (Map.Entry<String, Map<String, Map<Integer, List<ShippingDetails1>>>> ordGrpList : groupByDistance.entrySet()) {
 			String districtName = ordGrpList.getKey();
 			Map<String, Map<Integer, List<ShippingDetails1>>> vals = ordGrpList.getValue();
-			Map<List<ShippingDetails1>, List<TruckDetails>> truckAndOrderMap = new HashMap<>();
+			Map<List<ShippingDetails1>, List<AvailableTrucksModel>> truckAndOrderMap = new HashMap<>();
 			for (Map.Entry<String, Map<Integer, List<ShippingDetails1>>> distanceByGroup : vals.entrySet()) {
 				String materialName = distanceByGroup.getKey();
 				Map<Integer, List<ShippingDetails1>> vals1 = distanceByGroup.getValue();
 				for (Map.Entry<Integer, List<ShippingDetails1>> ordList : vals1.entrySet()) {
-					List<TruckDetails> trucksList = new ArrayList<>();
+					List<AvailableTrucksModel> trucksList = new ArrayList<>();
 					Integer orderDistance = ordList.getKey();
 					List<ShippingDetails1> ordsList = ordList.getValue();
 					/*if (ordsList.size() == 1) {// if single order contain for same
@@ -144,11 +150,11 @@ public class ShippingService {
 		return finalTruckDetails;
 	}
 
-	private List<TruckDetails> getHeavyTruckList(List<TruckDetails> groupTruckList, int totOrdQty,
-			List<TruckDetails> allAssignedTrucksList) {
-		List<TruckDetails> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
+	private List<AvailableTrucksModel> getHeavyTruckList(List<AvailableTrucksModel> groupTruckList, int totOrdQty,
+			List<AvailableTrucksModel> allAssignedTrucksList) {
+		List<AvailableTrucksModel> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
 		double initialTruckCap = totOrdQty - (totOrdQty * 0.5);
-		TruckDetails initialTruckDetails = getTruckDetails(initialTruckInfoList, initialTruckCap);
+		AvailableTrucksModel initialTruckDetails = getTruckDetails(initialTruckInfoList, initialTruckCap);
 
 		if (initialTruckDetails != null) {// if order qty is equal to truck
 											// capacity
@@ -157,8 +163,8 @@ public class ShippingService {
 			groupTruckList.add(initialTruckDetails);
 			return groupTruckList;
 		}
-		TruckDetails tDetails = Collections.max(initialTruckInfoList,
-				Comparator.comparing(TruckDetails::getVehicleType));// maximum
+		AvailableTrucksModel tDetails = Collections.max(initialTruckInfoList,
+				Comparator.comparing(AvailableTrucksModel::getVehicleType));// maximum
 																	// truck
 																	// details
 		int truckMaxCapacity = tDetails.getVehicleType();
@@ -178,8 +184,8 @@ public class ShippingService {
 		}
 		return groupTruckList;
 	}
-	private TruckDetails getOrderHeavyTruck(List<TruckDetails> allTrucksList, TruckDetails truckDetails,
-			List<TruckDetails> assignedTruckList) {
+	private AvailableTrucksModel getOrderHeavyTruck(List<AvailableTrucksModel> allTrucksList, AvailableTrucksModel truckDetails,
+			List<AvailableTrucksModel> assignedTruckList) {
 		/*
 		 * if(CollectionUtils.isEmpty(assignedTruckList)){ return truckDetails;
 		 * }
@@ -188,11 +194,11 @@ public class ShippingService {
 		int truckCapacity = truckDetails.getVehicleType();
 		double maxCapacity = truckCapacity + (truckCapacity * 0.5);
 		truckDetails.setVehicleType((int) maxCapacity);
-		String allTruckNos = assignedTruckList.stream().map(TruckDetails::getSlNo).collect(Collectors.joining(","));
+		String allTruckNos = assignedTruckList.stream().map(AvailableTrucksModel::getSlNo).collect(Collectors.joining(","));
 		if (!allTruckNos.contains(truckNo)) {
 			return truckDetails;
 		} else {
-			for (TruckDetails truckDtls : allTrucksList) {
+			for (AvailableTrucksModel truckDtls : allTrucksList) {
 				if (truckDtls.getVehicleType() == truckCapacity && !allTruckNos.contains(truckDtls.getSlNo())) {
 					truckDtls.setVehicleType((int) maxCapacity);
 					return truckDtls;
@@ -201,8 +207,8 @@ public class ShippingService {
 		}
 		return truckDetails;
 	}
-	private TruckDetails getTruckDetails(List<TruckDetails> truckInfoList, double qty) {
-		for (TruckDetails truckDetails : truckInfoList) {
+	private AvailableTrucksModel getTruckDetails(List<AvailableTrucksModel> truckInfoList, double qty) {
+		for (AvailableTrucksModel truckDetails : truckInfoList) {
 			int truckCapacity = truckDetails.getVehicleType();
 			double truckmaxCapacity = truckCapacity + (truckCapacity * 0.5);
 			if (truckmaxCapacity == qty) {
@@ -211,16 +217,16 @@ public class ShippingService {
 		}
 		return null;
 	}
-	private List<TruckDetails> getHeavyGroupTruckDetails(List<TruckDetails> truckInfoList, double qty,
-			List<TruckDetails> truckGroupList, List<TruckDetails> allAssignedTrucksList) {
+	private List<AvailableTrucksModel> getHeavyGroupTruckDetails(List<AvailableTrucksModel> truckInfoList, double qty,
+			List<AvailableTrucksModel> truckGroupList, List<AvailableTrucksModel> allAssignedTrucksList) {
 		if (qty < 8) {
 			return truckGroupList;
 		}
-		TruckDetails maxTruckDetails = null;
+		AvailableTrucksModel maxTruckDetails = null;
 		if (qty == 18.0) {
 			maxTruckDetails = getMaxCapacityTruckDetails("", 12, truckInfoList);
 		} else {
-			maxTruckDetails = truckInfoList.stream().max(Comparator.comparing(TruckDetails::getVehicleType))
+			maxTruckDetails = truckInfoList.stream().max(Comparator.comparing(AvailableTrucksModel::getVehicleType))
 					.orElseThrow(NoSuchElementException::new);
 		}
 
@@ -228,7 +234,7 @@ public class ShippingService {
 		if (truckCapacity == 27) {
 			truckCapacity = 18;
 		}
-		String assignedTruckNo = allAssignedTrucksList.stream().map(TruckDetails::getSlNo)
+		String assignedTruckNo = allAssignedTrucksList.stream().map(AvailableTrucksModel::getSlNo)
 				.collect(Collectors.joining(","));
 		if (assignedTruckNo.contains(maxTruckDetails.getSlNo())) {
 			maxTruckDetails = getMaxCapacityTruckDetails(assignedTruckNo, truckCapacity, truckInfoList);
@@ -246,7 +252,7 @@ public class ShippingService {
 			truckGroupList.add(maxTruckDetails);
 		} else {
 			double truckCap = qty - (qty * 0.5);
-			TruckDetails tt = truckInfoList.stream()
+			AvailableTrucksModel tt = truckInfoList.stream()
 					.reduce((result, current) -> Math.abs(truckCap - current.getVehicleType()) < Math
 							.abs(truckCap - result.getVehicleType()) ? current : result)
 					.get();
@@ -264,9 +270,9 @@ public class ShippingService {
 		}
 		return truckGroupList;
 	}
-	private TruckDetails getMaxCapacityTruckDetails(String allAssignedTrucks, int truckCapacity,
-			List<TruckDetails> truckDetails) {
-		for (TruckDetails truckDetails2 : truckDetails) {
+	private AvailableTrucksModel getMaxCapacityTruckDetails(String allAssignedTrucks, int truckCapacity,
+			List<AvailableTrucksModel> truckDetails) {
+		for (AvailableTrucksModel truckDetails2 : truckDetails) {
 			if (allAssignedTrucks.contains(truckDetails2.getSlNo())) {
 				continue;
 			} else {
@@ -277,11 +283,11 @@ public class ShippingService {
 		}
 		return null;
 	}
-	private List<TruckDetails> getNormalTruckList(List<TruckDetails> groupTruckList, int orderQty,
-			List<TruckDetails> allAssignedTrucksList) {
-		List<TruckDetails> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
-		TruckDetails maxTruckDetails = initialTruckInfoList.stream()
-				.max(Comparator.comparing(TruckDetails::getVehicleType)).orElseThrow(NoSuchElementException::new);
+	private List<AvailableTrucksModel> getNormalTruckList(List<AvailableTrucksModel> groupTruckList, int orderQty,
+			List<AvailableTrucksModel> allAssignedTrucksList) {
+		List<AvailableTrucksModel> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
+		AvailableTrucksModel maxTruckDetails = initialTruckInfoList.stream()
+				.max(Comparator.comparing(AvailableTrucksModel::getVehicleType)).orElseThrow(NoSuchElementException::new);
 		int truckMaxCapacity = maxTruckDetails.getVehicleType();
 		if (orderQty > truckMaxCapacity) {// check order qty with max truck
 											// capacity
@@ -297,7 +303,7 @@ public class ShippingService {
 				if (remainingOrderQty > truckMaxCapacity) {
 					getNormalTruckList(groupTruckList, remainingOrderQty, allAssignedTrucksList);
 				} else {// l
-					TruckDetails truckDtls = getTruckDetails(initialTruckInfoList, remainingOrderQty, groupTruckList,
+					AvailableTrucksModel truckDtls = getTruckDetails(initialTruckInfoList, remainingOrderQty, groupTruckList,
 							allAssignedTrucksList);
 					if (truckDtls != null) {
 						allAssignedTrucksList.add(truckDtls);
@@ -331,8 +337,8 @@ public class ShippingService {
 
 			}
 		} else {// if orser qty is low compare to truck max capacity
-			TruckDetails tDetails = Collections.min(initialTruckInfoList,
-					Comparator.comparing(TruckDetails::getVehicleType));
+			AvailableTrucksModel tDetails = Collections.min(initialTruckInfoList,
+					Comparator.comparing(AvailableTrucksModel::getVehicleType));
 			tDetails = getOrderTruck(initialTruckInfoList, tDetails, allAssignedTrucksList);
 			allAssignedTrucksList.add(tDetails);
 			groupTruckList.add(tDetails);
@@ -340,19 +346,19 @@ public class ShippingService {
 		}
 		return groupTruckList;
 	}
-	private TruckDetails getOrderTruck(List<TruckDetails> allTrucksList, TruckDetails truckDetails,
-			List<TruckDetails> assignedTruckList) {
+	private AvailableTrucksModel getOrderTruck(List<AvailableTrucksModel> allTrucksList, AvailableTrucksModel truckDetails,
+			List<AvailableTrucksModel> assignedTruckList) {
 		/*
 		 * if(CollectionUtils.isEmpty(assignedTruckList)){ return truckDetails;
 		 * }
 		 */
 		String truckNo = truckDetails.getSlNo();
 		int truckCapacity = truckDetails.getVehicleType();
-		String allTruckNos = assignedTruckList.stream().map(TruckDetails::getSlNo).collect(Collectors.joining(","));
+		String allTruckNos = assignedTruckList.stream().map(AvailableTrucksModel::getSlNo).collect(Collectors.joining(","));
 		if (!allTruckNos.contains(truckNo)) {
 			return truckDetails;
 		} else {
-			for (TruckDetails truckDtls : allTrucksList) {
+			for (AvailableTrucksModel truckDtls : allTrucksList) {
 				if (truckDtls.getVehicleType() == truckCapacity && !allTruckNos.contains(truckDtls.getSlNo())) {
 					return truckDtls;
 				}
@@ -360,10 +366,10 @@ public class ShippingService {
 		}
 		return truckDetails;
 	}
-	private TruckDetails getTruckDetails(List<TruckDetails> initialTruckInfoList, int orderQty,
-			List<TruckDetails> groupTruckList, List<TruckDetails> allAssignedTrucksList) {
+	private AvailableTrucksModel getTruckDetails(List<AvailableTrucksModel> initialTruckInfoList, int orderQty,
+			List<AvailableTrucksModel> groupTruckList, List<AvailableTrucksModel> allAssignedTrucksList) {
 
-		for (TruckDetails truckDetails : initialTruckInfoList) {
+		for (AvailableTrucksModel truckDetails : initialTruckInfoList) {
 			if (truckDetails.getVehicleType() == orderQty) {
 				if (!isTruckGroup(groupTruckList, truckDetails.getSlNo())) {
 					truckDetails = getOrderTruck(initialTruckInfoList, truckDetails, allAssignedTrucksList);
@@ -373,30 +379,31 @@ public class ShippingService {
 		}
 		return null;
 	}
-	private boolean isTruckGroup(List<TruckDetails> truckList, String truckNo) {
-		String allTruckNos = truckList.stream().map(TruckDetails::getSlNo).collect(Collectors.joining(","));
+	private boolean isTruckGroup(List<AvailableTrucksModel> truckList, String truckNo) {
+		String allTruckNos = truckList.stream().map(AvailableTrucksModel::getSlNo).collect(Collectors.joining(","));
 		if (allTruckNos.contains(truckNo)) {
 			return true;
 		}
 		return false;
 	}
-	public void getFinalOrdersClub(Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> finalTruckDetails) {
+	public void getFinalOrdersClub(Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails) {
 		List<String> trucksNoAssigned = new ArrayList<>();
-			for (Map.Entry<String, Map<List<ShippingDetails1>, List<TruckDetails>>> data : finalTruckDetails.entrySet()) {
+			for (Map.Entry<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> data : finalTruckDetails.entrySet()) {
 				String districtName = data.getKey();
-				Map<List<ShippingDetails1>, List<TruckDetails>> ords = data.getValue();
+				Map<List<ShippingDetails1>, List<AvailableTrucksModel>> ords = data.getValue();
 				orderGroupByTruck1(ords,trucksNoAssigned);
 			}
 		}
 
-		private void orderGroupByTruck1(Map<List<ShippingDetails1>, List<TruckDetails>> groupTruckMap,List<String> trucksNoAssigned) {
-			for (Map.Entry<List<ShippingDetails1>, List<TruckDetails>> allDetails : groupTruckMap.entrySet()) {
+	///start
+		private void orderGroupByTruck1(Map<List<ShippingDetails1>, List<AvailableTrucksModel>> groupTruckMap,List<String> trucksNoAssigned) {
+			for (Map.Entry<List<ShippingDetails1>, List<AvailableTrucksModel>> allDetails : groupTruckMap.entrySet()) {
 				List<ShippingDetails1> ordersList = allDetails.getKey();
 				// List<ShippingDetails1> ordersList =
 				// intellship.getOrderDetailsList();
 				// ordersList.stream().map(ShippingDetails1::getActual_delivery_qty).
 				int allOrdsQtys = getAllOrdersQty(ordersList);
-				List<TruckDetails> groupTruckDetails = allDetails.getValue();
+				List<AvailableTrucksModel> groupTruckDetails = allDetails.getValue();
 				OrderGroup orderGroup = null;
 				List<OrderGroup> orderGroupList = new ArrayList<>();
 				Map<String, List<OrderGroup>> ordersMap = new HashMap<>();
@@ -405,7 +412,7 @@ public class ShippingService {
 				Map<String, List<OrderGroup>> ordersTruckMap = new HashMap<>();
 				Date todaysDate = new Date();
 				ShippingDeliveryOrder shippingDeliveryOrder = null; 
-				for (TruckDetails truckDetails : groupTruckDetails) {
+				for (AvailableTrucksModel truckDetails : groupTruckDetails) {
 					shippingDeliveryOrder = new ShippingDeliveryOrder();
 					int initialOrder = 1;
 					int truckCapacity = truckDetails.getVehicleType();
@@ -530,7 +537,7 @@ public class ShippingService {
 			}
 		}
 
-	
+	////end 
 	
 	private int getAllOrdersQty(List<ShippingDetails1> shippingDetailsList) {
 		int ordQty = 0;
@@ -645,8 +652,13 @@ public class ShippingService {
 				intellishModel.setLoadType(TruckTypeInfo.getLoadType(orderGrup.getDistrictName()));
 				intellishModel.setMaterialType(orderGrup.getMaterialType());
 				String truckType = TruckTypeInfo.getTruckLoadType(orderGrup.getDistrictName());
+				String loadType = getTruckLoadType(orderGrup.getDistrictName(), truckNo);
 				districName = orderGrup.getDistrictName();
-				if ("Minimum".equals(truckType)) {
+				intellishModel.setTruckCapacity(orderGrup.getTruckCapacity());
+				intellishModel.setLoadType(loadType);
+				intellishModel.setShippingOrderId(orderGrup.getShippingDelivaryId());
+				intellishModel.setWheelerType(orderGrup.getWheelerType());
+				/*if ("Minimum".equals(truckType)) {
 					intellishModel.setTruckCapacity(orderGrup.getTruckCapacity());
 				} else {
 					int truckCap = Integer.parseInt(orderGrup.getTruckCapacity());
@@ -660,7 +672,7 @@ public class ShippingService {
 					}
 					String finalTruckCap = originalTruck + "(" + truckCap + ")";
 					intellishModel.setTruckCapacity(finalTruckCap);
-				}
+				}*/
 
 				intellishModel.setDistrictName(orderGrup.getDistrictName());
 				truckCapacity = Integer.parseInt(orderGrup.getTruckCapacity());
@@ -696,6 +708,7 @@ public class ShippingService {
 			intellishModel.setPendingQuantity(pedningQty);
 			intellishModel.setShippingStatus(getShippingStatus(shippingStatusCount));
 			intellishModel.setEstimationTime(duration);
+			shippingOrderService.saveShippingFinalOrders(intellishModel);
 			finalIntelishipModel.add(intellishModel);
 			shippingStatusCount++;
 		}
@@ -730,4 +743,413 @@ public class ShippingService {
 		shippingOrderService.saveDistrictClubOrdByPass(districtByPass);
 		
 	}
+	
+	
+	
+	public Map<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> getOrdersFitIntoTruck1(Map<String, Map<String, List<ShippingDetails1>>> materialOrdGroupMap){
+		//List<TruckDetails> initialTruckInfoList = shippingOrder.getAllTruckInfo();
+		List<ShippingDetails1> unGroupOrderList = new ArrayList<>();
+		List<TruckHistoryDetail> allAssignedTrucksList = new ArrayList<>(); 
+		Map<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> finalTruckDetails = new HashMap<>();
+		List<AvailableTrucksModel> availableTruckInfoList = shippingOrderService.getAllTruckInfo();
+		/*Map<String, TruckDetails> availableTrucksMap = availableTruckInfoList.stream()
+				.collect(Collectors.toMap(TruckDetails::getSlNo, truc -> truc));*/
+		List<String> usedTrucks = new ArrayList<>();
+		//List<AxleWheelnfoEntity> axleWheelerList = shippingOrderService.getWheelTypeInfo(name);
+		for (Map.Entry<String, Map<String, List<ShippingDetails1>>> ordGrpList : materialOrdGroupMap.entrySet()) {
+			String districtName = ordGrpList.getKey();
+			Map<String, List<ShippingDetails1>> vals = ordGrpList.getValue();
+			Map<List<ShippingDetails1>, List<TruckHistoryDetail>> truckAndOrderMap = new HashMap<>();
+			for (Map.Entry<String, List<ShippingDetails1>> ordList : vals.entrySet()) {
+				List<TruckHistoryDetail> trucksList = new ArrayList<>();
+				String materialName = ordList.getKey();
+				List<ShippingDetails1> ordsList = ordList.getValue();
+				//if(ordsList.size() == 1 && (Integer.parseInt(ordsList.get(0).getActual_delivery_qty()) <= 9)){//if single order contain for same material ,no need to group the that product
+				if(ordsList.size() == 1) {	
+				unGroupOrderList.add(ordsList.get(0));
+					continue;
+				}
+				String truckType = TruckTypeInfo.getTruckLoadType(districtName);
+				int totOrdQty = ordsList.stream().map(ShippingDetails1::getActual_delivery_qty)
+						.mapToInt(Integer::valueOf).sum();
+				List<TruckHistoryDetail> truckPreviousList = shippingOrderService
+						.getAllPreviousTrucksByDistName(districtName);
+			   	String axleType= getWheelerType(ordsList,totOrdQty);
+			   	axleType = getAxleTypeWheeler(truckPreviousList, axleType, totOrdQty);
+			   	truckPreviousList = getTruckHistoryDataByAxleType(truckPreviousList, axleType);
+				if(totOrdQty <= 12) {
+					TruckHistoryDetail trucksPre = getClosetTrunk(truckPreviousList, totOrdQty);
+					int qtyDiff = trucksPre.getNormalLoad() - totOrdQty;
+					if(qtyDiff >=15) {
+						break;
+					}
+				}
+				 List<TruckHistoryDetail> assignedTrucks = getAssignedTrucksFromOrder(totOrdQty, truckPreviousList, usedTrucks);
+				
+				/*if("Minimum".equals(truckType)){
+					trucksList = getNormalTruckList1(trucksList, totOrdQty,allAssignedTrucksList);
+					allAssignedTrucksList.addAll(trucksList);
+				} else{//maximum Extra
+					trucksList = getHeavyTruckList(trucksList, totOrdQty,allAssignedTrucksList);
+					allAssignedTrucksList.addAll(trucksList);
+				}*/
+				truckAndOrderMap.put(ordsList, assignedTrucks);
+			}
+			finalTruckDetails.put(districtName, truckAndOrderMap);
+		}
+		return finalTruckDetails;
+	}
+	
+	private TruckHistoryDetail getAvailableTruckFromPreviousData(Map<String, AvailableTrucksModel> availableTrucksMap,
+			List<TruckHistoryDetail> truckPreviousList, List<String> usedTrucks) {
+		TruckHistoryDetail availableTruck = null;
+		  for (TruckHistoryDetail truckHistoryDetail : truckPreviousList) {
+			  if(availableTrucksMap.containsKey(truckHistoryDetail.getTruckNo())) {
+				  if(usedTrucks.contains(truckHistoryDetail.getTruckNo())) {// truck is already assigned then check with other truck
+					  continue;
+				  }
+				  availableTruck = truckHistoryDetail;
+			  }
+		}
+		  return availableTruck; 
+		
+	}
+ private List<TruckHistoryDetail> getAssignedTrucksFromOrder( int originalOrderQty,List<TruckHistoryDetail> availableTrucks,List<String> assigndTruckNos) {
+	 
+	 List<TruckHistoryDetail> trucksAssignList = new ArrayList<>();//25
+	 boolean isFirstTruck = true;
+	// int minimumRatedLoad = availableTrucks.stream().mapToInt(TruckHistoryDetail::getNormalLoad).min().getAsInt();
+	 //int maximumRatedLoad = availableTrucks.stream().mapToInt(TruckHistoryDetail::getNormalLoad).max().getAsInt();
+	
+	TruckHistoryDetail initialTruck = null;
+	TruckHistoryDetail closestTruck = getClosetTrunk(availableTrucks, originalOrderQty);
+	int remainingQty = 0 ;
+	//final int  tempRemainingQty ;
+	
+	if(closestTruck !=null) {
+		 remainingQty = originalOrderQty - closestTruck.getNormalLoad();
+		 trucksAssignList.add(closestTruck);
+		// availableTrucks.remove(closestTruck);
+		 assigndTruckNos.add(closestTruck.getTruckNo());
+		 if(remainingQty > 10 ) {
+			 TruckHistoryDetail closestTruck1 = getClosetTrunk(availableTrucks, remainingQty);
+			 if(!assigndTruckNos.contains(closestTruck1.getTruckNo())) {
+				 trucksAssignList.add(closestTruck1);
+				 assigndTruckNos.add(closestTruck1.getTruckNo());
+				 remainingQty = remainingQty - closestTruck1.getNormalLoad();
+			 }
+		 }
+		
+	} else {
+		remainingQty = originalOrderQty;
+	}
+		//int tempQty =  originalOrderQty;
+	//tempRemainingQty = remainingQty;
+		if (remainingQty < 10) {
+        //  no need to assign any truck if qty is less than 10 tones ,this order goes into another cycle
+		} else {
+			for (TruckHistoryDetail availableTruck : availableTrucks) {
+				if (assigndTruckNos.contains(availableTruck.getTruckNo())) {// truck is already assign for orders then
+																			// check with another available trucks
+					continue;
+				}
+				// int tempQty = remainingQty - availableTruck.getNormalLoad();
+				int availQty = availableTruck.getNormalLoad();
+				if (remainingQty == availQty) {
+					trucksAssignList.add(availableTruck);
+					break;
+				} else {
+					if(remainingQty < 10) {
+                       break;						
+					} else {
+						int tempMaxQty = 0;
+						if(remainingQty > availQty ) {
+							tempMaxQty = remainingQty - availQty;
+							if(tempMaxQty >= 10 && tempMaxQty < 20) {
+								trucksAssignList.add(availableTruck);
+								remainingQty = remainingQty - availQty;
+							} 
+						} else  {//if(availQty > remainingQty)
+							tempMaxQty = availQty -  remainingQty;
+							if(tempMaxQty <=2) {
+								trucksAssignList.add(availableTruck);
+								remainingQty = remainingQty - availQty;
+							}
+						}
+					}
+					
+				}
+
+			}
+		}
+	  
+	 return trucksAssignList;
+ }
+ private TruckHistoryDetail getClosetTrunk(List<TruckHistoryDetail> availableTrucks,int qty) {
+	 TruckHistoryDetail closestTruck = null;
+	 try {
+		  closestTruck = availableTrucks.stream()
+				  
+					.min((f1, f2) -> Math.abs(f1.getNormalLoad() - qty)
+							- Math.abs(f2.getNormalLoad() - qty)).get();
+		  return closestTruck;
+	 } catch (NullPointerException nce) {
+		_LOGGER.error("unable to find closet truck from given available trucks: "+nce.getMessage());
+	} catch (Exception e) {
+		_LOGGER.error("unable to find closet truck from given available trucks: "+e.getMessage());
+	}
+	
+	 return closestTruck;
+ }
+ public void getFinalOrdersClub1(Map<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> finalTruckDetails) {
+		List<String> trucksNoAssigned = new ArrayList<>();
+			for (Map.Entry<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> data : finalTruckDetails.entrySet()) {
+				String districtName = data.getKey();
+				Map<List<ShippingDetails1>, List<TruckHistoryDetail>> ords = data.getValue();
+				orderGroupByTruck2(ords,trucksNoAssigned);
+			}
+		}
+ 
+	private void orderGroupByTruck2(Map<List<ShippingDetails1>, List<TruckHistoryDetail>> groupTruckMap,List<String> trucksNoAssigned) {
+		for (Map.Entry<List<ShippingDetails1>, List<TruckHistoryDetail>> allDetails : groupTruckMap.entrySet()) {
+			List<ShippingDetails1> ordersList = allDetails.getKey();
+			// List<ShippingDetails1> ordersList =
+			// intellship.getOrderDetailsList();
+			// ordersList.stream().map(ShippingDetails1::getActual_delivery_qty).
+			int allOrdsQtys = getAllOrdersQty(ordersList);
+			List<TruckHistoryDetail> groupTruckDetails = allDetails.getValue();
+			OrderGroup orderGroup = null;
+			List<OrderGroup> orderGroupList = new ArrayList<>();
+			Map<String, List<OrderGroup>> ordersMap = new HashMap<>();
+			int totTrucks = groupTruckDetails.size();
+			int trucksCount = 1;
+			Map<String, List<OrderGroup>> ordersTruckMap = new HashMap<>();
+			Date todaysDate = new Date();
+			ShippingDeliveryOrder shippingDeliveryOrder = null; 
+			for (TruckHistoryDetail truckDetails : groupTruckDetails) {
+				shippingDeliveryOrder = new ShippingDeliveryOrder();
+				int initialOrder = 1;
+				int truckCapacity = truckDetails.getNormalLoad();
+				int ordersQtyTruck = 0;
+				shippingDeliveryOrder.setTruckNo(truckDetails.getTruckNo());
+				shippingDeliveryOrder.setShippingDeliveryDate(todaysDate);
+				int shippingDelivaryId = shippingOrderService.generateShippingOrderId(shippingDeliveryOrder);
+				ShippingOrdersReAssignModel shippingReorder = null;
+				for (ShippingDetails1 orderDetails : ordersList) {
+					shippingReorder = convertShippingDetailsIntoAnother(orderDetails, truckDetails.getTruckNo());
+					orderGroup = new OrderGroup();
+					int orderQty = Integer.parseInt(orderDetails.getActual_delivery_qty());
+					if (isFullTruck(ordersTruckMap, truckCapacity, truckDetails.getTruckNo())) {
+						break;
+					}
+					//// check is order load in truck or not,if order is loaded then skip those order
+					if (isOrderQtyTruck(ordersMap, orderQty, orderDetails.getDelivery())) {
+						continue;
+					}
+					int remaingTruckCapacity = 0;
+					if (initialOrder != 1) {
+						int truckOrdQty = truckCapacity - ordersQtyTruck;
+						if (truckOrdQty < orderQty) {
+							remaingTruckCapacity = truckOrdQty;
+						} else {
+							remaingTruckCapacity = orderQty;
+						}
+					}
+					if (ordersMap.containsKey(orderDetails.getDelivery())) {
+						remaingTruckCapacity = getRemainingOrderqQty(ordersMap, orderDetails.getDelivery());
+						if (trucksCount != totTrucks && isLessOrderQty(ordersList, ordersMap, remaingTruckCapacity)) {
+							continue;
+						}
+						if (initialOrder == 1) {
+							orderQty = remaingTruckCapacity;
+						}
+					}
+					orderGroup.setDelivaryNo(orderDetails.getDelivery());
+					orderGroup.setOriginalOrderQty(orderDetails.getActual_delivery_qty());
+					orderGroup.setTruckNo(truckDetails.getTruckNo());
+					orderGroup.setTruckCapacity(String.valueOf(truckDetails.getNormalLoad()));
+					orderGroup.setMaterialType(orderDetails.getMaterial());
+					orderGroup.setDistrictName(orderDetails.getDistrict_name());
+					orderGroup.setLatitude(orderDetails.getShip_to_latt());
+					orderGroup.setLongitude(orderDetails.getShip_to_long());
+					orderGroup.setNameShipToParty(orderDetails.getName_of_sold_to_party());
+					orderGroup.setShippingDelivaryId(shippingDelivaryId);
+					orderGroup.setWheelerType(truckDetails.getWheelerType());
+					// shipping order Date
+					Date todayDate = new Date();
+					// LocalDate date = new date
+					orderGroup.setOrderShippingDate(todayDate);
+					LocalDateTime currentTime = LocalDateTime.now();
+					LocalDate date = currentTime.toLocalDate();
+					// orderGroup.setOrderShippingDate(date);
+					// orderGroup.setOrderShippingDate(Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+					if (initialOrder == 1) {
+						if (orderQty > truckCapacity) {
+							orderQty = truckCapacity;
+						}
+						orderGroup.setTruckOrderQty(orderQty);
+						ordersQtyTruck = orderQty;
+						shippingReorder.setActual_delivery_qty(String.valueOf(orderQty));
+					} else {
+						orderGroup.setTruckOrderQty(remaingTruckCapacity);
+						ordersQtyTruck = ordersQtyTruck + remaingTruckCapacity;
+						shippingReorder.setActual_delivery_qty(String.valueOf(remaingTruckCapacity));
+					}
+					orderGroup.setDelivaryDate(orderDetails.getDeliv_date());
+					// orderGroupList.add(orderGroup);
+					if (ordersMap.containsKey(orderDetails.getDelivery())) {
+						List<OrderGroup> orderGroupsList = ordersMap.get(orderDetails.getDelivery());
+						orderGroupsList.add(orderGroup);
+						ordersMap.put(orderDetails.getDelivery(), orderGroupsList);
+					} else {
+						List<OrderGroup> orders = new ArrayList<>();
+						orders.add(orderGroup);
+						ordersMap.put(orderDetails.getDelivery(), orders);
+					}
+					// for checking trucks data
+					if (ordersTruckMap.containsKey(orderGroup.getTruckNo())) {
+						List<OrderGroup> orderGroupsTruckList = ordersTruckMap.get(orderGroup.getTruckNo());
+						orderGroupsTruckList.add(orderGroup);
+						ordersTruckMap.put(orderGroup.getTruckNo(), orderGroupsTruckList);
+					} else {
+						List<OrderGroup> ordersTruck = new ArrayList<>();
+						ordersTruck.add(orderGroup);
+						ordersTruckMap.put(orderGroup.getTruckNo(), ordersTruck);
+					}
+                     shippingReorder.setTruckNo(truckDetails.getTruckNo());
+                     
+					initialOrder++;
+					shippingOrderService.saveShippingOrderReAssign(shippingReorder);
+					if (ordersQtyTruck == truckCapacity
+							|| isOrderQtyTruck(ordersMap, allOrdsQtys, orderDetails.getDelivery())) {// truck
+																										// is
+																										// full
+																										// with
+																										// orders
+						break;
+					}
+				}
+				ordersTruckMap = new HashMap<>();
+				// orderGroupList = new ArrayList<>();
+				trucksCount++;
+			} // end truck for loop
+				// check all orders fit into truck or not
+
+			for (Map.Entry<String, List<OrderGroup>> ords : ordersMap.entrySet()) {
+				List<OrderGroup> ordGroup = ords.getValue();
+				for (OrderGroup orderGroup2 : ordGroup) {
+					shippingOrderService.saveOrderGroup(orderGroup2);
+					shippingOrderService.updateOrderGroupFlag(orderGroup2.getDelivaryNo());
+				}
+			}
+		}
+	}
+ 
+ private ShippingOrdersReAssignModel convertShippingDetailsIntoAnother(ShippingDetails1 ship,String truckNo) {
+	 ShippingOrdersReAssignModel so = new ShippingOrdersReAssignModel();
+	 so.setActual_delivery_qty(ship.getActual_delivery_qty());
+	 so.setMaterial(ship.getMaterial());
+	 so.setDistrict_name(ship.getDistrict_name());
+	 so.setDistrict_code(ship.getDistrict_code());
+	 so.setDistribution_channel(ship.getDistribution_channel());
+	 so.setDeference_document(ship.getDeference_document());
+	 so.setDeliv_date(ship.getDeliv_date());
+	 so.setDelivery(ship.getDelivery());
+	 so.setDelivery_type(ship.getDelivery_type());
+	 so.setForwarding_agent_name(ship.getForwarding_agent_name());
+	 so.setName_of_sold_to_party(ship.getName_of_sold_to_party());
+	 so.setName_of_the_ship_to_party(ship.getName_of_the_ship_to_party());
+	 so.setRoute(ship.getRoute());
+	 so.setPlant(ship.getPlant());
+	 so.setRoute_description(ship.getRoute_description());
+	 so.setShip_to_latt(ship.getShip_to_latt());
+	 so.setShip_to_long(ship.getShip_to_long());
+	 so.setShipping_Point(ship.getShipping_Point());
+	 so.setSold_to_party(ship.getSold_to_party());
+	 so.setTruckNo(truckNo);
+	 return so;
+ }
+ private String getTruckLoadType(String districtName,String truckNo) {
+	TruckHistoryDetailsEntity truckDetails =  shippingOrderService.getDistrictDetails(districtName, truckNo);
+	 if(truckDetails.getNormalLoad() == truckDetails.getRatedLoad()) {
+		 return "Rated Load";
+	 } else {
+		 return "Normal Load";
+	 }
+	 
+ }
+ public boolean isDistrictByPass(List<DistrictClubOrdByPass> distBypassList,String distrciName) {
+	 for (DistrictClubOrdByPass districtClubOrdByPass : distBypassList) {
+		   if(districtClubOrdByPass.getDistrictName().equalsIgnoreCase(distrciName)) {
+			   return true;
+		   }
+	}
+	 return false;
+ }
+ private String getWheelerType(List<ShippingDetails1> ordersList,int totOrdQty) {
+	 double distance = getOrdersDistance(ordersList);
+	 String wheelerType = "";
+	 if(distance <= 180) {
+		 wheelerType = "6W";
+	 } else {
+		 if(totOrdQty > 15 && totOrdQty <=30) {
+			 wheelerType = "10W";
+		 } else if(totOrdQty > 30 && totOrdQty <=35) {
+			 wheelerType = "12W";
+		 } else if(totOrdQty > 35 && totOrdQty <=50) {
+			 wheelerType = "14W";
+		 } else if(totOrdQty > 50) {
+			 wheelerType = "18W";
+		 } else {
+			 
+		 }
+	 }
+	 return wheelerType;
+ }
+ private double getOrdersDistance(List<ShippingDetails1> ordersList) {
+	 PlantDetails plantDetails = sd.getAllPlantDetails().get(2);
+	 StringBuilder ordersLongitudeAndLatitude = new StringBuilder();
+	 StringBuilder plantLongAndLati = new StringBuilder();
+	 plantLongAndLati.append(plantDetails.getLatitude()).append(",").append(plantDetails.getLongitude());
+	 for (ShippingDetails1 shippingDetails1 : ordersList) {
+			ordersLongitudeAndLatitude.append(shippingDetails1.getShip_to_latt()).append(",")
+					.append(shippingDetails1.getShip_to_long()).append("|");
+		}
+	 double maxDistance = 0.0;
+	  try {
+			 maxDistance = gmapDist.getMaxDistenceFromMultipleDestination(plantLongAndLati.toString(),
+					ordersLongitudeAndLatitude.toString());
+			} catch (IOException e) {
+				_LOGGER.error("Unbale to calculate distance between 2 places: "+e.getMessage());
+			}
+
+	 
+	 return maxDistance;
+ }
+ private List<TruckHistoryDetail> getTruckHistoryDataByAxleType(List<TruckHistoryDetail> truckHistoryList, String  axleType){
+		return truckHistoryList.stream().filter(truck -> truck.getWheelerType().contains(axleType))
+				.collect(Collectors.toList());
+ }
+ private String getAxleTypeWheeler(List<TruckHistoryDetail> truckPreviousList,String whellerType,int totOrdQty) {
+		Set<String> whellerList = truckPreviousList.stream().map(truck ->truck.getWheelerType()).collect(Collectors.toSet());
+		if(!whellerList.contains(whellerType)) {
+			if(whellerType.equalsIgnoreCase("6W")) {
+				if(totOrdQty > 50) {
+					if(whellerList.contains("18W")) {
+						return "18W";
+					}
+				}
+			} else {
+				whellerList.remove("6W");
+				if(totOrdQty > 50) {
+					if(whellerList.contains("18W")) {
+						return "18W";
+					}
+				} else {
+					return whellerList.iterator().next();
+				}
+			}
+		} 
+	 return whellerType;
+ }
 }

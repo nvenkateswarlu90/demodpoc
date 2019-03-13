@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.poi.util.StringUtil;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -125,16 +124,40 @@ public class MapService {
 public static String getMaxHrs(List<String> allHrs){
 	
 	String hours = allHrs.get(0);
-	int maxHrs = Integer.parseInt(hours.split("hours")[0].trim());
+	int maxHrs = 0;
+	/*if(hours.contains("hours")) {
+		 maxHrs = Integer.parseInt(hours.split("hours")[0].trim());
+	}*/
+	
+	if(hours.contains("hour")) {
+		if(hours.contains("hours")) {
+			maxHrs = Integer.parseInt(hours.split("hours")[0].trim());
+		} else {
+			maxHrs = Integer.parseInt(hours.split("hour")[0].trim());
+		}
+		
+	}
+	
 	String finalTime = "";
 	String tempTime = "";
-	int initialTime = 1;
-	for (String times : allHrs) {//5 hours 27 mins
-		  int hr = Integer.parseInt(times.split("hours")[0].trim());
+	for (String times : allHrs) {//5 hours 27 mins  //1 hour 33 mins
+		int hr = 0;
+		if(times.contains("hour")) {
+			if(times.contains("hours")) {
+				 hr = Integer.parseInt(times.split("hours")[0].trim());
+			} else {
+				hr = Integer.parseInt(times.split("hour")[0].trim());
+			}
+			
+		}
+		  
 		  if (maxHrs < hr) {
 			  maxHrs = hr;
 			  finalTime = times;
-			} /*else if(maxHrs == hr){
+			}else {
+				finalTime = hours;
+			}
+		  /*else if(maxHrs == hr){
 				int maxHrsMins = 0;
 				if(initialTime == 1){
 					String maxMins = hours.split("hours")[1].trim();
@@ -146,7 +169,6 @@ public static String getMaxHrs(List<String> allHrs){
 				 
 			}*/
 		  tempTime = times;
-		  initialTime++;
 	}
 	if(StringUtils.isEmpty(finalTime)){
 		finalTime = tempTime;

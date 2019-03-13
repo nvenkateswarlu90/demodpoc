@@ -46,8 +46,15 @@ public class OrderGroupEntity {
 	private Date order_shipping_date;
 	@Column(name="shipping_delivary_id")
 	private Integer shippingDelivaryId;
+	@Column(name="wheeler_type")
+	private String wheelerType;
 	
-	
+	public String getWheelerType() {
+		return wheelerType;
+	}
+	public void setWheelerType(String wheelerType) {
+		this.wheelerType = wheelerType;
+	}
 	public Integer getShippingDelivaryId() {
 		return shippingDelivaryId;
 	}

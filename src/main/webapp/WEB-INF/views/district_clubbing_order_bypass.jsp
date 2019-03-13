@@ -54,16 +54,31 @@
                     <th>District Code</th>
                     <th>Start Date</th>
                     <th>End Date</th>
+                    <th>Action</th>
+                    
                    
                   </tr>
                 </thead>
                 <tbody>
                  <c:forEach items="${distByPass}" var="districtByPass" varStatus="status">
                                     <tr>
-                                    	<td>${districtByPass.districtName}</td>
-                                    	<td>${districtByPass.districtCode}</td>
-                                    	<td>${districtByPass.startDate}</td>
-                                    	<td>${districtByPass.endDate}</td>
+                                    	<td style="vertical-align:middle">${districtByPass.districtName}</td>
+                                    	<td style="vertical-align:middle">${districtByPass.districtCode}</td>
+                                    	<td style="vertical-align:middle">${districtByPass.startDate}</td>
+                                    	<td style="vertical-align:middle">${districtByPass.endDate}</td>
+                                    	<%-- <td style="width:17%">
+                                    	<div class="btn-group" role="group" aria-label="Basic example">
+             <button type="button" class="btn btn-warning btn-rounded" onclick="editDistrictDetails()"> <i class="fa fa-pencil"></i> Edit</button>
+             <button type="button" class="btn btn-danger btn-rounded" onclick="removeDistrictName()"> <i class="fa fa-trash"></i> Remove</button>
+             <a href="<c:url value='/delete-user-${districtByPass.districtName}' />" class="btn btn-danger custom-width">delete</a>
+</div> 
+                                    	
+                                    	</td> --%>
+                                    	<%-- <td>
+                                    	<a href="<c:url value='/deleteDistrict/${districtByPass.id}' />" class="btn btn-danger custom-width">Delete</a>
+                                    	<a href="<c:url value='/deleteDistrict1/${districtByPass.id}' />" class="btn btn-success  custom-width"  data-toggle="modal" data-districtData="${districtByPass}" data-target="#edit">Edit</a>
+                                    	</td>
+ --%>                                    	 
                                     </tr>                                  
                                     </c:forEach>
                 </tbody>
@@ -86,6 +101,52 @@
     <div class="modal-content animated bounceInRight">
       <div class="modal-header">
         <h4 class="modal-title">Add District Clubbing Order By Pass</h4>
+      </div>
+      <div class="modal-body" style="overflow-x: auto;">
+      
+      <form id="formId" class="form-horizontal m-l-md" action="distClubOrdByPassConfig" method="post">
+       <table class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>District Name</th>
+                    <th>District Code</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                   
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                 <%--  <td> <form:input path="districtName" class="form-control"/> </td>
+                 <td> <form:input path="districtCode" class="form-control"/></td>
+                  <td><form:input path="startDate" class="datepicker"/></td>
+                 <td> <form:input path="endDate" class="datepicker"/></td> --%>
+                  
+                    <td> <input type="text" name="districtName" class="form-control" value="${districtByPass.districtName}"></td>
+					  <td> <input type="text" name="districtCode"class="form-control"></td>
+					   <td> <input type="date" name="startDate" class="form-control"></td>
+                    <td> <input type="date" name="endDate" class="form-control"></td>
+                   
+                  </tr>
+               
+                </tbody>
+              </table>
+                <div class="modal-footer">
+        <button type="button" class="btn btn-white btn-rounded" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary btn-rounded">Save changes</button>
+      </div>
+              </form>
+      </div>
+    
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="edit" tabindex="-1" data-backdrop="static" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content animated bounceInRight">
+      <div class="modal-header">
+        <h4 class="modal-title">Edit District Clubbing Order By Pass</h4>
       </div>
       <div class="modal-body" style="overflow-x: auto;">
       
@@ -146,7 +207,10 @@ $(document).ready(function(){
     <script src="resources/js/bootstrap.min.js"></script>
     <script src="resources/js/plugins/metisMenu/jquery.metisMenu.js"></script>
     <script src="resources/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-
+    <script src="resources/js/bootstable.js"></script>
+   <!--  <script>
+ $('table').SetEditable();
+</script> -->
     <!-- Peity -->
     <script src="resources/js/plugins/peity/jquery.peity.min.js"></script>
 
@@ -167,6 +231,14 @@ $(document).ready(function(){
                 radioClass: 'iradio_square-green',
             });
         });
+        
+        function removeDistrictName(){
+        	alert('remove');
+        }
+        
+        function editDistrictDetails(){
+        	alert('edit');
+        }
     </script>
 
 </body>

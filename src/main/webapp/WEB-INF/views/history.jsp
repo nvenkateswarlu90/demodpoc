@@ -54,26 +54,10 @@
                     <div class="ibox float-e-margins">
                         <div class="ibox-title">
                             <h5>History</h5>
-                         <!--    <div class="ibox-tools">
-                                <a class="collapse-link">
-                                    <i class="fa fa-chevron-up"></i>
-                                </a>
-                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                    <i class="fa fa-wrench"></i>
-                                </a>
-                                <ul class="dropdown-menu dropdown-user">
-                                    <li><a href="#">Config option 1</a>
-                                    </li>
-                                    <li><a href="#">Config option 2</a>
-                                    </li>
-                                </ul>
-                                <a class="close-link">
-                                    <i class="fa fa-times"></i>
-                                </a>
-                            </div> -->
+                       
                         </div>
                         <div class="ibox-content">
-							<div calss="row">
+							<!-- <div calss="row">
 								  <div class="col-lg-6">
 								       <div class="form-group">
                 <label class="font-noraml">Select</label>
@@ -102,62 +86,49 @@
 								     
                              <a class="btn btn-success btn-rounded" href="#">Search</a>
 								</div>
-							</div>
-                            <table class="table table-bordered table-hover">
+							</div> -->
+                           <table class="table table-bordered">
                                 <thead>
                                 <tr>
-                                    <th>Invoice Number</th>
-                                    <th>Customer Name</th>
-                                    <th>Shipping Address</th>
-                                    <th>Material</th>
-									<th>Original Plant</th>
-                                    <th>Invoice Date</th>
-                                    <th>C & F Agent</th>
-                                    <th>Order Quantity</th>
-									<th>Truck Number</th>
-                                    <th>Estimated Time</th>
-                                   
-                                </tr>
+ 											<th>ShippingId</th>
+											<th>Truck No.</th>
+											<th>Axle/Wheeler Type</th>
+											<th>District Name</th>
+											<th>Load Type</th>
+											<th>Material Type</th>
+											<th>Total Order</th>
+											<th>Total Order Quantity</th>
+											<th>Truck Capacity</th>
+											<th>Pending Quantity</th>
+											<th>Plant</th>
+											<th>Total Kilometers</th>
+										</tr>
                                 </thead>
                                 <tbody>
-                                <tr>
-                                    <td>045</td>
-                                    <td>A.K</td>
-                                    <td>14/021</td>
-                                    <td>Goods</td>
-									 <td>1</td>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-									 <td>Otto</td>
-                                    <td>@mdo</td>
-                                </tr>
-                                <tr>
-                                   <td>046</td>
-                                    <td>M.K</td>
-                                    <td>32/21</td>
-                                    <td>Goods</td>
-									 <td>1</td>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-									 <td>Otto</td>
-                                    <td>@mdo</td>
-                                </tr>
-                                <tr>
-                                    <td>047</td>
-                                    <td>S.K</td>
-                                    <td>70/91</td>
-                                    <td>Goods</td>
-									 <td>1</td>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-									 <td>Otto</td>
-                                    <td>@mdo</td>
-                                </tr>
-                                </tbody>
+										<c:forEach items="${ordersHistory}"
+											var="shippingGroupDetails" varStatus="status">
+											<tr>
+											 <td>${shippingGroupDetails.shippingOrderId}</td>
+												<td>${shippingGroupDetails.truckNo}</td>
+												<td>${shippingGroupDetails.wheelerType}</td>
+												<td>${shippingGroupDetails.districtName}</td>
+												<td>${shippingGroupDetails.loadType}</td>
+												<td>${shippingGroupDetails.materialType}</td>
+												<td><button class="btn btn-success btn-circle" type="button" 
+														onclick="getOrderDetailsByMaterial('${shippingGroupDetails.truckNo}')">${shippingGroupDetails.totalOrders}
+													</button></td> 
+												<td>${shippingGroupDetails.totalOrderQuantity}</td>
+												<td>${shippingGroupDetails.truckCapacity}</td>
+												<td>${shippingGroupDetails.pendingQuantity}</td>
+												<td>${shippingGroupDetails.plant}</td>
+												<td>${shippingGroupDetails.totalKilometers}</td>
+												
+											</tr>
+										</c:forEach>
+									</tbody>
+
                             </table>
+
 
                         </div>
                     </div>
@@ -171,93 +142,56 @@
         </div>
         </div>
 
-
-    <div class="modal inmodal" id="configurealgo" tabindex="-1" role="dialog" aria-hidden="true">
-                                <div class="modal-dialog">
-                                <div class="modal-content animated bounceInRight">
-                                        <div class="modal-header">
-                                          
-                                        
-                                            <h4 class="modal-title">Configure IntellShip Alogrithm</h4>
-                                         
-                                        </div>
-                                        <div class="modal-body">
-                                             <table class="table">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Yes</th>
-                                    <th>No</th>
-                                    
-                                   
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>Enable Plant Re-organization</td>
-                                    <td> <div class="radio">
-                                                    <input type="radio" name="radio2" id="radio3" value="option1">
-                                                    <label for="radio3">
-                                                       
-                                                    </label>
-                                                </div></td>
-                                    <td> <div class="radio">
-                                                    <input type="radio" name="radio2" id="radio4" value="option2">
-                                                    <label for="radio4">
-                                                      
-                                                    </label>
-                                                </div></td>
-                                  
-                                </tr>
-                                <tr>
-                                   <td>Include Warehouse Location</td>
-                                    <td> <div class="radio">
-                                                    <input type="radio" name="radio3" id="radio1" value="option1">
-                                                    <label for="radio1">
-                                                       
-                                                    </label>
-                                                </div></td>
-                                    <td> <div class="radio">
-                                                    <input type="radio" name="radio3" id="radio2" value="option2">
-                                                    <label for="radio2">
-                                                      
-                                                    </label>
-                                                </div></td>
-                                  
-                                </tr>
-                                <tr>
-                                    <td>Include Shipment to Warehouse</td>
-                                    <td> <div class="radio">
-                                                    <input type="radio" name="radio3" id="radio01" value="option1">
-                                                    <label for="radio01">
-                                                       
-                                                    </label>
-                                                </div></td>
-                                    <td> <div class="radio">
-                                                    <input type="radio" name="radio3" id="radio02" value="option2">
-                                                    <label for="radio02">
-                                                      
-                                                    </label>
-                                                </div></td>
-                                   
-                                </tr>
-                                </tbody>
-                            </table>
-                                                 
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-white btn-rounded" data-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary btn-rounded">Save changes</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+<div class="modal" id="orderConfigurealgo" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content animated bounceInRight">
+      <div class="modal-header">
+        <h4 class="modal-title">Orders Information</h4>
+      </div>
+      <div class="modal-body" style="overflow-x: auto;">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Delivery</th>
+              <th>Reference Document</th>
+              <th>Sold to Party</th>
+              <th>Name of sold to Party</th>
+              <th>Name of the ship tp party</th>
+              <th>Material</th>
+              <th>Actual delivery Qty</th>
+              <th>Route Description</th>
+              <th>District Name</th>
+              <th>Plant</th>
+              <th>Route</th>
+              <th>Forwarding Agent Name</th>
+              <th>Distribution Channel</th>
+              <th>Deliv.Date(From/To)</th>
+              <th>Delivery Type</th>
+              <th>Shipping Point/Receiving Pt</th>
+              <th>District Code</th>
+              <th>Ship to Party</th>
+              <th>Shio to Long</th>
+              <th>Ship to Latt</th>
+            </tr>
+          </thead>
+          <tbody id="orderData1">
+																				
+				</tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-white btn-rounded" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary btn-rounded">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
   <!-- Mainly scripts -->
-	<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+	<!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js"
 			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-			  crossorigin="anonymous"></script> 
+			  crossorigin="anonymous"></script>  -->
 		<script>
-		
+		   $("#orderConfigurealgo").modal()
 $(document).ready(function(){
     $("#navbar").load("navbar.html");
 	 $("#header").load("header.html");
@@ -265,62 +199,8 @@ $(document).ready(function(){
 });
 	</script>
  
-<!--     <script src="js/bootstrap.min.js"></script>
-
-    Custom and plugin javascript
-    <script src="js/inspinia.js"></script>
-    <script src="js/plugins/pace/pace.min.js"></script>
-    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-
-    Chosen
-    <script src="js/plugins/chosen/chosen.jquery.js"></script>
-
-   JSKnob
-   <script src="js/plugins/jsKnob/jquery.knob.js"></script>
-
-   Input Mask
-    <script src="js/plugins/jasny/jasny-bootstrap.min.js"></script>
-
-   Data picker
-   <script src="js/plugins/datapicker/bootstrap-datepicker.js"></script>
-
-   NouSlider
-   <script src="js/plugins/nouslider/jquery.nouislider.min.js"></script>
-
-   Switchery
-   <script src="js/plugins/switchery/switchery.js"></script>
-
-    IonRangeSlider
-    <script src="js/plugins/ionRangeSlider/ion.rangeSlider.min.js"></script>
-
-    iCheck
-    <script src="js/plugins/iCheck/icheck.min.js"></script>
-
-    MENU
-    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
-
-    Color picker
-    <script src="js/plugins/colorpicker/bootstrap-colorpicker.min.js"></script>
-
-    Clock picker
-    <script src="js/plugins/clockpicker/clockpicker.js"></script>
-
-    Image cropper
-    <script src="js/plugins/cropper/cropper.min.js"></script>
-
-    Date range use moment.js same as full calendar plugin
-    <script src="js/plugins/fullcalendar/moment.min.js"></script>
-
-    Date range picker
-    <script src="js/plugins/daterangepicker/daterangepicker.js"></script>
-
-    Select2
-    <script src="js/plugins/select2/select2.full.min.js"></script>
-
-    TouchSpin
-    <script src="js/plugins/touchspin/jquery.bootstrap-touchspin.min.js"></script>
- -->
     <!-- <script src="resources/js/jquery-2.1.1_old.js"></script> -->
+    <script src="resources/js/jquery-2.1.1_old.js"></script> 
     <script src="resources/js/bootstrap.min.js"></script>
     <script src="resources/js/plugins/metisMenu/jquery.metisMenu.js"></script>
     <script src="resources/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
@@ -392,313 +272,39 @@ $(document).ready(function(){
 
 
     <script>
-        $(document).ready(function(){
+    function getOrderDetailsByMaterial(truckNo){
+  	  $.ajax({
+			type : "GET",
+			url : "getGroupOrderByTruck",
+			data : "truckNo=" + truckNo,
+			success : function(response) {
+				$("#orderData1").empty();
+				$.each(response, function(i, value) {
+					 $("#orderData1").append("<tr><td>" + value.delivery + "</td><td>" + value.deference_document + "</td><td>" + value.sold_to_party + 
+							"</td><td>" + value.name_of_sold_to_party + "</td><td>"  + value.name_of_the_ship_to_party + "</td><td>" + 
+							 value.material + "</td><td>" + value.actual_delivery_qty + "</td><td>" + 
+							  value.route_description + "</td><td>" + value.district_name + "</td><td>"  
+							 + value.plant + "</td><td>"+ value.route + "</td><td>" + 
+							 value.forwarding_agent_name + "</td><td>" + value.distribution_channel + "</td><td>" + value.deliv_date + "</td><td>" +
+							 value.delivery_type + "</td><td>" +value.shipping_Point + "</td><td>" +value.district_code + "</td><td>" +
+value.ship_to_party + "</td><td>"+ value.ship_to_long + "</td><td>" + value.ship_to_latt +"</td></tr>"); 
+				});
+				$("#orderConfigurealgo").modal();
+			},
+			error : function(e) {
+				 alert('Error: ' + e); 
+			}
+		});
 
-            var $image = $(".image-crop > img")
-            $($image).cropper({
-                aspectRatio: 1.618,
-                preview: ".img-preview",
-                done: function(data) {
-                    // Output the result data for cropping image.
-                }
-            });
-
-            var $inputImage = $("#inputImage");
-            if (window.FileReader) {
-                $inputImage.change(function() {
-                    var fileReader = new FileReader(),
-                            files = this.files,
-                            file;
-
-                    if (!files.length) {
-                        return;
-                    }
-
-                    file = files[0];
-
-                    if (/^image\/\w+$/.test(file.type)) {
-                        fileReader.readAsDataURL(file);
-                        fileReader.onload = function () {
-                            $inputImage.val("");
-                            $image.cropper("reset", true).cropper("replace", this.result);
-                        };
-                    } else {
-                        showMessage("Please choose an image file.");
-                    }
-                });
-            } else {
-                $inputImage.addClass("hide");
-            }
-
-            $("#download").click(function() {
-                window.open($image.cropper("getDataURL"));
-            });
-
-            $("#zoomIn").click(function() {
-                $image.cropper("zoom", 0.1);
-            });
-
-            $("#zoomOut").click(function() {
-                $image.cropper("zoom", -0.1);
-            });
-
-            $("#rotateLeft").click(function() {
-                $image.cropper("rotate", 45);
-            });
-
-            $("#rotateRight").click(function() {
-                $image.cropper("rotate", -45);
-            });
-
-            $("#setDrag").click(function() {
-                $image.cropper("setDragMode", "crop");
-            });
-
-            $('#data_1 .input-group.date').datepicker({
-                todayBtn: "linked",
-                keyboardNavigation: false,
-                forceParse: false,
-                calendarWeeks: true,
-                autoclose: true
-            });
-
-            $('#data_2 .input-group.date').datepicker({
-                startView: 1,
-                todayBtn: "linked",
-                keyboardNavigation: false,
-                forceParse: false,
-                autoclose: true,
-                format: "dd/mm/yyyy"
-            });
-
-            $('#data_3 .input-group.date').datepicker({
-                startView: 2,
-                todayBtn: "linked",
-                keyboardNavigation: false,
-                forceParse: false,
-                autoclose: true
-            });
-
-            $('#data_4 .input-group.date').datepicker({
-                minViewMode: 1,
-                keyboardNavigation: false,
-                forceParse: false,
-                autoclose: true,
-                todayHighlight: true
-            });
-
-            $('#data_5 .input-daterange').datepicker({
-                keyboardNavigation: false,
-                forceParse: false,
-                autoclose: true
-            });
-
-            var elem = document.querySelector('.js-switch');
-            var switchery = new Switchery(elem, { color: '#1AB394' });
-
-            var elem_2 = document.querySelector('.js-switch_2');
-            var switchery_2 = new Switchery(elem_2, { color: '#ED5565' });
-
-            var elem_3 = document.querySelector('.js-switch_3');
-            var switchery_3 = new Switchery(elem_3, { color: '#1AB394' });
-
-            $('.i-checks').iCheck({
-                checkboxClass: 'icheckbox_square-green',
-                radioClass: 'iradio_square-green'
-            });
-
-            $('.demo1').colorpicker();
-
-            var divStyle = $('.back-change')[0].style;
-            $('#demo_apidemo').colorpicker({
-                color: divStyle.backgroundColor
-            }).on('changeColor', function(ev) {
-                        divStyle.backgroundColor = ev.color.toHex();
-                    });
-
-            $('.clockpicker').clockpicker();
-
-            $('input[name="daterange"]').daterangepicker();
-
-            $('#reportrange span').html(moment().subtract(29, 'days').format('MMMM D, YYYY') + ' - ' + moment().format('MMMM D, YYYY'));
-
-            $('#reportrange').daterangepicker({
-                format: 'MM/DD/YYYY',
-                startDate: moment().subtract(29, 'days'),
-                endDate: moment(),
-                minDate: '01/01/2012',
-                maxDate: '12/31/2015',
-                dateLimit: { days: 60 },
-                showDropdowns: true,
-                showWeekNumbers: true,
-                timePicker: false,
-                timePickerIncrement: 1,
-                timePicker12Hour: true,
-                ranges: {
-                    'Today': [moment(), moment()],
-                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                    'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                },
-                opens: 'right',
-                drops: 'down',
-                buttonClasses: ['btn', 'btn-sm'],
-                applyClass: 'btn-primary',
-                cancelClass: 'btn-default',
-                separator: ' to ',
-                locale: {
-                    applyLabel: 'Submit',
-                    cancelLabel: 'Cancel',
-                    fromLabel: 'From',
-                    toLabel: 'To',
-                    customRangeLabel: 'Custom',
-                    daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
-                    monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                    firstDay: 1
-                }
-            }, function(start, end, label) {
-                console.log(start.toISOString(), end.toISOString(), label);
-                $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
-            });
-
-            $(".select2_demo_1").select2();
-            $(".select2_demo_2").select2();
-            $(".select2_demo_3").select2({
-                placeholder: "Select a state",
-                allowClear: true
-            });
-
-
-            $(".touchspin1").TouchSpin({
-                buttondown_class: 'btn btn-white',
-                buttonup_class: 'btn btn-white'
-            });
-
-            $(".touchspin2").TouchSpin({
-                min: 0,
-                max: 100,
-                step: 0.1,
-                decimals: 2,
-                boostat: 5,
-                maxboostedstep: 10,
-                postfix: '%',
-                buttondown_class: 'btn btn-white',
-                buttonup_class: 'btn btn-white'
-            });
-
-            $(".touchspin3").TouchSpin({
-                verticalbuttons: true,
-                buttondown_class: 'btn btn-white',
-                buttonup_class: 'btn btn-white'
-            });
-
-
+    }
+    
+    $(document).ready(function(){
+        $('.i-checks').iCheck({
+            checkboxClass: 'icheckbox_square-green',
+            radioClass: 'iradio_square-green',
         });
-        var config = {
-                '.chosen-select'           : {},
-                '.chosen-select-deselect'  : {allow_single_deselect:true},
-                '.chosen-select-no-single' : {disable_search_threshold:10},
-                '.chosen-select-no-results': {no_results_text:'Oops, nothing found!'},
-                '.chosen-select-width'     : {width:"95%"}
-                }
-            for (var selector in config) {
-                $(selector).chosen(config[selector]);
-            }
-
-        $("#ionrange_1").ionRangeSlider({
-            min: 0,
-            max: 5000,
-            type: 'double',
-            prefix: "$",
-            maxPostfix: "+",
-            prettify: false,
-            hasGrid: true
-        });
-
-        $("#ionrange_2").ionRangeSlider({
-            min: 0,
-            max: 10,
-            type: 'single',
-            step: 0.1,
-            postfix: " carats",
-            prettify: false,
-            hasGrid: true
-        });
-
-        $("#ionrange_3").ionRangeSlider({
-            min: -50,
-            max: 50,
-            from: 0,
-            postfix: "°",
-            prettify: false,
-            hasGrid: true
-        });
-
-        $("#ionrange_4").ionRangeSlider({
-            values: [
-                "January", "February", "March",
-                "April", "May", "June",
-                "July", "August", "September",
-                "October", "November", "December"
-            ],
-            type: 'single',
-            hasGrid: true
-        });
-
-        $("#ionrange_5").ionRangeSlider({
-            min: 10000,
-            max: 100000,
-            step: 100,
-            postfix: " km",
-            from: 55000,
-            hideMinMax: true,
-            hideFromTo: false
-        });
-
-        $(".dial").knob();
-
-        $("#basic_slider").noUiSlider({
-            start: 40,
-            behaviour: 'tap',
-            connect: 'upper',
-            range: {
-                'min':  20,
-                'max':  80
-            }
-        });
-
-        $("#range_slider").noUiSlider({
-            start: [ 40, 60 ],
-            behaviour: 'drag',
-            connect: true,
-            range: {
-                'min':  20,
-                'max':  80
-            }
-        });
-
-        $("#drag-fixed").noUiSlider({
-            start: [ 40, 60 ],
-            behaviour: 'drag-fixed',
-            connect: true,
-            range: {
-                'min':  20,
-                'max':  80
-            }
-        });
-
-
-    </script>
-
-    <script>
-        $(document).ready(function(){
-            $('.i-checks').iCheck({
-                checkboxClass: 'icheckbox_square-green',
-                radioClass: 'iradio_square-green',
-            });
-        });
+    });
+    
     </script>
 
 </body>

@@ -62,9 +62,10 @@
 							
                             <table class="table table-bordered">
                                 <thead>
-                                <tr>
-
+                                <tr>        
+                                            <th>ShippingId</th>
 											<th>Truck No.</th>
+											<th>Axle/Wheeler Type</th>
 											<th>District Name</th>
 											<th>Load Type</th>
 											<th>Material Type</th>
@@ -84,7 +85,9 @@
 										<c:forEach items="${shippingGroupList}"
 											var="shippingGroupDetails" varStatus="status">
 											<tr>
+											    <td>${shippingGroupDetails.shippingOrderId}</td>
 												<td>${shippingGroupDetails.truckNo}</td>
+												<td>${shippingGroupDetails.wheelerType}</td>
 												<td>${shippingGroupDetails.districtName}</td>
 												<td>${shippingGroupDetails.loadType}</td>
 												<td>${shippingGroupDetails.materialType}</td>
@@ -121,7 +124,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content animated bounceInRight">
       <div class="modal-header">
-        <h4 class="modal-title">Configure IntellShip Alogrithm</h4>
+        <h4 class="modal-title">Orders Information</h4>
       </div>
       <div class="modal-body" style="overflow-x: auto;">
         <table class="table table-bordered">
@@ -156,7 +159,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-white btn-rounded" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary btn-rounded">Save changes</button>
+        <!-- <button type="button" class="btn btn-primary btn-rounded">Save changes</button> -->
       </div>
     </div>
   </div>

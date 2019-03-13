@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import com.a4tech.controller.ShippingDetailController;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.ShippingEntity;
-import com.a4tech.dao.entity.TruckDetailsEntity;
+import com.a4tech.dao.entity.AvailableTrucks;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.service.mapper.IOrderDataMapper;
 import com.a4tech.shipping.ishippingDao.IshippingOrderDao;
@@ -45,10 +45,12 @@ public class ShippingMapping implements IOrderDataMapper{
 			Iterator<Row> iterator = sheet.iterator();
 			Set<String>  productXids = new HashSet<String>();
 			String orderNo = null;
+			Row headerRow = null;
 			while (iterator.hasNext()) {
 				
 				Row nextRow = iterator.next();
 				if(nextRow.getRowNum() == ApplicationConstants.CONST_NUMBER_ZERO){
+					headerRow = nextRow;
 					continue;
 				}
 				Iterator<Cell> cellIterator = nextRow.cellIterator();
@@ -61,7 +63,7 @@ public class ShippingMapping implements IOrderDataMapper{
 					int columnIndex = cell.getColumnIndex();
 					if(columnIndex  == 0){
 						Cell xidCell = nextRow.getCell(0);
-					     orderNo = CommonUtility.getCellValueStrinOrInt(xidCell);
+					     orderNo = CommonUtility.getCellValueStrinOrDecimal(xidCell);
 						//xid = CommonUtility.getCellValueStrinOrInt(cell);
 						checkXid = true;
 					}else{
@@ -81,116 +83,233 @@ public class ShippingMapping implements IOrderDataMapper{
 							    entityObj = new ShippingEntity();
 						 }
 					}
-				
-					switch (columnIndex + 1) {
-					case 1:// Delivery
-						String delivery=CommonUtility.getCellValueDouble(cell);
+					/*if (columnIndex == ApplicationConstants.CONST_NUMBER_ZERO) {
+						continue;
+					}*/
+					String headerName = getHeaderName(columnIndex, headerRow);
+					switch (headerName) {
+					case "Delivery":// Delivery
+						String delivery=CommonUtility.getCellValueStrinOrDecimal(cell);
 						//double value = Double.parseDouble(delivery);
 						entityObj.setDelivery(delivery);
 						
 						break;
-					case 2:// Reference document
+					case "Reference document":// Reference document
 						String document=CommonUtility.getCellValueStrinOrInt(cell);
 						entityObj.setDeference_document(document);
 						break;
-					case 3:// Sold-to party
-						String sold=cell.getStringCellValue();
+					case "Sold-to party":// Sold-to party
+						String sold=CommonUtility.getCellValueStrinOrInt(cell);
 						entityObj.setSold_to_party(sold);
 
 						break;
-					case 4:// Name of sold-to party
+					case "Name of sold-to party":// Name of sold-to party
 						String name_sold=cell.getStringCellValue();
 						entityObj.setName_of_sold_to_party(name_sold);
 
 						break;
-					case 5:// Name of the ship-to party
+					case "Name of the ship-to party":// Name of the ship-to party
 						String name_ship=cell.getStringCellValue();
 						entityObj.setName_of_the_ship_to_party(name_ship);
 
 						break;
-					case 6:// Material
+					case "Material":// Material
 						String material=cell.getStringCellValue();
 						entityObj.setMaterial(material);
 
 						break;
-					case 7:// Actual delivery qty
+					case "Actual delivery qty":// Actual delivery qty
 						String qty=CommonUtility.getCellValueStrinOrInt(cell);
 						entityObj.setActual_delivery_qty(qty);
 
 						break;
-					case 8:// Route Description
+					case "Route Description":// Route Description
 						String route_desc=cell.getStringCellValue();
 						entityObj.setRoute_description(route_desc);
 
 						break;
-					case 9:// dist. Name
+					case "District Name":// dist. Name
 						String districtName = cell.getStringCellValue();
 						entityObj.setDistrict_name(districtName);
 						break;
-					case 10:// Plant
+					case "Plant":// Plant
 						String plant=CommonUtility.getCellValueStrinOrInt(cell);
 						entityObj.setPlant(plant);
 
 						break;
 						
-		            case 11:// Route
+		            case "Route":// Route
 						String route=cell.getStringCellValue();
 						entityObj.setRoute(route);
 
 						break;
 					
-		            case 12://Forwarding agent name
+		            case "Forwarding agent name"://Forwarding agent name
 						String agent_name=cell.getStringCellValue();
 						entityObj.setForwarding_agent_name(agent_name);
 
 						break;
 						
-		            case 13://Distribution Channel
+		            case "Distribution Channel"://Distribution Channel
 						String distribution=CommonUtility.getCellValueStrinOrInt(cell);
 						entityObj.setDistribution_channel(distribution);
 
 						break;
 						
-		            case 14://Deliv. date(From/to)
+		            case "Deliv. date(From/to)"://Deliv. date(From/to)
 						Date date=cell.getDateCellValue();
 						DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 						String delivaryDate = df.format(date);
 						entityObj.setDeliv_date(delivaryDate);
 						break;	
 						
-		            case 15://delivary Type
+		            case "Delivery Type"://delivary Type
 		            	String delivaryType = cell.getStringCellValue();
 		            	entityObj.setDelivery_type(delivaryType);
 		            	break;
-		            case 16://Shipping Point/Receiving Pt
+		            case "Shipping Point/Receiving Pt"://Shipping Point/Receiving Pt
 						String point=CommonUtility.getCellValueStrinOrInt(cell);
 						entityObj.setShipping_Point(point);
 
 						break;
 						
-		            case 17://District Code
+		            case "District Code"://District Code
 						String code=cell.getStringCellValue();
 						entityObj.setDistrict_code(code);
 
 						break;
 						
-		            case 18://Ship-to party
+		            case "Ship-to party"://Ship-to party
 						String ship_party=CommonUtility.getCellValueStrinOrInt(cell);
 						entityObj.setShip_to_party(ship_party);
 
 						break;
 						
-		            case 19://Ship to Long
+		            case "Ship to Long."://Ship to Long
+		            case "Geo location longitude":
 						String ship_long=CommonUtility.getCellValueDouble(cell);
 						entityObj.setShip_to_long(ship_long);
 
 						break;
 						
-		            case 20://Ship to Latt
+		            case "Ship to Latt."://Ship to Latt
+		            case "Geo location latitude":
 						String ship_latt=CommonUtility.getCellValueDouble(cell);
 						entityObj.setShip_to_latt(ship_latt);
 
 						break;
+						// cases based on index(1,2,3,...)
+						
+/*						switch (columnIndex + 1) {
+						case 1:// Delivery
+							String delivery=CommonUtility.getCellValueStrinOrDecimal(cell);
+							//double value = Double.parseDouble(delivery);
+							entityObj.setDelivery(delivery);
+							
+							break;
+						case 2:// Reference document
+							String document=CommonUtility.getCellValueStrinOrInt(cell);
+							entityObj.setDeference_document(document);
+							break;
+						case 3:// Sold-to party
+							String sold=CommonUtility.getCellValueStrinOrInt(cell);
+							entityObj.setSold_to_party(sold);
+
+							break;
+						case 4:// Name of sold-to party
+							String name_sold=cell.getStringCellValue();
+							entityObj.setName_of_sold_to_party(name_sold);
+
+							break;
+						case 5:// Name of the ship-to party
+							String name_ship=cell.getStringCellValue();
+							entityObj.setName_of_the_ship_to_party(name_ship);
+
+							break;
+						case 6:// Material
+							String material=cell.getStringCellValue();
+							entityObj.setMaterial(material);
+
+							break;
+						case 7:// Actual delivery qty
+							String qty=CommonUtility.getCellValueStrinOrInt(cell);
+							entityObj.setActual_delivery_qty(qty);
+
+							break;
+						case 8:// Route Description
+							String route_desc=cell.getStringCellValue();
+							entityObj.setRoute_description(route_desc);
+
+							break;
+						case 9:// dist. Name
+							String districtName = cell.getStringCellValue();
+							entityObj.setDistrict_name(districtName);
+							break;
+						case 10:// Plant
+							String plant=CommonUtility.getCellValueStrinOrInt(cell);
+							entityObj.setPlant(plant);
+
+							break;
+							
+			            case 11:// Route
+							String route=cell.getStringCellValue();
+							entityObj.setRoute(route);
+
+							break;
+						
+			            case 12://Forwarding agent name
+							String agent_name=cell.getStringCellValue();
+							entityObj.setForwarding_agent_name(agent_name);
+
+							break;
+							
+			            case 13://Distribution Channel
+							String distribution=CommonUtility.getCellValueStrinOrInt(cell);
+							entityObj.setDistribution_channel(distribution);
+
+							break;
+							
+			            case 14://Deliv. date(From/to)
+							Date date=cell.getDateCellValue();
+							DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+							String delivaryDate = df.format(date);
+							entityObj.setDeliv_date(delivaryDate);
+							break;	
+							
+			            case 15://delivary Type
+			            	String delivaryType = cell.getStringCellValue();
+			            	entityObj.setDelivery_type(delivaryType);
+			            	break;
+			            case 16://Shipping Point/Receiving Pt
+							String point=CommonUtility.getCellValueStrinOrInt(cell);
+							entityObj.setShipping_Point(point);
+
+							break;
+							
+			            case 17://District Code
+							String code=cell.getStringCellValue();
+							entityObj.setDistrict_code(code);
+
+							break;
+							
+			            case 18://Ship-to party
+							String ship_party=CommonUtility.getCellValueStrinOrInt(cell);
+							entityObj.setShip_to_party(ship_party);
+
+							break;
+							
+			            case 19://Ship to Long
+							String ship_long=CommonUtility.getCellValueDouble(cell);
+							entityObj.setShip_to_long(ship_long);
+
+							break;
+							
+			            case 20://Ship to Latt
+							String ship_latt=CommonUtility.getCellValueDouble(cell);
+							entityObj.setShip_to_latt(ship_latt);
+
+							break;*/
+
 					
 					}
 				}
@@ -208,7 +327,7 @@ public class ShippingMapping implements IOrderDataMapper{
 	public String readTruckExcel(Workbook workbook) {
 	{
 		ShippingDetailController conObj=new ShippingDetailController();
-		TruckDetailsEntity entityObj=new TruckDetailsEntity();
+		AvailableTrucks entityObj=new AvailableTrucks();
 		
 		Sheet sheet=workbook.getSheetAt(0);
 		Iterator<Row> iterator = sheet.iterator();
@@ -247,7 +366,7 @@ public class ShippingMapping implements IOrderDataMapper{
 						    if(!productXids.contains(SL_NO)){
 						    	productXids.add(SL_NO);
 						    }
-						    entityObj=new TruckDetailsEntity();
+						    entityObj=new AvailableTrucks();
 					 }
 				}
 					switch (columnIndex + 1) {
@@ -414,6 +533,9 @@ public class ShippingMapping implements IOrderDataMapper{
 							historyObj.setNormalLoad(intNormal_Load);
 							
 							break;
+						case 6:
+							String wheelerType = cell.getStringCellValue();
+							historyObj.setWheelerType(wheelerType);
 		
 						}
 					}
@@ -633,6 +755,11 @@ public class ShippingMapping implements IOrderDataMapper{
 		return "Success";	
 		
 			}	
-	
+	private String getHeaderName(int columnIndex, Row headerRow) {
+		Cell cell2 = headerRow.getCell(columnIndex);
+		String headerName = CommonUtility.getCellValueStrinOrInt(cell2);
+		// columnIndex = ProGolfHeaderMapping.getHeaderIndex(headerName);
+		return headerName;
+	}
 	
 }

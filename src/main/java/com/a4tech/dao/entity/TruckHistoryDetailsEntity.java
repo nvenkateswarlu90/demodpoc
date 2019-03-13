@@ -26,9 +26,19 @@ public class TruckHistoryDetailsEntity {
 	private Integer ratedLoad;
 	@Column(name = "Normal_Load")
 	private Integer normalLoad;
+	@Column(name="wheeler_type")
+	private String wheelerType;
 /*	@Column(name = "Last_Transaction_Of_Normal_Load")
 	private Date lastTransactionOfNormalLoad;*/
 
+
+	public String getWheelerType() {
+		return wheelerType;
+	}
+
+	public void setWheelerType(String wheelerType) {
+		this.wheelerType = wheelerType;
+	}
 
 	public String getTruckNo() {
 		return truckNo;

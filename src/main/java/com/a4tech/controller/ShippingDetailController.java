@@ -70,7 +70,8 @@ import com.a4tech.shipping.model.ShippingDeliveryOrder;
 import com.a4tech.shipping.model.ShippingDetails;
 import com.a4tech.shipping.model.ShippingDetails1;
 import com.a4tech.shipping.model.ShortestDistLantiAndLongti;
-import com.a4tech.shipping.model.TruckDetails;
+import com.a4tech.shipping.model.AvailableTrucksModel;
+import com.a4tech.shipping.model.TruckHistoryDetail;
 import com.a4tech.shipping.services.ShippingService;
 import com.a4tech.shipping.validator.NormalLoadValidator;
 import com.a4tech.util.ApplicationConstants;
@@ -140,20 +141,31 @@ public class ShippingDetailController {
 	@RequestMapping(value = "/intellShip")
 	public ModelAndView intellShipPro() {
 		// List<IntellishipModel> orderGroupList = getGroupOrders();
-		shippingOrderService.deleteAllGroupOrders();
+		shippingOrderService.deleteAllGroupOrders("orderGroup");
+		shippingOrderService.deleteAllGroupOrders("orderReAssign");
+		shippingOrderService.deleteAllGroupOrders("shippingFinalOrders");
 		//here new map
+		List<ShippingDetails1> shippingaOrderListOnChannel = getAllOrdersBasedOnDistributionChannel("1");
+		Map<String, List<ShippingDetails1>> ordersOnDistrictMap = getAllOrdersBasedOnDistricts(
+				shippingaOrderListOnChannel);
+		Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap = getAllOrdersBasedOnMaterial(
+				ordersOnDistrictMap);
+		Map<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> finalTruckDetails = shippingService.getOrdersFitIntoTruck1(finalMaterialOrdMap);
+		shippingService.getFinalOrdersClub1(finalTruckDetails);
+		List<IntellishipModelByMaterial> finalIntelishipModel = shippingService.getFinalGroupOrders();
+		
 		/*Map<String, Map<String, Map<Integer, List<ShippingDetails1>>>> groupByDistance = shippingService
 				.getOrdersBasedOnDistence(finalMaterialOrdMap);
-	Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> finalTruckDetails = shippingService.getOrdersFitIntoTruck(groupByDistance);
+	Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> finalTruckDetails1 = shippingService.getOrdersFitIntoTruck(groupByDistance);
 	shippingService.getFinalOrdersClub(finalTruckDetails);
-	List<IntellishipModelByMaterial> finalIntelishipModel = shippingService.getFinalGroupOrders();*/
+	List<IntellishipModelByMaterial> finalIntelishipModel12 = shippingService.getFinalGroupOrders();*/
 		/*Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> finalTruckDetails = getOrdersFitIntoTruck(
 				groupByDistance);*/
 	//shippingService.getFinalOrdersClub
 	
 	//getFinalOrdersClub(finalTruckDetails);
 	
-		List<ShippingDetails1> shippingaOrderListOnChannel = getAllOrdersBasedOnDistributionChannel("1");
+	/*	List<ShippingDetails1> shippingaOrderListOnChannel = getAllOrdersBasedOnDistributionChannel("1");
 		Map<String, List<ShippingDetails1>> ordersOnDistrictMap = getAllOrdersBasedOnDistricts(
 				shippingaOrderListOnChannel);
 		Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap = getAllOrdersBasedOnMaterial(
@@ -162,14 +174,16 @@ public class ShippingDetailController {
 				finalMaterialOrdMap);
 		getFinalOrdersClub(finalTruckDetails);
 		List<IntellishipModelByMaterial> finalIntelishipModel = getFinalGroupOrders();
-		
+		*/
 		
 		//List<IntellishipModelByMaterial> finalIntelishipModel = getFinalGroupOrders();
 		/* studentlist.sort((Student s1, Student
 		 s2)->s1.getName().compareTo(s2.getName()));*/
 		 //soring based on district name
-		finalIntelishipModel.sort((IntellishipModelByMaterial i1, IntellishipModelByMaterial i2) -> i1.getDistrictName()
-				.compareTo(i2.getDistrictName()));
+		/*finalIntelishipModel.sort((IntellishipModelByMaterial i1, IntellishipModelByMaterial i2) -> i1.getDistrictName()
+				.compareTo(i2.getDistrictName()));*/
+		//finalIntelishipModel.sort(arg0);
+		Collections.sort(finalIntelishipModel, Comparator.comparing(IntellishipModelByMaterial::getTotalOrderQuantity));
 		return new ModelAndView("intellShipProcess", "shippingGroupList", finalIntelishipModel);
 		/*
 		 * if(isemptyValues(finalTruckDetails)){ return new
@@ -200,8 +214,11 @@ public class ShippingDetailController {
 	}
 
 	@RequestMapping(value = "/getShippingOrderHistory")
-	public String getShippingHistory() {
-		return "history";
+	public ModelAndView getShippingHistory() {
+		List<IntellishipModelByMaterial> ordersHistoryData = shippingOrderService.getAllShippingFinalOrders();
+		Collections.sort(ordersHistoryData, Comparator.comparing(IntellishipModelByMaterial::getTotalOrderQuantity));
+		return new ModelAndView("history", "ordersHistory", ordersHistoryData);
+		
 		// return "intellShipProcess";
 	}
 
@@ -210,8 +227,9 @@ public class ShippingDetailController {
 	public List<ShippingDetails1> getGroupOrdersByTruck(HttpServletRequest req) {
 		System.out.println("Get order Group Order details based On Truck");
 		String truckNo = req.getParameter("truckNo");
-		List<String> orderNoList = shippingOrderService.getOrderNoByTruck(truckNo);
-		List<ShippingDetails1> shippingaOrderList = getShippingDetailsByTruckNo(orderNoList);
+		/*List<String> orderNoList = shippingOrderService.getOrderNoByTruck(truckNo);
+		List<ShippingDetails1> shippingaOrderList = getShippingDetailsByTruckNo(orderNoList);*/
+		List<ShippingDetails1> shippingaOrderList = shippingOrderService.getAllReAssignOrdersBasedOnTruckNo(truckNo);
 		return shippingaOrderList;
 	}
 
@@ -226,7 +244,7 @@ public class ShippingDetailController {
 
 	@RequestMapping(value = "/getAllTrucksInformation")
 	public ModelAndView getAllTrucksInfo() {
-		List<TruckDetails> trucksInfoList = shippingOrderService.getAllTruckInfo();
+		List<AvailableTrucksModel> trucksInfoList = shippingOrderService.getAllTruckInfo();
 		return new ModelAndView("truck_info", "trucksList", trucksInfoList);
 	}
 	  @RequestMapping(value = "/uploadTrucksInfo", method = RequestMethod.GET)
@@ -281,12 +299,14 @@ public class ShippingDetailController {
 		Workbook wb = getWorkBook(file);
 		Sheet sheet = wb.getSheetAt(0);
         numberOfCells=sheet.getRow(0).getPhysicalNumberOfCells();
-			if (numberOfCells == countTruckDetailsFile) {
+        dataMapper.pendingOrderMapper(wb);
+		model.addAttribute("pendingOrderMessage", "success");
+		/*	if (numberOfCells == countTruckDetailsFile) {
 			dataMapper.pendingOrderMapper(wb);
 			model.addAttribute("pendingOrderMessage", "success");
 		} else {
 			model.addAttribute("showMessage", "format");
-		}
+		}*/
 	  }
 	  return "upload";
    }
@@ -300,7 +320,7 @@ public class ShippingDetailController {
   
 @RequestMapping(value="/uploadTruckHistoryDetails", method = RequestMethod.POST)
   public String processHistory(FileUploadBean mfile,Model model,HttpServletRequest request) throws IOException {
-	  int countTruckDetailsFile=5;
+	  int countTruckDetailsFile=6;
 	  int numberOfCells=0;
 	  if(mfile.getFile().getSize() == 0)
 	  {
@@ -329,7 +349,7 @@ public class ShippingDetailController {
 
 @RequestMapping(value="/updateTruckHistoryDetails", method = RequestMethod.POST)
 public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model) throws IOException {
-	  int countTruckDetailsFile=5;
+	  int countTruckDetailsFile=6;
 	  int numberOfCells=0;
 	  if(mfile.getFile().getSize() == 0)
 	  {
@@ -595,10 +615,15 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return new ModelAndView("district_clubbing_order_bypass", "distByPass", districtByPassList);
 		//return "configure_districtWise_Normal_load";
 	}
+	@RequestMapping(value="/deleteDistrict/{id}")
+	public String deleteOrderByPassDistrict(@PathVariable("id") Integer id) {
+		shippingOrderService.deleteOrderByPassDistrict(id);
+		return "redirect:/distClubOrdByPassConfig";
+	}
 
-	private boolean isemptyValues(Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> finalTruckDetails) {
-		for (Map.Entry<String, Map<List<ShippingDetails1>, List<TruckDetails>>> data : finalTruckDetails.entrySet()) {
-			Map<List<ShippingDetails1>, List<TruckDetails>> vals = data.getValue();
+	private boolean isemptyValues(Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails) {
+		for (Map.Entry<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> data : finalTruckDetails.entrySet()) {
+			Map<List<ShippingDetails1>, List<AvailableTrucksModel>> vals = data.getValue();
 			if (CollectionUtils.isEmpty(vals)) {
 				return true;
 			}
@@ -616,9 +641,12 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 
 	public Map<String, List<ShippingDetails1>> getAllOrdersBasedOnDistricts(List<ShippingDetails1> shippingOrderList) {
 		Map<String, List<ShippingDetails1>> ordersOnDistrictMap = new HashMap<>();
-
+        List<DistrictClubOrdByPass> distByPassList = shippingOrderService.getAllDistrictClubOrdByPass();
 		for (ShippingDetails1 shippingDetails1 : shippingOrderList) {
 			String districtName = shippingDetails1.getDistrict_name();
+			if(shippingService.isDistrictByPass(distByPassList, districtName)) {
+				continue;
+			}
 			List<ShippingDetails1> ordersList = ordersOnDistrictMap.get(districtName);
 			if (ordersList != null) {
 				ordersList.add(shippingDetails1);
@@ -656,17 +684,17 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return finalMaterialOrdMap;
 	}
 
-	public Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> getOrdersFitIntoTruck1(Map<String, Map<String, List<ShippingDetails1>>> materialOrdGroupMap){
+	public Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> getOrdersFitIntoTruck1(Map<String, Map<String, List<ShippingDetails1>>> materialOrdGroupMap){
 		//List<TruckDetails> initialTruckInfoList = shippingOrder.getAllTruckInfo();
 		List<ShippingDetails1> unGroupOrderList = new ArrayList<>();
-		List<TruckDetails> allAssignedTrucksList = new ArrayList<>(); 
-		Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> finalTruckDetails = new HashMap<>();
+		List<AvailableTrucksModel> allAssignedTrucksList = new ArrayList<>(); 
+		Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails = new HashMap<>();
 		for (Map.Entry<String, Map<String, List<ShippingDetails1>>> ordGrpList : materialOrdGroupMap.entrySet()) {
 			String districtName = ordGrpList.getKey();
 			Map<String, List<ShippingDetails1>> vals = ordGrpList.getValue();
-			Map<List<ShippingDetails1>, List<TruckDetails>> truckAndOrderMap = new HashMap<>();
+			Map<List<ShippingDetails1>, List<AvailableTrucksModel>> truckAndOrderMap = new HashMap<>();
 			for (Map.Entry<String, List<ShippingDetails1>> ordList : vals.entrySet()) {
-				List<TruckDetails> trucksList = new ArrayList<>();
+				List<AvailableTrucksModel> trucksList = new ArrayList<>();
 				String materialName = ordList.getKey();
 				List<ShippingDetails1> ordsList = ordList.getValue();
 				if(ordsList.size() == 1){//if single order contain for same material ,no need to group the that product
@@ -690,22 +718,22 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return finalTruckDetails;
 	}
 	
-	public Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> getOrdersFitIntoTruck(
+	public Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> getOrdersFitIntoTruck(
 			Map<String, Map<String, Map<Integer, List<ShippingDetails1>>>> groupByDistance) {
 		// List<TruckDetails> initialTruckInfoList =
 		// shippingOrder.getAllTruckInfo();
 		List<ShippingDetails1> unGroupOrderList = new ArrayList<>();
-		List<TruckDetails> allAssignedTrucksList = new ArrayList<>();
-		Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> finalTruckDetails = new HashMap<>();
+		List<AvailableTrucksModel> allAssignedTrucksList = new ArrayList<>();
+		Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails = new HashMap<>();
 		for (Map.Entry<String, Map<String, Map<Integer, List<ShippingDetails1>>>> ordGrpList : groupByDistance.entrySet()) {
 			String districtName = ordGrpList.getKey();
 			Map<String, Map<Integer, List<ShippingDetails1>>> vals = ordGrpList.getValue();
-			Map<List<ShippingDetails1>, List<TruckDetails>> truckAndOrderMap = new HashMap<>();
+			Map<List<ShippingDetails1>, List<AvailableTrucksModel>> truckAndOrderMap = new HashMap<>();
 			for (Map.Entry<String, Map<Integer, List<ShippingDetails1>>> distanceByGroup : vals.entrySet()) {
 				String materialName = distanceByGroup.getKey();
 				Map<Integer, List<ShippingDetails1>> vals1 = distanceByGroup.getValue();
 				for (Map.Entry<Integer, List<ShippingDetails1>> ordList : vals1.entrySet()) {
-					List<TruckDetails> trucksList = new ArrayList<>();
+					List<AvailableTrucksModel> trucksList = new ArrayList<>();
 					Integer orderDistance = ordList.getKey();
 					List<ShippingDetails1> ordsList = ordList.getValue();
 					/*if (ordsList.size() == 1) {// if single order contain for same
@@ -734,11 +762,11 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return finalTruckDetails;
 	}
 
-	private List<TruckDetails> getNormalTruckList(List<TruckDetails> groupTruckList, int orderQty,
-			List<TruckDetails> allAssignedTrucksList) {
-		List<TruckDetails> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
-		TruckDetails maxTruckDetails = initialTruckInfoList.stream()
-				.max(Comparator.comparing(TruckDetails::getVehicleType)).orElseThrow(NoSuchElementException::new);
+	private List<AvailableTrucksModel> getNormalTruckList(List<AvailableTrucksModel> groupTruckList, int orderQty,
+			List<AvailableTrucksModel> allAssignedTrucksList) {
+		List<AvailableTrucksModel> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
+		AvailableTrucksModel maxTruckDetails = initialTruckInfoList.stream()
+				.max(Comparator.comparing(AvailableTrucksModel::getVehicleType)).orElseThrow(NoSuchElementException::new);
 		int truckMaxCapacity = maxTruckDetails.getVehicleType();
 		if (orderQty > truckMaxCapacity) {// check order qty with max truck
 											// capacity
@@ -754,7 +782,7 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 				if (remainingOrderQty > truckMaxCapacity) {
 					getNormalTruckList(groupTruckList, remainingOrderQty, allAssignedTrucksList);
 				} else {// l
-					TruckDetails truckDtls = getTruckDetails(initialTruckInfoList, remainingOrderQty, groupTruckList,
+					AvailableTrucksModel truckDtls = getTruckDetails(initialTruckInfoList, remainingOrderQty, groupTruckList,
 							allAssignedTrucksList);
 					if (truckDtls != null) {
 						allAssignedTrucksList.add(truckDtls);
@@ -788,8 +816,8 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 
 			}
 		} else {// if orser qty is low compare to truck max capacity
-			TruckDetails tDetails = Collections.min(initialTruckInfoList,
-					Comparator.comparing(TruckDetails::getVehicleType));
+			AvailableTrucksModel tDetails = Collections.min(initialTruckInfoList,
+					Comparator.comparing(AvailableTrucksModel::getVehicleType));
 			tDetails = getOrderTruck(initialTruckInfoList, tDetails, allAssignedTrucksList);
 			allAssignedTrucksList.add(tDetails);
 			groupTruckList.add(tDetails);
@@ -798,11 +826,11 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return groupTruckList;
 	}
 
-	private List<TruckDetails> getHeavyTruckList(List<TruckDetails> groupTruckList, int totOrdQty,
-			List<TruckDetails> allAssignedTrucksList) {
-		List<TruckDetails> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
+	private List<AvailableTrucksModel> getHeavyTruckList(List<AvailableTrucksModel> groupTruckList, int totOrdQty,
+			List<AvailableTrucksModel> allAssignedTrucksList) {
+		List<AvailableTrucksModel> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
 		double initialTruckCap = totOrdQty - (totOrdQty * 0.5);
-		TruckDetails initialTruckDetails = getTruckDetails(initialTruckInfoList, initialTruckCap);
+		AvailableTrucksModel initialTruckDetails = getTruckDetails(initialTruckInfoList, initialTruckCap);
 
 		if (initialTruckDetails != null) {// if order qty is equal to truck
 											// capacity
@@ -811,8 +839,8 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 			groupTruckList.add(initialTruckDetails);
 			return groupTruckList;
 		}
-		TruckDetails tDetails = Collections.max(initialTruckInfoList,
-				Comparator.comparing(TruckDetails::getVehicleType));// maximum
+		AvailableTrucksModel tDetails = Collections.max(initialTruckInfoList,
+				Comparator.comparing(AvailableTrucksModel::getVehicleType));// maximum
 																	// truck
 																	// details
 		int truckMaxCapacity = tDetails.getVehicleType();
@@ -833,8 +861,8 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return groupTruckList;
 	}
 
-	private TruckDetails getTruckDetails(List<TruckDetails> truckInfoList, double qty) {
-		for (TruckDetails truckDetails : truckInfoList) {
+	private AvailableTrucksModel getTruckDetails(List<AvailableTrucksModel> truckInfoList, double qty) {
+		for (AvailableTrucksModel truckDetails : truckInfoList) {
 			int truckCapacity = truckDetails.getVehicleType();
 			double truckmaxCapacity = truckCapacity + (truckCapacity * 0.5);
 			if (truckmaxCapacity == qty) {
@@ -844,10 +872,10 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return null;
 	}
 
-	private TruckDetails getTruckDetails(List<TruckDetails> initialTruckInfoList, int orderQty,
-			List<TruckDetails> groupTruckList, List<TruckDetails> allAssignedTrucksList) {
+	private AvailableTrucksModel getTruckDetails(List<AvailableTrucksModel> initialTruckInfoList, int orderQty,
+			List<AvailableTrucksModel> groupTruckList, List<AvailableTrucksModel> allAssignedTrucksList) {
 
-		for (TruckDetails truckDetails : initialTruckInfoList) {
+		for (AvailableTrucksModel truckDetails : initialTruckInfoList) {
 			if (truckDetails.getVehicleType() == orderQty) {
 				if (!isTruckGroup(groupTruckList, truckDetails.getSlNo())) {
 					truckDetails = getOrderTruck(initialTruckInfoList, truckDetails, allAssignedTrucksList);
@@ -858,9 +886,9 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return null;
 	}
 
-	private TruckDetails getHeavyTruckDetails(List<TruckDetails> truckInfoList, double qty) {
+	private AvailableTrucksModel getHeavyTruckDetails(List<AvailableTrucksModel> truckInfoList, double qty) {
 
-		for (TruckDetails truckDetails : truckInfoList) {
+		for (AvailableTrucksModel truckDetails : truckInfoList) {
 			if (Double.valueOf(truckDetails.getVehicleType()) == qty) {
 				return truckDetails;
 			}
@@ -869,19 +897,19 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return null;
 	}
 
-	private TruckDetails getOrderTruck(List<TruckDetails> allTrucksList, TruckDetails truckDetails,
-			List<TruckDetails> assignedTruckList) {
+	private AvailableTrucksModel getOrderTruck(List<AvailableTrucksModel> allTrucksList, AvailableTrucksModel truckDetails,
+			List<AvailableTrucksModel> assignedTruckList) {
 		/*
 		 * if(CollectionUtils.isEmpty(assignedTruckList)){ return truckDetails;
 		 * }
 		 */
 		String truckNo = truckDetails.getSlNo();
 		int truckCapacity = truckDetails.getVehicleType();
-		String allTruckNos = assignedTruckList.stream().map(TruckDetails::getSlNo).collect(Collectors.joining(","));
+		String allTruckNos = assignedTruckList.stream().map(AvailableTrucksModel::getSlNo).collect(Collectors.joining(","));
 		if (!allTruckNos.contains(truckNo)) {
 			return truckDetails;
 		} else {
-			for (TruckDetails truckDtls : allTrucksList) {
+			for (AvailableTrucksModel truckDtls : allTrucksList) {
 				if (truckDtls.getVehicleType() == truckCapacity && !allTruckNos.contains(truckDtls.getSlNo())) {
 					return truckDtls;
 				}
@@ -890,8 +918,8 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return truckDetails;
 	}
 
-	private TruckDetails getOrderHeavyTruck(List<TruckDetails> allTrucksList, TruckDetails truckDetails,
-			List<TruckDetails> assignedTruckList) {
+	private AvailableTrucksModel getOrderHeavyTruck(List<AvailableTrucksModel> allTrucksList, AvailableTrucksModel truckDetails,
+			List<AvailableTrucksModel> assignedTruckList) {
 		/*
 		 * if(CollectionUtils.isEmpty(assignedTruckList)){ return truckDetails;
 		 * }
@@ -900,11 +928,11 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		int truckCapacity = truckDetails.getVehicleType();
 		double maxCapacity = truckCapacity + (truckCapacity * 0.5);
 		truckDetails.setVehicleType((int) maxCapacity);
-		String allTruckNos = assignedTruckList.stream().map(TruckDetails::getSlNo).collect(Collectors.joining(","));
+		String allTruckNos = assignedTruckList.stream().map(AvailableTrucksModel::getSlNo).collect(Collectors.joining(","));
 		if (!allTruckNos.contains(truckNo)) {
 			return truckDetails;
 		} else {
-			for (TruckDetails truckDtls : allTrucksList) {
+			for (AvailableTrucksModel truckDtls : allTrucksList) {
 				if (truckDtls.getVehicleType() == truckCapacity && !allTruckNos.contains(truckDtls.getSlNo())) {
 					truckDtls.setVehicleType((int) maxCapacity);
 					return truckDtls;
@@ -914,16 +942,16 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return truckDetails;
 	}
 
-	private List<TruckDetails> getHeavyGroupTruckDetails(List<TruckDetails> truckInfoList, double qty,
-			List<TruckDetails> truckGroupList, List<TruckDetails> allAssignedTrucksList) {
+	private List<AvailableTrucksModel> getHeavyGroupTruckDetails(List<AvailableTrucksModel> truckInfoList, double qty,
+			List<AvailableTrucksModel> truckGroupList, List<AvailableTrucksModel> allAssignedTrucksList) {
 		if (qty < 8) {
 			return truckGroupList;
 		}
-		TruckDetails maxTruckDetails = null;
+		AvailableTrucksModel maxTruckDetails = null;
 		if (qty == 18.0) {
 			maxTruckDetails = getMaxCapacityTruckDetails("", 12, truckInfoList);
 		} else {
-			maxTruckDetails = truckInfoList.stream().max(Comparator.comparing(TruckDetails::getVehicleType))
+			maxTruckDetails = truckInfoList.stream().max(Comparator.comparing(AvailableTrucksModel::getVehicleType))
 					.orElseThrow(NoSuchElementException::new);
 		}
 
@@ -931,7 +959,7 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		if (truckCapacity == 27) {
 			truckCapacity = 18;
 		}
-		String assignedTruckNo = allAssignedTrucksList.stream().map(TruckDetails::getSlNo)
+		String assignedTruckNo = allAssignedTrucksList.stream().map(AvailableTrucksModel::getSlNo)
 				.collect(Collectors.joining(","));
 		if (assignedTruckNo.contains(maxTruckDetails.getSlNo())) {
 			maxTruckDetails = getMaxCapacityTruckDetails(assignedTruckNo, truckCapacity, truckInfoList);
@@ -949,7 +977,7 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 			truckGroupList.add(maxTruckDetails);
 		} else {
 			double truckCap = qty - (qty * 0.5);
-			TruckDetails tt = truckInfoList.stream()
+			AvailableTrucksModel tt = truckInfoList.stream()
 					.reduce((result, current) -> Math.abs(truckCap - current.getVehicleType()) < Math
 							.abs(truckCap - result.getVehicleType()) ? current : result)
 					.get();
@@ -968,9 +996,9 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return truckGroupList;
 	}
 
-	private TruckDetails getMaxCapacityTruckDetails(String allAssignedTrucks, int truckCapacity,
-			List<TruckDetails> truckDetails) {
-		for (TruckDetails truckDetails2 : truckDetails) {
+	private AvailableTrucksModel getMaxCapacityTruckDetails(String allAssignedTrucks, int truckCapacity,
+			List<AvailableTrucksModel> truckDetails) {
+		for (AvailableTrucksModel truckDetails2 : truckDetails) {
 			if (allAssignedTrucks.contains(truckDetails2.getSlNo())) {
 				continue;
 			} else {
@@ -982,23 +1010,23 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return null;
 	}
 
-	private void getFinalOrdersClub(Map<String, Map<List<ShippingDetails1>, List<TruckDetails>>> finalTruckDetails) {
+	private void getFinalOrdersClub(Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails) {
 	List<String> trucksNoAssigned = new ArrayList<>();
-		for (Map.Entry<String, Map<List<ShippingDetails1>, List<TruckDetails>>> data : finalTruckDetails.entrySet()) {
+		for (Map.Entry<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> data : finalTruckDetails.entrySet()) {
 			String districtName = data.getKey();
-			Map<List<ShippingDetails1>, List<TruckDetails>> ords = data.getValue();
+			Map<List<ShippingDetails1>, List<AvailableTrucksModel>> ords = data.getValue();
 			orderGroupByTruck1(ords,trucksNoAssigned);
 		}
 	}
 
-	private void orderGroupByTruck1(Map<List<ShippingDetails1>, List<TruckDetails>> groupTruckMap,List<String> trucksNoAssigned) {
-		for (Map.Entry<List<ShippingDetails1>, List<TruckDetails>> allDetails : groupTruckMap.entrySet()) {
+	private void orderGroupByTruck1(Map<List<ShippingDetails1>, List<AvailableTrucksModel>> groupTruckMap,List<String> trucksNoAssigned) {
+		for (Map.Entry<List<ShippingDetails1>, List<AvailableTrucksModel>> allDetails : groupTruckMap.entrySet()) {
 			List<ShippingDetails1> ordersList = allDetails.getKey();
 			// List<ShippingDetails1> ordersList =
 			// intellship.getOrderDetailsList();
 			// ordersList.stream().map(ShippingDetails1::getActual_delivery_qty).
 			int allOrdsQtys = getAllOrdersQty(ordersList);
-			List<TruckDetails> groupTruckDetails = allDetails.getValue();
+			List<AvailableTrucksModel> groupTruckDetails = allDetails.getValue();
 			OrderGroup orderGroup = null;
 			List<OrderGroup> orderGroupList = new ArrayList<>();
 			Map<String, List<OrderGroup>> ordersMap = new HashMap<>();
@@ -1007,7 +1035,7 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 			Map<String, List<OrderGroup>> ordersTruckMap = new HashMap<>();
 			Date todaysDate = new Date();
 			ShippingDeliveryOrder shippingDeliveryOrder = null; 
-			for (TruckDetails truckDetails : groupTruckDetails) {
+			for (AvailableTrucksModel truckDetails : groupTruckDetails) {
 				shippingDeliveryOrder = new ShippingDeliveryOrder();
 				int initialOrder = 1;
 				int truckCapacity = truckDetails.getVehicleType();
@@ -1286,8 +1314,8 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return 0;
 	}
 
-	private boolean isTruckGroup1(List<TruckDetails> truckList, String truckNo) {
-		String allTruckNos = truckList.stream().map(TruckDetails::getSlNo).collect(Collectors.joining(","));
+	private boolean isTruckGroup1(List<AvailableTrucksModel> truckList, String truckNo) {
+		String allTruckNos = truckList.stream().map(AvailableTrucksModel::getSlNo).collect(Collectors.joining(","));
 		if (allTruckNos.contains(truckNo)) {
 			return true;
 		}
@@ -1420,25 +1448,25 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 
 	private void getGroupByOrderQty(List<IntellishipModel> data) {
 		// List<TruckDetails> truckInfoList = shippingOrder.getAllTruckInfo();
-		Map<IntellishipModel, List<TruckDetails>> groupTruckMap = new HashMap<>();
+		Map<IntellishipModel, List<AvailableTrucksModel>> groupTruckMap = new HashMap<>();
 		for (IntellishipModel intellishipModel : data) {
 			List<ShippingDetails1> ordersList = intellishipModel.getOrderDetailsList();
-			List<TruckDetails> groupTruckList = new ArrayList<>();
+			List<AvailableTrucksModel> groupTruckList = new ArrayList<>();
 			int allOrderQty = 0;
 			for (ShippingDetails1 shippingDetails1 : ordersList) {
 				allOrderQty = allOrderQty + Integer.parseInt(shippingDetails1.getActual_delivery_qty());
 			}
-			List<TruckDetails> groupTruckDetails = getfinalTruckList(groupTruckList, allOrderQty);
+			List<AvailableTrucksModel> groupTruckDetails = getfinalTruckList(groupTruckList, allOrderQty);
 			groupTruckMap.put(intellishipModel, groupTruckDetails);
 		}
 		orderGroupByTruck(groupTruckMap);
 		// split tru1cks based on order quantity
 	}
 
-	private List<TruckDetails> getfinalTruckList(List<TruckDetails> groupTruckList, int orderQty) {
-		List<TruckDetails> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
-		TruckDetails maxTruckDetails = initialTruckInfoList.stream()
-				.max(Comparator.comparing(TruckDetails::getVehicleType)).orElseThrow(NoSuchElementException::new);
+	private List<AvailableTrucksModel> getfinalTruckList(List<AvailableTrucksModel> groupTruckList, int orderQty) {
+		List<AvailableTrucksModel> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
+		AvailableTrucksModel maxTruckDetails = initialTruckInfoList.stream()
+				.max(Comparator.comparing(AvailableTrucksModel::getVehicleType)).orElseThrow(NoSuchElementException::new);
 		int truckMaxCapacity = maxTruckDetails.getVehicleType();
 		if (orderQty > truckMaxCapacity) {// check order qty with max truck
 											// capacity
@@ -1448,7 +1476,7 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 				if (remainingOrderQty > truckMaxCapacity) {
 
 				} else {
-					for (TruckDetails truckDetails : initialTruckInfoList) {
+					for (AvailableTrucksModel truckDetails : initialTruckInfoList) {
 						if (truckDetails.getVehicleType() == remainingOrderQty) {
 							if (!isTruckGroup(groupTruckList, truckDetails.getSlNo())) {
 								groupTruckList.add(truckDetails);
@@ -1464,33 +1492,33 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 
 			}
 		} else {// if orser qty is low compare to truck max capacity
-			TruckDetails tDetails = Collections.min(initialTruckInfoList,
-					Comparator.comparing(TruckDetails::getVehicleType));
+			AvailableTrucksModel tDetails = Collections.min(initialTruckInfoList,
+					Comparator.comparing(AvailableTrucksModel::getVehicleType));
 			groupTruckList.add(tDetails);
 
 		}
 		return groupTruckList;
 	}
 
-	private boolean isTruckGroup(List<TruckDetails> truckList, String truckNo) {
-		String allTruckNos = truckList.stream().map(TruckDetails::getSlNo).collect(Collectors.joining(","));
+	private boolean isTruckGroup(List<AvailableTrucksModel> truckList, String truckNo) {
+		String allTruckNos = truckList.stream().map(AvailableTrucksModel::getSlNo).collect(Collectors.joining(","));
 		if (allTruckNos.contains(truckNo)) {
 			return true;
 		}
 		return false;
 	}
 
-	private void orderGroupByTruck(Map<IntellishipModel, List<TruckDetails>> groupTruckMap) {
-		for (Map.Entry<IntellishipModel, List<TruckDetails>> allDetails : groupTruckMap.entrySet()) {
+	private void orderGroupByTruck(Map<IntellishipModel, List<AvailableTrucksModel>> groupTruckMap) {
+		for (Map.Entry<IntellishipModel, List<AvailableTrucksModel>> allDetails : groupTruckMap.entrySet()) {
 			IntellishipModel intellship = allDetails.getKey();
 			List<ShippingDetails1> ordersList = intellship.getOrderDetailsList();
 			// ordersList.stream().map(ShippingDetails1::getActual_delivery_qty).
 			int allOrdsQtys = getAllOrdersQty(ordersList);
-			List<TruckDetails> groupTruckDetails = allDetails.getValue();
+			List<AvailableTrucksModel> groupTruckDetails = allDetails.getValue();
 			OrderGroup orderGroup = null;
 			List<OrderGroup> orderGroupList = new ArrayList<>();
 			Map<String, List<OrderGroup>> ordersMap = new HashMap<>();
-			for (TruckDetails truckDetails : groupTruckDetails) {
+			for (AvailableTrucksModel truckDetails : groupTruckDetails) {
 				int initialOrder = 1;
 				int truckCapacity = truckDetails.getVehicleType();
 				int ordersQtyTruck = 0;

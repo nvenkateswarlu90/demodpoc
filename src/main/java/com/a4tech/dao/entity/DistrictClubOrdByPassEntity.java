@@ -1,5 +1,6 @@
 package com.a4tech.dao.entity;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 import javax.persistence.Column;
@@ -10,7 +11,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 @Entity
 @Table(name="district_clubbing_ord_byPass")
-public class DistrictClubOrdByPassEntity {
+public class DistrictClubOrdByPassEntity implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2765851060351665401L;
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="id")

@@ -16,6 +16,8 @@ public class OrderGroup {
 	private String nameShipToParty;
 	private Date   orderShippingDate;
 	private Integer shippingDelivaryId;
+	private String  wheelerType;
+	
 	
 	public Integer getShippingDelivaryId() {
 		return shippingDelivaryId;
@@ -95,6 +97,12 @@ public class OrderGroup {
 	}
 	public void setDelivaryDate(String delivaryDate) {
 		this.delivaryDate = delivaryDate;
+	}
+	public String getWheelerType() {
+		return wheelerType;
+	}
+	public void setWheelerType(String wheelerType) {
+		this.wheelerType = wheelerType;
 	}
 
 }

@@ -284,8 +284,8 @@ $(document).ready(function()
 	    					var json = JSON.stringify(response);
 	    					$("#axleWhel").empty();
 	    					$.each(response, function(i, value) {
-	     						 $("#axleWhel").append("<tr><td>" + value.id + "</td><td>" + value.order + "</td><td>" + value.club + "</td></tr>");  
-	     						//srNo = srNo+1;
+	     						 $("#axleWhel").append("<tr><td>" + srNo + "</td><td>" + value.order + "</td><td>" + value.club + "</td></tr>");  
+	     						srNo = srNo+1;
 	     					});
 	  	    				},
 	    				error : function(e) {

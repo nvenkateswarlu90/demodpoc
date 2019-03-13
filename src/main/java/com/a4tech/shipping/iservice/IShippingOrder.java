@@ -7,21 +7,24 @@ import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
+import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.map.model.Address;
 import com.a4tech.shipping.model.AxleWheelConfiguration;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
+import com.a4tech.shipping.model.IntellishipModelByMaterial;
 import com.a4tech.shipping.model.NormalLoadConfiguration;
 import com.a4tech.shipping.model.OrderGroup;
 import com.a4tech.shipping.model.ShippingDeliveryOrder;
 import com.a4tech.shipping.model.ShippingDetails1;
-import com.a4tech.shipping.model.TruckDetails;
+import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
+import com.a4tech.shipping.model.AvailableTrucksModel;
 import com.a4tech.shipping.model.TruckHistoryDetail;
 
 public interface IShippingOrder {
   public List<ShippingDetails1> getAllShippingOrders();
   public List<ShippingDetails1> getShippingDetailsByDate(String date);
-  public List<TruckDetails> getAllTruckInfo();
+  public List<AvailableTrucksModel> getAllTruckInfo();
   public void saveOrderGroup(OrderGroup orderGroup);
   public List<OrderGroup> getAllGroupOrderList();
   public List<OrderGroup> getOrderGroupByDate(String date);
@@ -29,7 +32,7 @@ public interface IShippingOrder {
   public List<String> getOrderNoByTruck(String truckNo);
   public void updateOrderGroupFlag(String delivaryNo);
   public List<Address> getLatitudeAndLongitude(String truckNo);
-  public void deleteAllGroupOrders();
+  public void deleteAllGroupOrders(String tableName);
   public int generateShippingOrderId(ShippingDeliveryOrder shippingDelivary);
   public void saveDistrictWiseNormalLoad(NormalLoadConfiguration normal);
   public List<DistrictWiseNormalLoadCapacity> getAllDistrictWiseLoads();
@@ -42,6 +45,14 @@ public interface IShippingOrder {
   public List<DistrictClubOrdByPass> getAllDistrictClubOrdByPass();
   public AxleWheelTypeEntity getAxlewheel(String wheelType);
   public List<AxleWheelTypeEntity> getAllAxleWheelTypeEntity();
-public List<AxleWheelnfoEntity> getWheelTypeInfo(String name);
-
+  public List<AxleWheelnfoEntity> getWheelTypeInfo(String name);
+  public List<TruckHistoryDetail> getAllPreviousTrucksByDistName(String distName);
+  public void saveShippingOrderReAssign(ShippingOrdersReAssignModel shippingEntity); 
+  public List<ShippingDetails1> getAllReAssignOrdersBasedOnTruckNo(String truck);
+  public TruckHistoryDetailsEntity getDistrictDetails(String distName,String truckNo);
+  public List<AvailableTrucksModel> getAllAvailableTrucksByAxleType(String axleType);
+  public void deleteOrderByPassDistrict(Integer id);
+  
+  public void saveShippingFinalOrders(IntellishipModelByMaterial shippingFinalOrders);
+  public List<IntellishipModelByMaterial> getAllShippingFinalOrders();
 }

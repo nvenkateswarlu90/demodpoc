@@ -1,20 +1,48 @@
-package com.a4tech.shipping.model;
+package com.a4tech.dao.entity;
 
-public class IntellishipModelByMaterial {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="shipping_final_orders")
+public class ShippingFinalOrders {
+	@Id
+	@Column(name="id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer id;
+	@Column(name="truck_no")
 	private String    truckNo;
+	@Column(name="load_type")
 	private String    loadType;
+	@Column(name="material_type")
 	private String    materialType;
+	@Column(name="total_orders")
 	private Integer   totalOrders;
+	@Column(name="total_order_quantity")
 	private Integer   totalOrderQuantity;
+	@Column(name="truck_capacity")
 	private String    truckCapacity;
+	@Column(name="pending_quantity")
 	private Integer   pendingQuantity;
+	@Column(name="plant")
 	private String    plant;
+	@Column(name="total_kilometers")
 	private String    totalKilometers;
+	@Column(name="delivary_date")
 	private String    delivaryDate;
+	@Column(name="district_name")
 	private String    districtName;
+	@Column(name="shipping_status")
 	private String    shippingStatus;
+	@Column(name="estimation_time")
 	private String    estimationTime;
+	@Column(name="shipping_order_id")
 	private Integer   shippingOrderId;
+	@Column(name="wheeler_type")
 	private String    wheelerType;
 	
 	public String getEstimationTime() {

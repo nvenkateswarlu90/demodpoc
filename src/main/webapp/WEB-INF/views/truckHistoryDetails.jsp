@@ -154,7 +154,8 @@
 																<td>${historyData.districtName}</td>
 																<td>${historyData.ratedLoad}</td>
 																<td>${historyData.normalLoad}</td>
-																<td></td>
+																<td>${historyData.wheelerType}</td>
+																
 																<%-- 												<td>${historyData.lastTransactionOfNormalLoad}</td>
  --%>
 															</tr>

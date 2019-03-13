@@ -30,9 +30,12 @@ import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.OrderGroupEntity;
 import com.a4tech.dao.entity.ShippingDeliveryOrderEntity;
 import com.a4tech.dao.entity.ShippingEntity;
-import com.a4tech.dao.entity.TruckDetailsEntity;
+import com.a4tech.dao.entity.ShippingFinalOrders;
+import com.a4tech.dao.entity.ShippingOrdersReAssign;
+import com.a4tech.dao.entity.AvailableTrucks;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.shipping.ishippingDao.IshippingOrderDao;
+import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
 import com.mysql.cj.x.protobuf.MysqlxCrud.CreateViewOrBuilder;
 
 
@@ -149,14 +152,14 @@ public class ShippingDao implements IshippingOrderDao{
 		return new ArrayList<>();
 	}
 	@Override
-	public List<TruckDetailsEntity> getAllTruckInfo() {
+	public List<AvailableTrucks> getAllTruckInfo() {
 		Session session = null;
 		Transaction transaction = null;
 		try {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
 			@SuppressWarnings("unchecked")
-			List<TruckDetailsEntity> truckDetailsList = session.createCriteria(TruckDetailsEntity.class).list();
+			List<AvailableTrucks> truckDetailsList = session.createCriteria(AvailableTrucks.class).list();
 			transaction.commit();
 			return truckDetailsList;
 		} catch (Exception ex) {
@@ -176,7 +179,7 @@ public class ShippingDao implements IshippingOrderDao{
 	}
 	
 	@Override
-	public void saveTruckdetailsEntity(TruckDetailsEntity truckEntity) {
+	public void saveTruckdetailsEntity(AvailableTrucks truckEntity) {
 
 		Session session = null;
 		Transaction transaction = null;
@@ -404,7 +407,7 @@ public class ShippingDao implements IshippingOrderDao{
 		return new ArrayList<>();
 	}
 	@Override
-	public void deleteAllGroupOrders() {
+	public void deleteAllGroupOrders(String tableName) {
 		Session session = null;
 		Transaction transaction = null;
 		try {
@@ -416,7 +419,14 @@ public class ShippingDao implements IshippingOrderDao{
 			transaction.commit();*/
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
-			String hql = String.format("delete from %s","OrderGroupEntity");
+			String hql = "";
+			if(tableName.equalsIgnoreCase("orderGroup")) {
+				hql = String.format("delete from %s","OrderGroupEntity");
+			} else if(tableName.equalsIgnoreCase("orderReAssign")) {
+				hql = String.format("delete from %s","ShippingOrdersReAssign");
+			} else if(tableName.equalsIgnoreCase("shippingFinalOrders")) {
+				hql = String.format("delete from %s","ShippingFinalOrders");
+			}
 		    Query query = session.createQuery(hql);
 		    int no = query.executeUpdate();
 		    transaction.commit();
@@ -861,17 +871,13 @@ public class ShippingDao implements IshippingOrderDao{
 	}
 	@Override
 	public List<AxleWheelnfoEntity> getWheelTypeInfo(String name) {
-
-
 		Session session = null;
 		Transaction transaction = null;
 		try {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
-					
 			Criteria cq= session.createCriteria(AxleWheelnfoEntity.class);
 			List<AxleWheelnfoEntity> wheelrList = cq.add(Restrictions.eq("no",Integer.parseInt(name))).list();
-		
 			transaction.commit();
 			return wheelrList;
 		} catch (Exception ex) {
@@ -888,11 +894,7 @@ public class ShippingDao implements IshippingOrderDao{
 			}
 		}
 		return new ArrayList<>();
-	
 	}
-	
-	
-	
 	@Override
 	public <T> List<T> listAllData(Class<T> clazz) {
 		Session session = null;
@@ -937,7 +939,7 @@ public class ShippingDao implements IshippingOrderDao{
 		return null;
 	}
 	@Override
-	public <T> List<T> listAllDataById(Class<T> clazz, String variableName, T val) {
+	public <T> List<T> listAllDataById(Class<T> clazz, String variableName, String val) {
 		Session session = null;
 		try {
 			session = sessionFactory.openSession();
@@ -953,7 +955,163 @@ public class ShippingDao implements IshippingOrderDao{
 		return new ArrayList<>();
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<TruckHistoryDetailsEntity> getTruckHistoryDataByDistrictName(String districtName) {
+
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+		//   List<TruckHistoryDetailsEntity> truckData = session.createCriteria(TruckHistoryDetailsEntity.class).list();
+		    Criteria criteria = session.createCriteria(TruckHistoryDetailsEntity.class);
+		    criteria.add(Restrictions.eq("districtName",districtName ));
+		    List<TruckHistoryDetailsEntity> truckData = criteria.list();
+			return truckData;
+		} catch (Exception ex) {
+			_LOGGER.error("Unable to get data from vehicle no. "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} finally {
+			if (session != null) {
+				try {
+					session.close();
+				} catch (Exception ex) {
+				}
+			}
+		}
+		return new ArrayList<>();
+		
+
+	}
+	@Override
+	public void saveShippingEntityReOrder(ShippingOrdersReAssign shippingEntity) {
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+			session.save(shippingEntity);
+			transaction.commit();
+			_LOGGER.info("RE-Order Details data has been saved successfully in db");
+		} catch (Exception ex) {
+			_LOGGER.error("unable to save Re-data into DB: "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} finally {
+			if (session != null) {
+				try {
+					session.close();
+				} catch (Exception ex) {
+				}
+			}
+		}
+		
+	}
+	@Override
+	public List<ShippingOrdersReAssign> getAllReAssignOrdersBasedOnTruckNo(String truck) {
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+		//   List<TruckHistoryDetailsEntity> truckData = session.createCriteria(TruckHistoryDetailsEntity.class).list();
+		    Criteria criteria = session.createCriteria(ShippingOrdersReAssign.class);
+		    criteria.add(Restrictions.eq("truckNo", truck));
+		    List<ShippingOrdersReAssign> ordersData = criteria.list();
+			return ordersData;
+		} catch (Exception ex) {
+			_LOGGER.error("Unable to get data from vehicle no. "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} finally {
+			if (session != null) {
+				try {
+					session.close();
+				} catch (Exception ex) {
+				}
+			}
+		}
+		return new ArrayList<>();
+			
+	}
+	@Override
+	public TruckHistoryDetailsEntity getDistrictDetails(String districtName,String truckNo) {
+		Session session = null;
+		try {
+			session = sessionFactory.openSession();
+			Criteria criteria = session.createCriteria(TruckHistoryDetailsEntity.class);
+			criteria.add(Restrictions.eq("districtName", districtName));
+			criteria.add(Restrictions.eq("truckNo", truckNo));
+			TruckHistoryDetailsEntity wheelData = (TruckHistoryDetailsEntity) criteria.uniqueResult();
+			return wheelData;
+		} catch (Exception ex) {
+			_LOGGER.error("unable to get district truck load types from DB based on date: "+ex.getCause());
+			
+		} finally {
+			if (session != null) {
+				try {
+					session.close();
+				} catch (Exception ex) {
+				}
+			}
+		}
+		return null;
+	}
+	@Override
+	@SuppressWarnings("deprecation")
+	public List<AvailableTrucks> getAllAvailableTrucksByAxleType(String axleType) {
+		 
+		 try(Session session = sessionFactory.openSession()){
+			Criteria criteria = session.createCriteria(TruckHistoryDetailsEntity.class);
+				criteria.add(Restrictions.eq("vehicleType", axleType));
+				List<AvailableTrucks> avaiableTrucksList = criteria.list();
+				return avaiableTrucksList;
+		 }catch (Exception e) {
+			_LOGGER.error("Unbale to fetch available trucks data: "+e.getMessage());
+		}
+		return null;
+	}
+	@Override
+	public void saveShippingFinalOrders(ShippingFinalOrders shippingFinalOrders) {
+		Transaction transaction = null;
+		try(Session session =  sessionFactory.openSession() ) {
+			transaction = session.beginTransaction();
+			session.save(shippingFinalOrders);
+			transaction.commit();
+			_LOGGER.info("ShippingFinal data Details data has been saved successfully in db");
+		} catch (Exception ex) {
+			_LOGGER.error("unable to save shipping final data Details into DB: "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} 
+		
+	}
+	@Override
+	public void deleteOrderByPassDistrict(Integer id) {
+	   Transaction tranction = null;
+	   try(Session session = sessionFactory.openSession()) {
+		   tranction = session.beginTransaction();
+		 DistrictClubOrdByPassEntity district = session.load(DistrictClubOrdByPassEntity.class, id);
+		 if(district != null) {
+			 session.delete(district);
+		 }
+		 tranction.commit();
+		 _LOGGER.info("Bypass District has been successfully removed from DB: ");
+	   } catch (Exception e) {
+		   if(tranction!= null) {
+			   tranction.rollback();   
+		   }
+	}
+		
+	}
 	
+
 	
 	
 	
