@@ -620,7 +620,21 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		shippingOrderService.deleteOrderByPassDistrict(id);
 		return "redirect:/distClubOrdByPassConfig";
 	}
-
+	@RequestMapping(value = "/editDistClubOrdByPass", method = RequestMethod.POST)
+	public ModelAndView editDistrictClubOrderByPassConfigure(
+			@ModelAttribute("districtByPass") @Validated DistrictClubOrdByPass districtByPass,BindingResult result,Model model,HttpServletRequest req) {
+		System.out.println("Update configuration");
+		districtByPass.setId(Integer.parseInt(req.getParameter("distId1")));
+		districtByPass.setDistrictName(req.getParameter("districtName1"));
+		districtByPass.setDistrictCode(req.getParameter("districtCode1"));
+		districtByPass.setStartDate(LocalDate.parse(req.getParameter("startDate1")));
+		districtByPass.setEndDate(LocalDate.parse(req.getParameter("endDate1")));
+      shippingService.orderDistrictByPass(districtByPass, req.getParameter("startDate1"), req.getParameter("endDate1"));
+       model.addAttribute("update", "updateSuccess");
+       List<DistrictClubOrdByPass> districtByPassList = shippingOrderService.getAllDistrictClubOrdByPass();
+		return new ModelAndView("district_clubbing_order_bypass", "distByPass", districtByPassList);
+		//return "configure_districtWise_Normal_load";
+	}
 	private boolean isemptyValues(Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails) {
 		for (Map.Entry<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> data : finalTruckDetails.entrySet()) {
 			Map<List<ShippingDetails1>, List<AvailableTrucksModel>> vals = data.getValue();
@@ -1206,7 +1220,6 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 			int totalOrdQty = 0;
 			int ordQty = 0;
 			int truckCapacity = 0;
-			String districName = "";
 			for (OrderGroup orderGrup : orderGrpList) {
 				shippingLatitudeAndLonitude.append(orderGrup.getLatitude()).append(",")
 						.append(orderGrup.getLongitude());
@@ -1226,7 +1239,6 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 				intellishModel.setLoadType(TruckTypeInfo.getLoadType(orderGrup.getDistrictName()));
 				intellishModel.setMaterialType(orderGrup.getMaterialType());
 				String truckType = TruckTypeInfo.getTruckLoadType(orderGrup.getDistrictName());
-				districName = orderGrup.getDistrictName();
 				if ("Minimum".equals(truckType)) {
 					intellishModel.setTruckCapacity(orderGrup.getTruckCapacity());
 				} else {

@@ -6,6 +6,7 @@ import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
+import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
 import com.a4tech.dao.entity.OrderGroupEntity;
 import com.a4tech.dao.entity.ShippingDeliveryOrderEntity;
 import com.a4tech.dao.entity.ShippingEntity;
@@ -13,6 +14,7 @@ import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
 import com.a4tech.dao.entity.AvailableTrucks;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.shipping.model.DistrictClubOrdByPass;
 
 public interface IshippingOrderDao {
   public void saveShippingEntity(ShippingEntity shippingEntity);
@@ -37,7 +39,7 @@ public interface IshippingOrderDao {
   public void saveTruckhistory(TruckHistoryDetailsEntity truckHistory);
   public void saveAxleWheelConfiguration(AxleWheelTypeEntity wheelEntity);
   public List<TruckHistoryDetailsEntity> getSearchTrucksHistoryDetails(String value,String type);
-  public void saveDistrictClubOrdByPass(DistrictClubOrdByPassEntity byPassEnitity);
+  public void saveOrUpdateDistrictClubOrdByPass(DistrictClubOrdByPassEntity byPassEnitity);
   public List<DistrictClubOrdByPassEntity> getAllDistrictClubOrdByPass();
   public AxleWheelTypeEntity getAxlewheel(String wheelType);
   public List<AxleWheelTypeEntity> getAllAxleWheelTypeEntity();
@@ -51,6 +53,8 @@ public interface IshippingOrderDao {
   
   public void saveShippingFinalOrders(ShippingFinalOrders shippingFinalOrders);
   public void deleteOrderByPassDistrict(Integer id);
+  public void saveLatitudeAndLongitudeVals(LangitudeAndLatitudeMap longi);
+ // public void updateDistrictClubOrdByPass(DistrictClubOrdByPassEntity districtByPass);
   public <T> List<T> listAllData(Class<T> clazz); 
   public <T> List<T> listAllDataById(Class<T> clazz,String variableName,String val);
   public <T> T getDataById(Class<T> clazz,String type,T val);

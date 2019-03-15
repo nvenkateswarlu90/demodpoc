@@ -46,15 +46,19 @@
               <h5>District Clubbing Order ByPass</h5>
             </div>
             <div class="ibox-content">
-				  <button type="button" class="btn btn-info add-new pull-right btn-rounded"  data-toggle="modal" data-target="#create"><i class="fa fa-plus"></i> Add New District</button>
-              <table class="table table-bordered table-hover">
+								<button type="button"
+									class="btn btn-info add-new pull-right btn-rounded"
+									data-toggle="modal" data-target="#create">
+									<i class="fa fa-plus"></i> Add New District
+								</button>
+								<table class="table table-bordered table-hover">
                 <thead>
                   <tr>
                     <th>District Name</th>
                     <th>District Code</th>
                     <th>Start Date</th>
                     <th>End Date</th>
-                   <!--  <th>Action</th> -->
+                   <th>Action</th> 
                     
                    
                   </tr>
@@ -66,19 +70,12 @@
                                     	<td style="vertical-align:middle">${districtByPass.districtCode}</td>
                                     	<td style="vertical-align:middle">${districtByPass.startDate}</td>
                                     	<td style="vertical-align:middle">${districtByPass.endDate}</td>
-                                    	<%-- <td style="width:17%">
-                                    	<div class="btn-group" role="group" aria-label="Basic example">
-             <button type="button" class="btn btn-warning btn-rounded" onclick="editDistrictDetails()"> <i class="fa fa-pencil"></i> Edit</button>
-             <button type="button" class="btn btn-danger btn-rounded" onclick="removeDistrictName()"> <i class="fa fa-trash"></i> Remove</button>
-             <a href="<c:url value='/delete-user-${districtByPass.districtName}' />" class="btn btn-danger custom-width">delete</a>
-</div> 
-                                    	
-                                    	</td> --%>
-                                    	<%-- <td>
+                                    	 <td>
                                     	<a href="<c:url value='/deleteDistrict/${districtByPass.id}' />" class="btn btn-danger custom-width">Delete</a>
-                                    	<a href="<c:url value='/deleteDistrict1/${districtByPass.id}' />" class="btn btn-success  custom-width"  data-toggle="modal" data-districtData="${districtByPass}" data-target="#edit">Edit</a>
-                                    	</td>
- --%>                                    	 
+													<button class="btn btn-success editDistrict"
+														onclick="editDistrict('${districtByPass.id}','${districtByPass.districtName}','${districtByPass.districtCode}','${districtByPass.startDate}','${districtByPass.endDate}')">Edit</button>
+												</td>
+                                   	 
                                     </tr>                                  
                                     </c:forEach>
                 </tbody>
@@ -117,18 +114,11 @@
                 </thead>
                 <tbody>
                   <tr>
-                 <%--  <td> <form:input path="districtName" class="form-control"/> </td>
-                 <td> <form:input path="districtCode" class="form-control"/></td>
-                  <td><form:input path="startDate" class="datepicker"/></td>
-                 <td> <form:input path="endDate" class="datepicker"/></td> --%>
-                  
-                    <td> <input type="text" name="districtName" class="form-control" value="${districtByPass.districtName}"></td>
-					  <td> <input type="text" name="districtCode"class="form-control"></td>
-					   <td> <input type="date" name="startDate" class="form-control"></td>
-                    <td> <input type="date" name="endDate" class="form-control"></td>
-                   
+                    <td> <input type="text" name="districtName" class="form-control" ></td>
+					  <td> <input type="text" name="districtCode"class="form-control" ></td>
+					   <td> <input type="date" name="startDate" class="form-control" ></td>
+                    <td> <input type="date" name="endDate" class="form-control" ></td>
                   </tr>
-               
                 </tbody>
               </table>
                 <div class="modal-footer">
@@ -137,7 +127,6 @@
       </div>
               </form>
       </div>
-    
     </div>
   </div>
 </div>
@@ -150,7 +139,7 @@
       </div>
       <div class="modal-body" style="overflow-x: auto;">
       
-      <form id="formId" class="form-horizontal m-l-md" action="distClubOrdByPassConfig" method="post">
+      <form id="formId" class="form-horizontal m-l-md" action="editDistClubOrdByPass" method="post">
        <table class="table table-bordered table-hover">
                 <thead>
                   <tr>
@@ -167,12 +156,11 @@
                  <td> <form:input path="districtCode" class="form-control"/></td>
                   <td><form:input path="startDate" class="datepicker"/></td>
                  <td> <form:input path="endDate" class="datepicker"/></td> --%>
-                  
-                    <td> <input type="text" name="districtName" class="form-control"></td>
-					  <td> <input type="text" name="districtCode"class="form-control"></td>
-					   <td> <input type="date" name="startDate" class="form-control"></td>
-                    <td> <input type="date" name="endDate" class="form-control"></td>
-                   
+                   <input type="hidden" id="distId" name="distId1">
+                   <td> <input type="text" id="distName" name="districtName1" class="form-control" readonly="readonly" ></td>
+					  <td> <input type="text" id="distCode" name="districtCode1"class="form-control"></td>
+					   <td> <input type="date" id= "startDt" name="startDate1" class="form-control" ></td>
+                    <td> <input type="date" id="endDt" name="endDate1" class="form-control" ></td>
                   </tr>
                
                 </tbody>
@@ -189,10 +177,6 @@
 </div>
 <%-- </form:form> --%>
 
-    <!-- Mainly scripts -->
-   <!-- <script src="https://code.jquery.com/jquery-3.3.1.min.js"
-			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-			  crossorigin="anonymous"></script> -->
 		<script>
 		
 $(document).ready(function(){
@@ -236,9 +220,16 @@ $(document).ready(function(){
         	alert('remove');
         }
         
-        function editDistrictDetails(){
-        	alert('edit');
+        function editDistrict(id,districtName1,districtCode1,startDate1,endDate1){
+        	 $("#distId").val(id);   
+        	$("#distName").val(districtName1);
+        	    $("#distCode").val(districtCode1);
+        	    $("#startDt").val(startDate1);
+        	    $("#endDt").val(endDate1);
+				var myEditModal = $("#edit");
+        	   myEditModal.modal({ show: true });
         }
+        
     </script>
 
 </body>

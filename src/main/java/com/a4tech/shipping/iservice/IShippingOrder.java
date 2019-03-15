@@ -7,6 +7,7 @@ import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
+import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
 import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.map.model.Address;
@@ -41,7 +42,7 @@ public interface IShippingOrder {
   public List<TruckHistoryDetailsEntity> getAllTrucksHistoryDetails();
   public List<TruckHistoryDetailsEntity> getSearchTrucksHistoryDetails(String value,String type);
   public void saveAxleWheelConfiguration(AxleWheelConfiguration axleWheelConfig);
-  public void saveDistrictClubOrdByPass(DistrictClubOrdByPass districtByPass);
+  public void saveOrUpdateDistrictClubOrdByPass(DistrictClubOrdByPass districtByPass);
   public List<DistrictClubOrdByPass> getAllDistrictClubOrdByPass();
   public AxleWheelTypeEntity getAxlewheel(String wheelType);
   public List<AxleWheelTypeEntity> getAllAxleWheelTypeEntity();
@@ -52,6 +53,9 @@ public interface IShippingOrder {
   public TruckHistoryDetailsEntity getDistrictDetails(String distName,String truckNo);
   public List<AvailableTrucksModel> getAllAvailableTrucksByAxleType(String axleType);
   public void deleteOrderByPassDistrict(Integer id);
+ // public void updateDistrictClubOrdByPass(DistrictClubOrdByPass districtByPass);
+  public void saveLatitudeAndLongitudeVals(LangitudeAndLatitudeMap longi);
+  public Map<String, String> getAllLatitudeAndLongitudeVals();
   
   public void saveShippingFinalOrders(IntellishipModelByMaterial shippingFinalOrders);
   public List<IntellishipModelByMaterial> getAllShippingFinalOrders();

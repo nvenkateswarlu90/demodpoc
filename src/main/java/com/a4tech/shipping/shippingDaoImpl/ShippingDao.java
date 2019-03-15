@@ -27,6 +27,7 @@ import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
+import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
 import com.a4tech.dao.entity.OrderGroupEntity;
 import com.a4tech.dao.entity.ShippingDeliveryOrderEntity;
 import com.a4tech.dao.entity.ShippingEntity;
@@ -672,13 +673,13 @@ public class ShippingDao implements IshippingOrderDao{
 		}		
 	}
 	@Override
-	public void saveDistrictClubOrdByPass(DistrictClubOrdByPassEntity byPassEnitity) {
+	public void saveOrUpdateDistrictClubOrdByPass(DistrictClubOrdByPassEntity byPassEnitity) {
 		Session session = null;
 		Transaction transaction = null;
 		try {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
-			session.save(byPassEnitity);
+			session.saveOrUpdate(byPassEnitity);
 			transaction.commit();
 			_LOGGER.info("Added bypass district configuration data has been saved successfully in db");
 		} catch (Exception ex) {
@@ -1110,7 +1111,48 @@ public class ShippingDao implements IshippingOrderDao{
 	}
 		
 	}
-	
+	/*@Override
+	public void updateDistrictClubOrdByPass(DistrictClubOrdByPassEntity districtByPass) {
+		Session session = null;
+		Transaction transaction = null;
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+			session.save(districtByPass);
+			transaction.commit();
+			_LOGGER.info("Added bypass district configuration data has been saved successfully in db");
+		} catch (Exception ex) {
+			_LOGGER.error("unable to save bypass configuration data into DB: "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} finally {
+			if (session != null) {
+				try {
+					session.close();
+				} catch (Exception ex) {
+				}
+			}
+		}		
+		
+	}
+	*/
+	@Override
+	public void saveLatitudeAndLongitudeVals(LangitudeAndLatitudeMap longi) {
+		Transaction transaction = null;
+		try(Session session =  sessionFactory.openSession() ) {
+			transaction = session.beginTransaction();
+			session.save(longi);
+			transaction.commit();
+			_LOGGER.info("ShippingFinal data Details data has been saved successfully in db");
+		} catch (Exception ex) {
+			_LOGGER.error("unable to save shipping final data Details into DB: "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} 
+		
+	}
 
 	
 	

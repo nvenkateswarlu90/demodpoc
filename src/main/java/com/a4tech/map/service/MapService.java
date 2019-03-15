@@ -6,7 +6,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -20,7 +22,8 @@ import com.google.gson.Gson;
 
 public class MapService {
   private RestTemplate restTemplate ;
-
+  private static Map<String, Double> distanceMapStore = new HashMap<>();
+  private static Map<String, String> distanceAndHrsMapStore = new HashMap<>();
   public double getDistence(String originCoordinates,String destinationCoordinates) throws IOException{
 	  URL url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+originCoordinates+"&destinations="+destinationCoordinates+"&mode=driving");
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -174,6 +177,19 @@ public static String getMaxHrs(List<String> allHrs){
 		finalTime = tempTime;
 	}
 	return finalTime;
+}
+public static void saveDistanceMapStore(String langAndLong,double distance) {
+	distanceMapStore.put(langAndLong, distance);
+}
+public static void saveDistanceAndHrsMapStore(String langAndLong,String distance) {
+	distanceAndHrsMapStore.put(langAndLong, distance);
+}
+
+public static Double getDistanceMapStore(String langAndLong) {
+	return distanceMapStore.get(langAndLong);
+}
+public static  String getDistanceAndHrsMapStore(String langAndLong) {
+	return distanceAndHrsMapStore.get(langAndLong);
 }
 public RestTemplate getRestTemplate() {
 	return restTemplate;

@@ -2,6 +2,8 @@ package com.a4tech.shipping.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
+import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
 import com.a4tech.dao.entity.OrderGroupEntity;
 import com.a4tech.dao.entity.ShippingDeliveryOrderEntity;
 import com.a4tech.dao.entity.ShippingEntity;
@@ -342,14 +345,17 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 		shippingOrderDao.saveAxleWheelConfiguration(wheelEntity);
 
 	}
-	public void saveDistrictClubOrdByPass(DistrictClubOrdByPass districtByPass) {
+	public void saveOrUpdateDistrictClubOrdByPass(DistrictClubOrdByPass districtByPass) {
 		// TODO Auto-generated method stub
 		DistrictClubOrdByPassEntity distByPassEnti = new DistrictClubOrdByPassEntity();
+		if(districtByPass.getId() != null) {
+			distByPassEnti.setId(districtByPass.getId());
+		}
 		distByPassEnti.setDistrictCode(districtByPass.getDistrictCode());
 		distByPassEnti.setDistrictName(districtByPass.getDistrictName());
 		distByPassEnti.setStartDate(districtByPass.getStartDate());
 		distByPassEnti.setEndDate(districtByPass.getEndDate());
-		shippingOrderDao.saveDistrictClubOrdByPass(distByPassEnti);
+		shippingOrderDao.saveOrUpdateDistrictClubOrdByPass(distByPassEnti);
 	}
 
 
@@ -561,6 +567,34 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 		shippingOrderDao.deleteOrderByPassDistrict(id);
 		
 	}
+
+
+	@Override
+	public void saveLatitudeAndLongitudeVals(LangitudeAndLatitudeMap longi) {
+		shippingOrderDao.saveLatitudeAndLongitudeVals(longi);
+		
+	}
+
+
+	@Override
+	public Map<String, String> getAllLatitudeAndLongitudeVals() {
+		List<LangitudeAndLatitudeMap> langitudeAndLatitudeMapList = shippingOrderDao.listAllData(LangitudeAndLatitudeMap.class);
+		Map<String, String> latitudeAndLongitudeValsMap = langitudeAndLatitudeMapList.stream().collect(Collectors
+				.toMap(LangitudeAndLatitudeMap::getLatitudeAndLongitude, LangitudeAndLatitudeMap::getDistance));
+		return latitudeAndLongitudeValsMap;
+	}
+
+/*
+	@Override
+	public void updateDistrictClubOrdByPass(DistrictClubOrdByPass districtByPass) {
+		DistrictClubOrdByPassEntity distByPassEnti = new DistrictClubOrdByPassEntity();
+		distByPassEnti.setDistrictCode(districtByPass.getDistrictCode());
+		distByPassEnti.setDistrictName(districtByPass.getDistrictName());
+		distByPassEnti.setStartDate(districtByPass.getStartDate());
+		distByPassEnti.setEndDate(districtByPass.getEndDate());
+		shippingOrderDao.saveDistrictClubOrdByPass(distByPassEnti);
+		
+	}*/
 
 
 

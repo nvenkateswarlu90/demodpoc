@@ -31,7 +31,7 @@
             <li><a href="<c:url value='getAllTrucksInformation' />"> <span class="fa fa-chevron-right submenu"></span> All Available Trucks</a></li>
             <li><a href="<c:url value='showTruckHistoryDetails' />"> <span class="fa fa-chevron-right submenu"></span> Show Trucks History Details</a></li>
              <li><a href="<c:url value='uploadTruckHistoryDetails' />"> <span class="fa fa-chevron-right submenu"></span> Upload And Update Truck History Details</a></li> 
-            <li><a href="#"> <span class="fa fa-chevron-right submenu"></span> Clubbed Order Loaded Trucks</a></li>
+            <!-- <li><a href="#"> <span class="fa fa-chevron-right submenu"></span> Clubbed Order Loaded Trucks</a></li> -->
              </ul>
              </li>
              

@@ -19,10 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.a4tech.dao.entity.AxleWheelnfoEntity;
+import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.map.service.MapService;
 import com.a4tech.shipping.iservice.IShippingOrder;
+import com.a4tech.shipping.model.AvailableTrucksModel;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
 import com.a4tech.shipping.model.IntellishipModelByMaterial;
 import com.a4tech.shipping.model.OrderGroup;
@@ -30,7 +31,6 @@ import com.a4tech.shipping.model.PlantDetails;
 import com.a4tech.shipping.model.ShippingDeliveryOrder;
 import com.a4tech.shipping.model.ShippingDetails1;
 import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
-import com.a4tech.shipping.model.AvailableTrucksModel;
 import com.a4tech.shipping.model.TruckHistoryDetail;
 import com.a4tech.util.TruckTypeInfo;
 
@@ -633,6 +633,7 @@ public class ShippingService {
 			int ordQty = 0;
 			int truckCapacity = 0;
 			String districName = "";
+			int truckOrdQty = 0;
 			for (OrderGroup orderGrup : orderGrpList) {
 				shippingLatitudeAndLonitude.append(orderGrup.getLatitude()).append(",")
 						.append(orderGrup.getLongitude());
@@ -648,6 +649,7 @@ public class ShippingService {
 				if (pendingOrder != null) {
 					ordQty = pendingOrder.getTruckOrderQty();
 				}
+				truckOrdQty = truckOrdQty + Integer.parseInt(orderGrup.getOriginalOrderQty());
 				totalOrdQty = totalOrdQty + Integer.parseInt(orderGrup.getOriginalOrderQty());
 				intellishModel.setLoadType(TruckTypeInfo.getLoadType(orderGrup.getDistrictName()));
 				intellishModel.setMaterialType(orderGrup.getMaterialType());
@@ -684,9 +686,18 @@ public class ShippingService {
 				totalOrdQty = totalOrdQty - ordQty;
 			}
 			try {
-				String distenceAndHrs = gmapDist.getMaxDistenceAndHrsFromMultipleDestination(
-						plantDetails.getLatitude() + "," + plantDetails.getLongitude(),
-						shippingLatitudeAndLonitude.toString());
+				
+				String distenceAndHrs = MapService.getDistanceAndHrsMapStore(shippingLatitudeAndLonitude.toString());
+				if(distenceAndHrs == null) {
+					 distenceAndHrs = gmapDist.getMaxDistenceAndHrsFromMultipleDestination(
+								plantDetails.getLatitude() + "," + plantDetails.getLongitude(),
+								shippingLatitudeAndLonitude.toString());
+					 LangitudeAndLatitudeMap lat = new LangitudeAndLatitudeMap();
+					 lat.setLatitudeAndLongitude(shippingLatitudeAndLonitude.toString());
+					 lat.setDistance(distenceAndHrs);
+					 shippingOrderService.saveLatitudeAndLongitudeVals(lat);
+					 MapService.saveDistanceAndHrsMapStore(shippingLatitudeAndLonitude.toString(), distenceAndHrs);
+				}
 				String[] data = distenceAndHrs.split("###");
 				distence = Double.parseDouble(data[0]);
 				duration = data[1];
@@ -703,7 +714,7 @@ public class ShippingService {
 			intellishModel.setTruckNo(truckNo);
 			intellishModel.setTotalKilometers(String.valueOf(distence));
 			intellishModel.setTotalOrders(orderGrpList.size());
-			intellishModel.setTotalOrderQuantity(totalOrdQty);
+			intellishModel.setTotalOrderQuantity(truckOrdQty);
 			intellishModel.setPlant(plantDetails.getPlantName());
 			intellishModel.setPendingQuantity(pedningQty);
 			intellishModel.setShippingStatus(getShippingStatus(shippingStatusCount));
@@ -740,7 +751,7 @@ public class ShippingService {
 		LocalDate ld = LocalDate.parse(startDate1);
 		
 		LocalDate ld123 = LocalDate.parse(endDate1);*/
-		shippingOrderService.saveDistrictClubOrdByPass(districtByPass);
+		shippingOrderService.saveOrUpdateDistrictClubOrdByPass(districtByPass);
 		
 	}
 	
@@ -1078,12 +1089,25 @@ public class ShippingService {
 	 }
 	 
  }
- public boolean isDistrictByPass(List<DistrictClubOrdByPass> distBypassList,String distrciName) {
-	 for (DistrictClubOrdByPass districtClubOrdByPass : distBypassList) {
-		   if(districtClubOrdByPass.getDistrictName().equalsIgnoreCase(distrciName)) {
-			   return true;
-		   }
+
+	public boolean isDistrictByPass(List<DistrictClubOrdByPass> distBypassList, String distrciName) {
+		for (DistrictClubOrdByPass districtClubOrdByPass : distBypassList) {
+			if (districtClubOrdByPass.getDistrictName().equalsIgnoreCase(distrciName)) {
+				if (isDistrictOrderByPassDate(districtClubOrdByPass.getStartDate(),
+						districtClubOrdByPass.getEndDate())) {
+					return true;
+				}
+
+			}
+		}
+		return false;
 	}
+ private boolean isDistrictOrderByPassDate(LocalDate startDate, LocalDate endDate) {
+	  LocalDate now = LocalDate.now();
+	 if ((now.isAfter(startDate) && now.isBefore(endDate))
+				|| (now.equals(startDate) || now.equals(endDate))) {
+			return true;
+		} 
 	 return false;
  }
  private String getWheelerType(List<ShippingDetails1> ordersList,int totOrdQty) {
@@ -1115,15 +1139,21 @@ public class ShippingService {
 			ordersLongitudeAndLatitude.append(shippingDetails1.getShip_to_latt()).append(",")
 					.append(shippingDetails1.getShip_to_long()).append("|");
 		}
-	 double maxDistance = 0.0;
+	 Double maxDistance = 0.0;
 	  try {
-			 maxDistance = gmapDist.getMaxDistenceFromMultipleDestination(plantLongAndLati.toString(),
-					ordersLongitudeAndLatitude.toString());
+		  maxDistance = MapService.getDistanceMapStore(ordersLongitudeAndLatitude.toString());
+		  if(maxDistance == null) {
+			  maxDistance = gmapDist.getMaxDistenceFromMultipleDestination(plantLongAndLati.toString(),
+						ordersLongitudeAndLatitude.toString());
+			  LangitudeAndLatitudeMap lat = new LangitudeAndLatitudeMap();
+				 lat.setLatitudeAndLongitude(ordersLongitudeAndLatitude.toString());
+				 lat.setDistance(String.valueOf(maxDistance));
+				 shippingOrderService.saveLatitudeAndLongitudeVals(lat);
+			  MapService.saveDistanceMapStore(ordersLongitudeAndLatitude.toString(), maxDistance);
+		  }
 			} catch (IOException e) {
 				_LOGGER.error("Unbale to calculate distance between 2 places: "+e.getMessage());
 			}
-
-	 
 	 return maxDistance;
  }
  private List<TruckHistoryDetail> getTruckHistoryDataByAxleType(List<TruckHistoryDetail> truckHistoryList, String  axleType){
@@ -1152,4 +1182,5 @@ public class ShippingService {
 		} 
 	 return whellerType;
  }
+ 
 }
