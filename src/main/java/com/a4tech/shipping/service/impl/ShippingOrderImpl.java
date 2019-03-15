@@ -574,8 +574,6 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 		shippingOrderDao.saveLatitudeAndLongitudeVals(longi);
 		
 	}
-
-
 	@Override
 	public Map<String, String> getAllLatitudeAndLongitudeVals() {
 		List<LangitudeAndLatitudeMap> langitudeAndLatitudeMapList = shippingOrderDao.listAllData(LangitudeAndLatitudeMap.class);

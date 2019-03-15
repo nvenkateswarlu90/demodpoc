@@ -43,7 +43,7 @@ public class ShippingService {
 	@Autowired
 	private IShippingOrder shippingOrderService;
 	private Logger _LOGGER = Logger.getLogger(ShippingService.class);
-
+    public static Map<String, String> latitudeAndLongitudeMap = new HashMap<>();
 	public Map<String, Map<String, Map<Integer, List<ShippingDetails1>>>> getOrdersBasedOnDistence(
 			Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrd) {
 		PlantDetails plantDetails = sd.getAllPlantDetails().get(2);
@@ -1182,5 +1182,6 @@ public class ShippingService {
 		} 
 	 return whellerType;
  }
+ 
  
 }
