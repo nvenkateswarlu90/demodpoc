@@ -1,6 +1,7 @@
 package com.a4tech.shipping.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -577,9 +578,13 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 	@Override
 	public Map<String, String> getAllLatitudeAndLongitudeVals() {
 		List<LangitudeAndLatitudeMap> langitudeAndLatitudeMapList = shippingOrderDao.listAllData(LangitudeAndLatitudeMap.class);
-		Map<String, String> latitudeAndLongitudeValsMap = langitudeAndLatitudeMapList.stream().collect(Collectors
-				.toMap(LangitudeAndLatitudeMap::getLatitudeAndLongitude, LangitudeAndLatitudeMap::getDistance));
-		return latitudeAndLongitudeValsMap;
+		/*Map<String, String> latitudeAndLongitudeValsMap = langitudeAndLatitudeMapList.stream().collect(Collectors
+				.toMap(LangitudeAndLatitudeMap::getLatitudeAndLongitude, LangitudeAndLatitudeMap::getDistance));*/
+		Map<String, String> maps = new HashMap<>();
+		for (LangitudeAndLatitudeMap langitudeAndLatitudeMap : langitudeAndLatitudeMapList) {
+			maps.put(langitudeAndLatitudeMap.getLatitudeAndLongitude(), langitudeAndLatitudeMap.getDistance());
+		}
+		return maps;
 	}
 
 /*

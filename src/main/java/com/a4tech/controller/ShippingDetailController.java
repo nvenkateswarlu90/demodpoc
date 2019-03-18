@@ -144,6 +144,7 @@ public class ShippingDetailController {
 		shippingOrderService.deleteAllGroupOrders("orderGroup");
 		shippingOrderService.deleteAllGroupOrders("orderReAssign");
 		shippingOrderService.deleteAllGroupOrders("shippingFinalOrders");
+		
 		//here new map
 		List<ShippingDetails1> shippingaOrderListOnChannel = getAllOrdersBasedOnDistributionChannel("1");
 		Map<String, List<ShippingDetails1>> ordersOnDistrictMap = getAllOrdersBasedOnDistricts(
