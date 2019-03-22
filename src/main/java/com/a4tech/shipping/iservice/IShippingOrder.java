@@ -10,6 +10,7 @@ import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
 import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.map.model.Address;
 import com.a4tech.shipping.model.AxleWheelConfiguration;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
@@ -21,6 +22,7 @@ import com.a4tech.shipping.model.ShippingDetails1;
 import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
 import com.a4tech.shipping.model.AvailableTrucksModel;
 import com.a4tech.shipping.model.TruckHistoryDetail;
+import com.a4tech.shipping.model.User;
 
 public interface IShippingOrder {
   public List<ShippingDetails1> getAllShippingOrders();
@@ -57,6 +59,7 @@ public interface IShippingOrder {
   public void saveLatitudeAndLongitudeVals(LangitudeAndLatitudeMap longi);
   public Map<String, String> getAllLatitudeAndLongitudeVals();
   
+  public User getUserDetails(String name);
   public void saveShippingFinalOrders(IntellishipModelByMaterial shippingFinalOrders);
   public List<IntellishipModelByMaterial> getAllShippingFinalOrders();
 }

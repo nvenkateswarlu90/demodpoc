@@ -17,6 +17,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -35,6 +36,7 @@ import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
 import com.a4tech.dao.entity.AvailableTrucks;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.shipping.ishippingDao.IshippingOrderDao;
 import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
 import com.mysql.cj.x.protobuf.MysqlxCrud.CreateViewOrBuilder;
@@ -1152,6 +1154,17 @@ public class ShippingDao implements IshippingOrderDao{
 			}
 		} 
 		
+	}
+	@Override
+	public UserEntity getUserDetails(String userName) {
+		try(Session session = sessionFactory.openSession()){
+			Criteria cre = session.createCriteria(UserEntity.class);
+			cre.add(Restrictions.eq("userName", userName));
+			return (UserEntity)cre.uniqueResult();
+		} catch (Exception e) {
+			_LOGGER.error("Unable to fetch user details:"+e.getMessage());
+		}
+		return null;
 	}
 
 	

@@ -14,6 +14,7 @@ import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
 import com.a4tech.dao.entity.AvailableTrucks;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
 
 public interface IshippingOrderDao {
@@ -54,6 +55,7 @@ public interface IshippingOrderDao {
   public void saveShippingFinalOrders(ShippingFinalOrders shippingFinalOrders);
   public void deleteOrderByPassDistrict(Integer id);
   public void saveLatitudeAndLongitudeVals(LangitudeAndLatitudeMap longi);
+  public UserEntity getUserDetails(String userName);
  // public void updateDistrictClubOrdByPass(DistrictClubOrdByPassEntity districtByPass);
   public <T> List<T> listAllData(Class<T> clazz); 
   public <T> List<T> listAllDataById(Class<T> clazz,String variableName,String val);

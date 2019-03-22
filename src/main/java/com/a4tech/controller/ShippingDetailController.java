@@ -38,6 +38,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,6 +73,7 @@ import com.a4tech.shipping.model.ShippingDetails1;
 import com.a4tech.shipping.model.ShortestDistLantiAndLongti;
 import com.a4tech.shipping.model.AvailableTrucksModel;
 import com.a4tech.shipping.model.TruckHistoryDetail;
+import com.a4tech.shipping.model.User;
 import com.a4tech.shipping.services.ShippingService;
 import com.a4tech.shipping.validator.NormalLoadValidator;
 import com.a4tech.util.ApplicationConstants;
@@ -101,6 +103,32 @@ public class ShippingDetailController {
 	protected void initBinder(WebDataBinder binder){
 		binder.setValidator(normalLoadValidatior);
 	}
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public String login(Model model) {
+	model.addAttribute("user", new User());
+		return "login";
+	}
+	@RequestMapping(value="/login",method = RequestMethod.POST)
+	public String loginProcess(@ModelAttribute("user") User user,Model model) {
+	     User userDetails = shippingOrderService.getUserDetails(user.getUserName());
+	     if(userDetails != null) {
+			if ((userDetails.getUserName().equalsIgnoreCase(user.getUserName()))
+					&& (userDetails.getPassword().equals(user.getPassword()))) {
+				return "redirect:/showPendingOrders";
+			 } else {
+				 model.addAttribute("msg", "Invalid Details");
+				 return "login";
+			 }
+		 } else {
+			 model.addAttribute("msg", "Invalid Details");
+			 return "login";
+		 }
+	     
+		
+		//return "/redirect:"
+	}
+	
 	@RequestMapping(value = "/getShortestDistence/{orderNo}")
 	public String getShortDistence(@PathVariable("orderNo") String orderNo) {
 		System.out.println(orderNo);
@@ -116,12 +144,12 @@ public class ShippingDetailController {
 	 * @RequestMapping(value="/saveShippingMapping") public void
 	 * saveShippingData(){ dataMapper.mapper(); System.out.println("Test"); }
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	/*@RequestMapping(method = RequestMethod.GET)
 	public ModelAndView algorithmProcess1() {
 		List<ShippingDetails1> shippingaOrderList = shippingOrderService.getAllShippingOrders();
 		System.out.println("Total Orders: " + shippingaOrderList.size());
 		return new ModelAndView("algorithm_process", "shippingaOrderList", shippingaOrderList);
-	}
+	}*/
 
 	@RequestMapping(value = "/algorithmProcess")
 	public ModelAndView algorithmProcess() {
@@ -635,6 +663,10 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
        List<DistrictClubOrdByPass> districtByPassList = shippingOrderService.getAllDistrictClubOrdByPass();
 		return new ModelAndView("district_clubbing_order_bypass", "distByPass", districtByPassList);
 		//return "configure_districtWise_Normal_load";
+	}
+	@GetMapping(value="/channelConfiguration")
+	public String showChannelConfiguration() {
+		return "channel_config";
 	}
 	private boolean isemptyValues(Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails) {
 		for (Map.Entry<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> data : finalTruckDetails.entrySet()) {

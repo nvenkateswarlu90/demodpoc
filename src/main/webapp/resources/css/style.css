@@ -38,6 +38,10 @@ h5 {
   margin-top: 5px;
   font-weight: 600;
 }
+.txt_red {
+	color: red;
+	font-size: 15px;
+}
 .nav > li > a {
   color: #a7b1c2;
   font-weight: 600;
@@ -8241,5 +8245,26 @@ body.md-skin {
 .ibox-content{
 	overflow-x: auto;
 }
+
+.dtHorizontalVerticalExampleWrapper {
+max-width: 600px;
+margin: 0 auto;
+}
+#dtHorizontalVerticalExample th, td {
+white-space: nowrap;
+}
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_asc_disabled:before,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_desc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:before {
+bottom: .5em;
+}
+
 
 

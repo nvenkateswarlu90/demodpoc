@@ -59,7 +59,7 @@
 <%--                   <button class="btn btn-warning btn-circle" type="button"><i class="fa fa-refresh"></i> </button>
                   <a class="btn btn-success btn-rounded" href="#">Process New Order Batch</a> <a class="btn btn-primary btn-rounded" href="<c:url value='getShippingOrderHistory' />">History</a> </p>
  --%>              </div>
-              <table class="table table-bordered table-hover">
+              <table class="table table-bordered" id="dtHorizontalVerticalExample">
                                 <thead>
                                 <tr>
                                     <th>Delivery OrderNo</th>
@@ -239,6 +239,14 @@ $(document).ready(function(){
                 radioClass: 'iradio_square-green',
             });
         });
+        
+        $(document).ready(function () {
+        	$('#dtHorizontalVerticalExample').DataTable({
+        	"scrollX": true,
+        	"scrollY": 200,
+        	});
+        	$('.dataTables_length').addClass('bs-select');
+        	});
     </script>
 </body>
 </html>

@@ -21,6 +21,7 @@ import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
 import com.a4tech.dao.entity.AvailableTrucks;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.map.model.Address;
 import com.a4tech.shipping.iservice.IShippingOrder;
 import com.a4tech.shipping.ishippingDao.IshippingOrderDao;
@@ -34,6 +35,7 @@ import com.a4tech.shipping.model.ShippingDetails1;
 import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
 import com.a4tech.shipping.model.AvailableTrucksModel;
 import com.a4tech.shipping.model.TruckHistoryDetail;
+import com.a4tech.shipping.model.User;
 
 @Service
 public class ShippingOrderImpl<T> implements IShippingOrder {
@@ -587,6 +589,21 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 		return maps;
 	}
 
+
+	@Override
+	public User getUserDetails(String name) {
+	UserEntity userEn = shippingOrderDao.getUserDetails(name);
+	if(userEn != null) {
+		User user = new User();
+		user.setUserName(userEn.getUserName());
+		user.setPassword(userEn.getPassword());
+			return user;
+	}
+	return null;
+	}
+
+
+	
 /*
 	@Override
 	public void updateDistrictClubOrdByPass(DistrictClubOrdByPass districtByPass) {

@@ -41,7 +41,7 @@
                <li><a href="<c:url value='uploadLoadConfig' />"> <span class="fa fa-chevron-right submenu"></span>Upload DistrictWise Configuration</a></li>
                <li><a href="<c:url value='axelWheelConfiguration' />"> <span class="fa fa-chevron-right submenu"></span> Axel Wheel Configuration</a></li>
                <li><a href="<c:url value='distClubOrdByPassConfig' />"> <span class="fa fa-chevron-right submenu"></span>DistrictClubbingOrderByPass</a></li>
-         
+                <li><a href="<c:url value='channelConfiguration' />"> <span class="fa fa-chevron-right submenu"></span>Channel Configuration</a></li>
                </ul>
               </li>
               
