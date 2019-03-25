@@ -20,6 +20,7 @@
     <link href="resources/css/animate.css" rel="stylesheet">
     <link href="resources/css/style.css" rel="stylesheet">
     <link href="resources/css/icon.css" rel="stylesheet">
+    <link href="resources/css/select2.min.css" rel="stylesheet">
 	 <link href="resources/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css" rel="stylesheet">
 <style>
 #map {
@@ -55,12 +56,12 @@
           <div class="ibox float-e-margins">
             <div class="ibox-title">
               <h5>Channel Configuration</h5>
-              <div class="ibox-tools"> <a class="collapse-link"> <i class="fa fa-chevron-up"></i> </a> <a class="dropdown-toggle" data-toggle="dropdown" href="#"> <i class="fa fa-wrench"></i> </a>
+              <!-- <div class="ibox-tools"> <a class="collapse-link"> <i class="fa fa-chevron-up"></i> </a> <a class="dropdown-toggle" data-toggle="dropdown" href="#"> <i class="fa fa-wrench"></i> </a>
                 <ul class="dropdown-menu dropdown-user">
                   <li><a href="#">Config option 1</a> </li>
                   <li><a href="#">Config option 2</a> </li>
                 </ul>
-                <a class="close-link"> <i class="fa fa-times"></i> </a> </div>
+                <a class="close-link"> <i class="fa fa-times"></i> </a> </div> -->
             </div>
             <div class="ibox-content">
 				<button class="btn btn-success btn-rounded pull-right" data-toggle="modal" data-target="#confadd" type="button">Add</button> 
@@ -75,55 +76,43 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Sequence 1</td>
-					  <td>01</td>
-					   <td>Same</td>
-                    <td><button class="btn btn-warning btn-rounded" data-toggle="modal" data-target="#confedit" type="button">Edit</button> 
-						<button class="btn btn-danger btn-rounded" type="button">Delete</button></td>
-                   
-                 
-                  </tr>
-                 <tr>
-                    <td>Sequence 2</td>
-					  <td>01+03</td>
-					   <td>Same</td>
-                 <td><button class="btn btn-warning btn-rounded" data-toggle="modal" data-target="#confedit" type="button">Edit</button> 
-						<button class="btn btn-danger btn-rounded" type="button">Delete</button></td>
-                   
-                 
-                  </tr>
-                  <tr>
-                    <td>Sequence 3</td>
-					  <td>02</td>
-					   <td>Multiple</td>
-                   <td><button class="btn btn-warning btn-rounded" data-toggle="modal" data-target="#confedit" type="button">Edit</button> 
-						<button class="btn btn-danger btn-rounded" type="button">Delete</button></td>
-                   
-                 
-                  </tr>
+                  <c:forEach items="${channelConfigList}" var="channelConfig" varStatus="status">
+                                    <tr>
+                                    	<td style="vertical-align:middle">${channelConfig.sequence}</td>
+                                    	<td style="vertical-align:middle">${channelConfig.channel}</td>
+                                    	<td style="vertical-align:middle">${channelConfig.skuType}</td>
+                                    	 <td>
+                                    	 <button class="btn btn-success "
+														onclick="editChannelConfiguration('${channelConfig.id}','${channelConfig.sequence}','${channelConfig.channel}','${channelConfig.skuType}')">Edit</button>
+                                    	<a href="<c:url value='/deleteChannelConfiguration/${channelConfig.id}' />" class="btn btn-danger custom-width">Delete</a>
+												</td>
+                                   	 
+                                    </tr>                                  
+                                    </c:forEach>
                 </tbody>
               </table>
 
 				 <div class="col-lg-12">
 				<div class="row">
-					
-				      <div class="form-group">
-                <label class="font-noraml">Channel Sequence</label>
-                <div class="input-group">
-                <select class="chosen-select" multiple style="width:450px;" tabindex="4">
-              
-                <option value="United States">Sequence 1</option>
-                <option value="United Kingdom">Sequence 2</option>
-                <option value="Afghanistan">Sequence 3</option>
-             
-             
-                </select>
-                </div>
-                </div>
-				
-				
-              <a href="<c:url value='/showPendingOrders'/>" class="btn btn-success pull-right btn-rounded" type="button">Back </a> </div>
+
+										<div class="form-group">
+											<label class="font-noraml">Channel Sequence</label>
+											<div class="input-group">
+												<select class="chosen-select" multiple="multiple" id="sequenceId" name="sequenceId[]" placeholder="select" style="width: 450px; height: 450px; display: none;" tabindex="4">
+													
+													<c:forEach items="${sequenceList}" var="sequence"
+														varStatus="status">
+														<option value="${sequence}">${sequence}</option>
+													</c:forEach>
+												</select>
+												<input type="hidden" name="multiple_value" id="multiple_value"  />
+												<button class="btn btn-success" style="margin:5px"
+														onclick="saveSequence()">Submit</button>
+											</div>
+										</div>
+
+
+										<a href="<c:url value='/showPendingOrders'/>" class="btn btn-success pull-right btn-rounded" type="button">Back </a> </div>
 					
 			  </div>
 			  </div>
@@ -144,6 +133,7 @@
         <h4 class="modal-title">Edit Channel Configuration</h4>
       </div>
       <div class="modal-body" style="overflow-x: auto;">
+        <form id="formId" class="form-horizontal m-l-md" action="editChannelConfiguration" method="post">
         <table class="table table-bordered">
           <thead>
                  <tr>
@@ -156,18 +146,21 @@
           </thead>
           <tbody>
             <tr>
-				<td><input type="text" class="form-control"></td>
-				<td><input type="text" class="form-control"></td>
-				<td><input type="text" class="form-control"></td>
+                 <input type="hidden" id="id" name="id">
+				<td><input type="text" id="sequence" name="sequence" class="form-control" readonly="readonly"></td>
+				<td><input type="text" id="channel" name="channel" class="form-control"></td>
+				<td><input type="text" id="skuType" name="skuType" class="form-control"></td>
             </tr>
          
           </tbody>
         </table>
-      </div>
+     
       <div class="modal-footer">
         <button type="button" class="btn btn-white btn-rounded" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary btn-rounded">Save changes</button>
+        <button type="submit" class="btn btn-primary btn-rounded">Save changes</button>
       </div>
+      </form>
+       </div>
     </div>
   </div>
 </div>
@@ -178,6 +171,7 @@
         <h4 class="modal-title">Add Channel Configuration</h4>
       </div>
       <div class="modal-body" style="overflow-x: auto;">
+      <form id="formId" class="form-horizontal m-l-md" action="channelConfiguration" method="post">
          <table class="table table-bordered">
           <thead>
                  <tr>
@@ -190,18 +184,21 @@
           </thead>
           <tbody>
             <tr>
-				<td><input type="text" class="form-control"></td>
-				<td><input type="text" class="form-control"></td>
-				<td><input type="text" class="form-control"></td>
+				    <td> <input type="text" name="sequence" class="form-control" ></td>
+					  <td> <input type="text" name="channel"class="form-control" ></td>
+					   <td> <input type="text" name="skuType" class="form-control" ></td>
             </tr>
          
           </tbody>
         </table>
-      </div>
+     
       <div class="modal-footer">
         <button type="button" class="btn btn-white btn-rounded" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary btn-rounded">Save changes</button>
+        <button type="submit" class="btn btn-primary btn-rounded">Save changes</button>
+        
       </div>
+      </form>
+       </div>
     </div>
   </div>
 </div>
@@ -214,6 +211,7 @@
     <script src="resources/js/plugins/metisMenu/jquery.metisMenu.js"></script>
     <script src="resources/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
     <script src="resources/js/bootstable.js"></script>
+    <script src="resources/js/select2.min.js"></script>
    <!--  <script>
  $('table').SetEditable();
 </script> -->
@@ -258,7 +256,56 @@ Peity
                 radioClass: 'iradio_square-green',
             });
         });
-	$(".chosen-select").chosen()
+	$(".chosen-select").chosen();
+	
+	 function editChannelConfiguration(id,sequence,channel,skuType){
+        	 $("#id").val(id);   
+        	$("#sequence").val(sequence);
+        	    $("#channel").val(channel);
+        	    $("#skuType").val(skuType);
+        	  
+				var myEditModal = $("#confedit");
+        	   myEditModal.modal({ show: true });
+        }
+	 
+	 function saveSequence(){
+		 var sequnce = $('#sequenceId').val();
+		 alert(sequnce)
+		 
+		 $.ajax({
+				type : "GET",
+				url : "orderSequence",
+				data : "sequence=" + sequnce,
+				success : function(response) {
+					alert(response)
+				  if(response == "success"){
+					  alert('order sequence saved successfully')
+				  } else {
+					  
+				  }
+					
+				},
+				error : function(e) {
+					 alert('Error: ' + e); 
+				}
+			});
+		
+	 }
+	 
+		  $("select").select2({
+			  tags: true,
+			  placeholder: "Please select Sequence"
+			}); 
+ 
+			 $("select").on("select2:select", function (evt) {
+			  var element = evt.params.data.element;
+			  var $element = $(element);
+			  
+			  $element.detach();
+			  $(this).append($element);
+			  $(this).trigger("change");
+			});  
+	 
     </script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
+import com.a4tech.dao.entity.ChannelConfigurationEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
@@ -56,6 +57,8 @@ public interface IshippingOrderDao {
   public void deleteOrderByPassDistrict(Integer id);
   public void saveLatitudeAndLongitudeVals(LangitudeAndLatitudeMap longi);
   public UserEntity getUserDetails(String userName);
+  public void saveOrUpdateChannelConfiguration(ChannelConfigurationEntity channelConfig);
+  public void deleteChannelConfiguration(Integer id);
  // public void updateDistrictClubOrdByPass(DistrictClubOrdByPassEntity districtByPass);
   public <T> List<T> listAllData(Class<T> clazz); 
   public <T> List<T> listAllDataById(Class<T> clazz,String variableName,String val);

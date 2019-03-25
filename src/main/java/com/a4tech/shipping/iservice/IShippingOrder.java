@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
+import com.a4tech.dao.entity.ChannelConfigurationEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
@@ -13,6 +14,7 @@ import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.map.model.Address;
 import com.a4tech.shipping.model.AxleWheelConfiguration;
+import com.a4tech.shipping.model.ChannelConfiguration;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
 import com.a4tech.shipping.model.IntellishipModelByMaterial;
 import com.a4tech.shipping.model.NormalLoadConfiguration;
@@ -62,4 +64,7 @@ public interface IShippingOrder {
   public User getUserDetails(String name);
   public void saveShippingFinalOrders(IntellishipModelByMaterial shippingFinalOrders);
   public List<IntellishipModelByMaterial> getAllShippingFinalOrders();
+  public List<ChannelConfiguration> getAllChannelConfigurations();
+  public void saveOrUpdatechannelConfiguration(ChannelConfiguration channelConfig);
+  public void deleteChannelConfiguration(Integer id);
 }

@@ -70,6 +70,7 @@
 				<value>com.a4tech.dao.entity.ShippingFinalOrders</value>
 				<value>com.a4tech.dao.entity.LangitudeAndLatitudeMap</value>
 				<value>com.a4tech.dao.entity.UserEntity</value>
+				<value>com.a4tech.dao.entity.ChannelConfigurationEntity</value>
 			</list>
 		</property>
 		

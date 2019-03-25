@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
+import com.a4tech.dao.entity.ChannelConfigurationEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
@@ -1165,6 +1166,40 @@ public class ShippingDao implements IshippingOrderDao{
 			_LOGGER.error("Unable to fetch user details:"+e.getMessage());
 		}
 		return null;
+	}
+	@Override
+	public void saveOrUpdateChannelConfiguration(ChannelConfigurationEntity channelConfig) {
+		Transaction transaction = null;
+		try(Session session = sessionFactory.openSession()) {
+			transaction = session.beginTransaction();
+			session.saveOrUpdate(channelConfig);
+			transaction.commit();
+			_LOGGER.info("Added channel configuration data has been saved successfully in db");
+		} catch (Exception ex) {
+			_LOGGER.error("unable to save channel configuration data into DB: "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} 	
+		
+	}
+	@Override
+	public void deleteChannelConfiguration(Integer id) {
+		  Transaction tranction = null;
+		   try(Session session = sessionFactory.openSession()) {
+			   tranction = session.beginTransaction();
+			   ChannelConfigurationEntity district = session.load(ChannelConfigurationEntity.class, id);
+			 if(district != null) {
+				 session.delete(district);
+			 }
+			 tranction.commit();
+			 _LOGGER.info("channel configuration has been successfully removed from DB: ");
+		   } catch (Exception e) {
+			   if(tranction!= null) {
+				   tranction.rollback();   
+			   }
+		}
+		
 	}
 
 	

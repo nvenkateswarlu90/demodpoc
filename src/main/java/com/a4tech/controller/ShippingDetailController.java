@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.metadata.MethodType;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -53,6 +55,7 @@ import saveShipping.StoreSpDetails;
 
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
+import com.a4tech.dao.entity.ChannelConfigurationEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.map.model.Address;
@@ -60,6 +63,7 @@ import com.a4tech.map.service.MapService;
 import com.a4tech.service.mapper.IOrderDataMapper;
 import com.a4tech.shipping.iservice.IShippingOrder;
 import com.a4tech.shipping.model.AxleWheelConfiguration;
+import com.a4tech.shipping.model.ChannelConfiguration;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
 import com.a4tech.shipping.model.FileUploadBean;
 import com.a4tech.shipping.model.IntellishipModel;
@@ -664,9 +668,51 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return new ModelAndView("district_clubbing_order_bypass", "distByPass", districtByPassList);
 		//return "configure_districtWise_Normal_load";
 	}
-	@GetMapping(value="/channelConfiguration")
-	public String showChannelConfiguration() {
-		return "channel_config";
+	
+	@RequestMapping(value="/channelConfiguration",method = RequestMethod.GET)
+	public ModelAndView showChannelConfiguration(Model model) {
+		 List<ChannelConfiguration> channelConfigList = shippingOrderService.getAllChannelConfigurations();
+		List<String> sequenceList = channelConfigList.stream().map(ChannelConfiguration::getSequence)
+				.collect(Collectors.toList());
+		 model.addAttribute("sequenceList", sequenceList);
+			return new ModelAndView("channel_config", "channelConfigList", channelConfigList);
+	}
+	@RequestMapping(value="/channelConfiguration",method = RequestMethod.POST)
+	public String channelConfiguration(
+			@ModelAttribute("districtByPass") @Validated ChannelConfiguration channelConfig,BindingResult result,Model model,HttpServletRequest req) {
+		
+       shippingOrderService.saveOrUpdatechannelConfiguration(channelConfig);
+     //  model.addAttribute("update", "updateSuccess");
+       return "redirect:/channelConfiguration";
+       /*List<ChannelConfiguration> channelConfigList = shippingOrderService.getAllChannelConfigurations();
+		return new ModelAndView("channel_config", "channelConfigList", channelConfigList);*/
+		//return "configure_districtWise_Normal_load";
+	}
+	@RequestMapping(value="/deleteChannelConfiguration/{id}")
+	public String deleteChannelConfiguration(@PathVariable("id") Integer id) {
+		shippingOrderService.deleteChannelConfiguration(id);
+		return "redirect:/channelConfiguration";
+	}
+	@RequestMapping(value="/editChannelConfiguration",method = RequestMethod.POST)
+	public String editChannelConfiguration(
+			@ModelAttribute("districtByPass") @Validated ChannelConfiguration channelConfig,BindingResult result,Model model,HttpServletRequest req) {
+		 shippingOrderService.saveOrUpdatechannelConfiguration(channelConfig);
+	       model.addAttribute("update", "updateSuccess");
+	       return "redirect:/channelConfiguration";
+		//return "configure_districtWise_Normal_load";
+	}
+	
+	public String saveOrderSequence() {
+		
+		return "";
+	}
+	@RequestMapping(value = "/orderSequence", produces = "application/json")
+	@ResponseBody
+	public void saveOrderSequence(HttpServletRequest req,HttpServletResponse response) throws IOException {
+		String sequence = req.getParameter("sequence");
+		System.out.println(sequence);
+		 response.getWriter().println("success");
+		
 	}
 	private boolean isemptyValues(Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails) {
 		for (Map.Entry<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> data : finalTruckDetails.entrySet()) {

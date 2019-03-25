@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
+import com.a4tech.dao.entity.ChannelConfigurationEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
@@ -26,6 +27,7 @@ import com.a4tech.map.model.Address;
 import com.a4tech.shipping.iservice.IShippingOrder;
 import com.a4tech.shipping.ishippingDao.IshippingOrderDao;
 import com.a4tech.shipping.model.AxleWheelConfiguration;
+import com.a4tech.shipping.model.ChannelConfiguration;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
 import com.a4tech.shipping.model.IntellishipModelByMaterial;
 import com.a4tech.shipping.model.NormalLoadConfiguration;
@@ -600,6 +602,43 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 			return user;
 	}
 	return null;
+	}
+
+
+	@Override
+	public List<ChannelConfiguration> getAllChannelConfigurations() {
+		List<ChannelConfigurationEntity> channelList = shippingOrderDao.listAllData(ChannelConfigurationEntity.class);
+		List<ChannelConfiguration> channelConfigList = new ArrayList<>();
+		ChannelConfiguration channelConfig = null;
+		for (ChannelConfigurationEntity channelConfiguration : channelList) {
+			channelConfig = new ChannelConfiguration();
+			channelConfig.setId(channelConfiguration.getId());
+			channelConfig.setSequence(channelConfiguration.getSequence());
+			channelConfig.setChannel(channelConfiguration.getChannel());
+			channelConfig.setSkuType(channelConfiguration.getSkuType());
+			channelConfigList.add(channelConfig);
+		}
+		return channelConfigList;
+	}
+
+
+	@Override
+	public void saveOrUpdatechannelConfiguration(ChannelConfiguration channelConfig) {
+		ChannelConfigurationEntity channelConfigEntity = new ChannelConfigurationEntity();
+	    if(channelConfig != null) {
+	    	channelConfigEntity.setId(channelConfig.getId());
+	    }
+		channelConfigEntity.setSequence(channelConfig.getSequence());
+		channelConfigEntity.setChannel(channelConfig.getChannel());
+		channelConfigEntity.setSkuType(channelConfig.getSkuType());
+		shippingOrderDao.saveOrUpdateChannelConfiguration(channelConfigEntity);
+	}
+
+
+	@Override
+	public void deleteChannelConfiguration(Integer id) {
+		shippingOrderDao.deleteChannelConfiguration(id);
+		
 	}
 
 
