@@ -12,7 +12,7 @@ import javax.persistence.Table;
 public class ChannelConfigurationEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="ID")
+	@Column(name="CH_ID")
 	private Integer id;
 	@Column(name="SEQUENCE")
 	private String sequence;
