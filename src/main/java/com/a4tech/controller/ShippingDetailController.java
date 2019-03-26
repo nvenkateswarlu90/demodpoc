@@ -669,15 +669,17 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		//return "configure_districtWise_Normal_load";
 	}
 	
-	@RequestMapping(value="/channelConfiguration",method = RequestMethod.GET)
+	@GetMapping(value="/channelConfiguration")
 	public ModelAndView showChannelConfiguration(Model model) {
 		 List<ChannelConfiguration> channelConfigList = shippingOrderService.getAllChannelConfigurations();
 		List<String> sequenceList = channelConfigList.stream().map(ChannelConfiguration::getSequence)
 				.collect(Collectors.toList());
+		String channelSeq = shippingOrderService.getChannelSequence();
 		 model.addAttribute("sequenceList", sequenceList);
+		 model.addAttribute("channelSeq", channelSeq);
 			return new ModelAndView("channel_config", "channelConfigList", channelConfigList);
 	}
-	@RequestMapping(value="/channelConfiguration",method = RequestMethod.POST)
+	@PostMapping(value="/channelConfiguration")
 	public String channelConfiguration(
 			@ModelAttribute("districtByPass") @Validated ChannelConfiguration channelConfig,BindingResult result,Model model,HttpServletRequest req) {
 		
@@ -688,12 +690,12 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		return new ModelAndView("channel_config", "channelConfigList", channelConfigList);*/
 		//return "configure_districtWise_Normal_load";
 	}
-	@RequestMapping(value="/deleteChannelConfiguration/{id}")
+	@GetMapping(value="/deleteChannelConfiguration/{id}")
 	public String deleteChannelConfiguration(@PathVariable("id") Integer id) {
 		shippingOrderService.deleteChannelConfiguration(id);
 		return "redirect:/channelConfiguration";
 	}
-	@RequestMapping(value="/editChannelConfiguration",method = RequestMethod.POST)
+	@PostMapping(value="/editChannelConfiguration")
 	public String editChannelConfiguration(
 			@ModelAttribute("districtByPass") @Validated ChannelConfiguration channelConfig,BindingResult result,Model model,HttpServletRequest req) {
 		 shippingOrderService.saveOrUpdatechannelConfiguration(channelConfig);
@@ -706,12 +708,13 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		
 		return "";
 	}
-	@RequestMapping(value = "/orderSequence", produces = "application/json")
+	@RequestMapping(value = "/orderSequence", produces = "text/plain")
 	@ResponseBody
-	public void saveOrderSequence(HttpServletRequest req,HttpServletResponse response) throws IOException {
+	public String saveOrderSequence(HttpServletRequest req,HttpServletResponse response) throws IOException {
 		String sequence = req.getParameter("sequence");
+		shippingOrderService.saveChannelSequence(sequence);
 		System.out.println(sequence);
-		 response.getWriter().println("success");
+		 return "success";
 		
 	}
 	private boolean isemptyValues(Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> finalTruckDetails) {

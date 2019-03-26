@@ -94,24 +94,37 @@
 
 				 <div class="col-lg-12">
 				<div class="row">
-
-										<div class="form-group">
+				<div class="col-md-6">
+					<div class="row">
+					<div class="col-md-9">
+					<div class="form-group">
 											<label class="font-noraml">Channel Sequence</label>
 											<div class="input-group">
-												<select class="chosen-select" multiple="multiple" id="sequenceId" name="sequenceId[]" placeholder="select" style="width: 450px; height: 450px; display: none;" tabindex="4">
+												<select class="chosen-select" multiple="multiple" id="sequenceId" name="sequenceId[]" placeholder="select" style="width: 380px !important; display: none;" tabindex="4">
 													
 													<c:forEach items="${sequenceList}" var="sequence"
 														varStatus="status">
 														<option value="${sequence}">${sequence}</option>
 													</c:forEach>
 												</select>
-												<input type="hidden" name="multiple_value" id="multiple_value"  />
-												<button class="btn btn-success" style="margin:5px"
-														onclick="saveSequence()">Submit</button>
+												
+												
+												
 											</div>
+											
 										</div>
-
-
+					</div>
+					<div class="col-md-3">
+					<button class="btn btn-success" style="margin-top:22px"
+														onclick="return saveSequence()">Submit</button>
+					</div>
+				
+										</div>
+										</div>
+										<div class="col-md-6">
+										<label class="font-noraml">Current Sequence</label>
+										<input type="text" class="form-control" name="sequences" id="sequences" value="${channelSeq}" readonly="readonly">
+										</div>
 										<a href="<c:url value='/showPendingOrders'/>" class="btn btn-success pull-right btn-rounded" type="button">Back </a> </div>
 					
 			  </div>
@@ -203,6 +216,24 @@
   </div>
 </div>
 
+ <div class="modal" id="successId" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header alert-success ">
+        <h2 class="modal-title">Succsess !  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button></h2>
+       
+      </div>
+      <div class="modal-body">
+        <h4 class="text-navy">Sequence Order has been saved successfully</h4>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Mainly scripts --> 
     <script src="resources/js/jquery-2.1.1_old.js"></script> 
    
@@ -270,18 +301,22 @@ Peity
 	 
 	 function saveSequence(){
 		 var sequnce = $('#sequenceId').val();
-		 alert(sequnce)
-		 
+		    if(sequnce == null){
+		    	alert('Please choose sequence')
+		    	return true;
+		    }
 		 $.ajax({
 				type : "GET",
 				url : "orderSequence",
 				data : "sequence=" + sequnce,
-				success : function(response) {
-					alert(response)
-				  if(response == "success"){
-					  alert('order sequence saved successfully')
+				success : function(responseMsg) {
+				  if(responseMsg == "success"){
+					  var myEditModal = $("#successId");
+		        	   myEditModal.modal({ show: true });
+		        	   //$('#sequenceId').val(null).trigger("change")$('#sequenceId').val(null)
+		        	   $('#sequences').val(sequnce);
 				  } else {
-					  
+					  alert('not saved')
 				  }
 					
 				},
@@ -289,7 +324,7 @@ Peity
 					 alert('Error: ' + e); 
 				}
 			});
-		
+		 
 	 }
 	 
 		  $("select").select2({

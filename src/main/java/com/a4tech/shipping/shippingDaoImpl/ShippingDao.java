@@ -2,8 +2,6 @@ package com.a4tech.shipping.shippingDaoImpl;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.TypedQuery;
@@ -17,16 +15,16 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.criteria.internal.compile.CriteriaQueryTypeQueryAdapter;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.a4tech.dao.entity.AvailableTrucks;
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.ChannelConfigurationEntity;
+import com.a4tech.dao.entity.ChannelSequenceEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
@@ -35,12 +33,9 @@ import com.a4tech.dao.entity.ShippingDeliveryOrderEntity;
 import com.a4tech.dao.entity.ShippingEntity;
 import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
-import com.a4tech.dao.entity.AvailableTrucks;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.shipping.ishippingDao.IshippingOrderDao;
-import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
-import com.mysql.cj.x.protobuf.MysqlxCrud.CreateViewOrBuilder;
 
 
 @Transactional
@@ -1200,6 +1195,49 @@ public class ShippingDao implements IshippingOrderDao{
 			   }
 		}
 		
+	}
+	@Override
+	public void saveChannelSequence(ChannelSequenceEntity channelSeq) {
+		Transaction transaction = null;
+		try(Session session = sessionFactory.openSession()) {
+			transaction = session.beginTransaction();
+			ChannelSequenceEntity channelSequence = getChannelSequences(1);
+			if(channelSequence == null) {
+				session.save(channelSeq);
+			} else {
+				channelSequence.setSequence(channelSeq.getSequence());
+				session.update(channelSequence);
+			}
+			//session.saveOrUpdate(channelSeq);
+			transaction.commit();
+			_LOGGER.info("Added channel sequence data has been saved successfully in db");
+		} catch (Exception ex) {
+			_LOGGER.error("unable to save channel sequence data into DB: "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} 	
+		
+	}
+	@Override
+	public ChannelSequenceEntity getChannelSequence() {
+		try(Session session = sessionFactory.openSession()){
+			Criteria cre = session.createCriteria(ChannelSequenceEntity.class);
+			return (ChannelSequenceEntity)cre.uniqueResult();
+		} catch (Exception e) {
+			_LOGGER.error("Unable to fetch channel sequence:"+e.getMessage());
+		}
+		return new ChannelSequenceEntity();
+	}
+	public ChannelSequenceEntity getChannelSequences(Integer id) {
+		try(Session session = sessionFactory.openSession()){
+			Criteria cre = session.createCriteria(ChannelSequenceEntity.class);
+			cre.add(Restrictions.eq("seqId", id));
+			return (ChannelSequenceEntity)cre.uniqueResult();
+		} catch (Exception e) {
+			_LOGGER.error("Unable to fetch channel sequence details:"+e.getMessage());
+		}
+		return new ChannelSequenceEntity();
 	}
 
 	

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.ChannelConfigurationEntity;
+import com.a4tech.dao.entity.ChannelSequenceEntity;
 import com.a4tech.dao.entity.DistrictClubOrdByPassEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
@@ -639,6 +640,24 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 	public void deleteChannelConfiguration(Integer id) {
 		shippingOrderDao.deleteChannelConfiguration(id);
 		
+	}
+
+
+	@Override
+	public void saveChannelSequence(String sequence) {
+		ChannelSequenceEntity channelSeq = new ChannelSequenceEntity();
+		channelSeq.setSequence(sequence);
+		shippingOrderDao.saveChannelSequence(channelSeq);
+	}
+
+
+	@Override
+	public String getChannelSequence() {
+		 ChannelSequenceEntity channel = shippingOrderDao.getChannelSequence();
+		 if(channel != null) {
+			 return channel.getSequence();
+		 }
+		 return "";
 	}
 
 

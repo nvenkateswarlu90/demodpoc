@@ -67,4 +67,6 @@ public interface IShippingOrder {
   public List<ChannelConfiguration> getAllChannelConfigurations();
   public void saveOrUpdatechannelConfiguration(ChannelConfiguration channelConfig);
   public void deleteChannelConfiguration(Integer id);
+  public void saveChannelSequence(String sequence);
+  public String getChannelSequence();
 }
