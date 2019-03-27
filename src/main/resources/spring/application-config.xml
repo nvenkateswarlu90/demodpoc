@@ -38,20 +38,20 @@
 	 <bean id = "multipartResolver"
       class = "org.springframework.web.multipart.commons.CommonsMultipartResolver" />
 
-	<!-- <bean id="dataSource"
+	 <bean id="dataSource"
 		class="org.apache.commons.dbcp.BasicDataSource">
 		<property name="driverClassName"
 			value="com.mysql.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://localhost:3306/dpoc" />
 		<property name="username" value="root" />
 		<property name="password" value="root" />
-	</bean>    -->
-	   <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	</bean>    
+	  <!--  <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
   		<property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
   		<property name="url" value="jdbc:sqlserver://192.168.1.10;databaseName=DPOC;" />
      	<property name="username" value="sa" />
   		<property name="password" value="P@$$w0rd123" />
-  	</bean>   
+  	</bean>    -->
 		<bean id="hibernate3AnnotatedSessionFactory"
 		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 		<property name="dataSource" ref="dataSource"></property>
@@ -79,8 +79,8 @@
 		
 		<property name="hibernateProperties">
 			<props>
-				<!--  <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> -->
-			  <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>  
+				 <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> 
+			  <!-- <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop> -->  
 				<prop key="hibernate.current_session_context_class">thread</prop>
 				<prop key="show_sql">true</prop>
 				<prop key="hbm2ddl.auto">update</prop>
