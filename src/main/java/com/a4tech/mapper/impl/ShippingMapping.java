@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import com.a4tech.controller.ShippingDetailController;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.ShippingEntity;
-import com.a4tech.dao.entity.AvailableTrucks;
+import com.a4tech.dao.entity.AvailableTrucksEntity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.service.mapper.IOrderDataMapper;
 import com.a4tech.shipping.ishippingDao.IshippingOrderDao;
@@ -327,7 +327,7 @@ public class ShippingMapping implements IOrderDataMapper{
 	public String readTruckExcel(Workbook workbook) {
 	{
 		ShippingDetailController conObj=new ShippingDetailController();
-		AvailableTrucks entityObj=new AvailableTrucks();
+		AvailableTrucksEntity entityObj=new AvailableTrucksEntity();
 		
 		Sheet sheet=workbook.getSheetAt(0);
 		Iterator<Row> iterator = sheet.iterator();
@@ -366,7 +366,7 @@ public class ShippingMapping implements IOrderDataMapper{
 						    if(!productXids.contains(SL_NO)){
 						    	productXids.add(SL_NO);
 						    }
-						    entityObj=new AvailableTrucks();
+						    entityObj=new AvailableTrucksEntity();
 					 }
 				}
 					switch (columnIndex + 1) {

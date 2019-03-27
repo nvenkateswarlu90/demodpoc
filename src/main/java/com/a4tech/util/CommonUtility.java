@@ -253,5 +253,11 @@ public class CommonUtility {
 		return doubleprices;
 		
 	}
-  
+    public static String getChannels(String channel) {
+    	 channel = channel.replaceAll("Channel", "").trim();
+    	 channel = channel.replaceAll("\\+", ",");
+    	 return channel;
+    	
+    }
+	
 	}

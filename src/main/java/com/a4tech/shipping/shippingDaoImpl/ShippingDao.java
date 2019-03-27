@@ -20,7 +20,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.a4tech.dao.entity.AvailableTrucks;
+import com.a4tech.dao.entity.AvailableTrucksEntity;
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.ChannelConfigurationEntity;
@@ -151,14 +151,14 @@ public class ShippingDao implements IshippingOrderDao{
 		return new ArrayList<>();
 	}
 	@Override
-	public List<AvailableTrucks> getAllTruckInfo() {
+	public List<AvailableTrucksEntity> getAllTruckInfo() {
 		Session session = null;
 		Transaction transaction = null;
 		try {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
 			@SuppressWarnings("unchecked")
-			List<AvailableTrucks> truckDetailsList = session.createCriteria(AvailableTrucks.class).list();
+			List<AvailableTrucksEntity> truckDetailsList = session.createCriteria(AvailableTrucksEntity.class).list();
 			transaction.commit();
 			return truckDetailsList;
 		} catch (Exception ex) {
@@ -178,7 +178,7 @@ public class ShippingDao implements IshippingOrderDao{
 	}
 	
 	@Override
-	public void saveTruckdetailsEntity(AvailableTrucks truckEntity) {
+	public void saveTruckdetailsEntity(AvailableTrucksEntity truckEntity) {
 
 		Session session = null;
 		Transaction transaction = null;
@@ -1063,12 +1063,12 @@ public class ShippingDao implements IshippingOrderDao{
 	}
 	@Override
 	@SuppressWarnings("deprecation")
-	public List<AvailableTrucks> getAllAvailableTrucksByAxleType(String axleType) {
+	public List<AvailableTrucksEntity> getAllAvailableTrucksByAxleType(String axleType) {
 		 
 		 try(Session session = sessionFactory.openSession()){
 			Criteria criteria = session.createCriteria(TruckHistoryDetailsEntity.class);
 				criteria.add(Restrictions.eq("vehicleType", axleType));
-				List<AvailableTrucks> avaiableTrucksList = criteria.list();
+				List<AvailableTrucksEntity> avaiableTrucksList = criteria.list();
 				return avaiableTrucksList;
 		 }catch (Exception e) {
 			_LOGGER.error("Unbale to fetch available trucks data: "+e.getMessage());

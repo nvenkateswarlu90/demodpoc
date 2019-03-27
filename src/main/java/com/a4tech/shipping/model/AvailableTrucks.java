@@ -1,42 +1,19 @@
-package com.a4tech.dao.entity;
+package com.a4tech.shipping.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name="available_trucks_pool")
 public class AvailableTrucks {
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="Truck_id")
     private int truckId;
-	@Column(name="SL_NO")
 	private String slNo;
-	@Column(name="VEHICLE_NO")
 	private String vehiclNo;
-	@Column(name="VEHICLE_TYPE")
 	private int vehicleType;
-	@Column(name="WHEELS")
 	private String wheels;	
-	@Column(name="ENTRY_TYPE")
 	private String entryType;
-	@Column(name="TAGGED_TRANSPORTER")
 	private String taggedTranspoter;
-	@Column(name="DO_NO")
 	private String doNo;
-	@Column(name="TAGGED_DATE")
 	private String  taggedDate;
-	@Column(name="TAGGED_TIME")
 	private String taggedTime;
-	@Column(name="DELAY")
 	private String delay;
-	/*@Column(name="REF_TRUCK_VENDOR_ID")
 	private String refTruckVendorId;
-	*/
+	
 	public int getTruckId() {
 		return truckId;
 	}
@@ -103,10 +80,23 @@ public class AvailableTrucks {
 	public void setDelay(String delay) {
 		this.delay = delay;
 	}
-	/*public String getRefTruckVendorId() {
+	public String getRefTruckVendorId() {
 		return refTruckVendorId;
 	}
 	public void setRefTruckVendorId(String refTruckVendorId) {
 		this.refTruckVendorId = refTruckVendorId;
-	}*/
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

@@ -14,7 +14,7 @@ import com.a4tech.dao.entity.ShippingDeliveryOrderEntity;
 import com.a4tech.dao.entity.ShippingEntity;
 import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
-import com.a4tech.dao.entity.AvailableTrucks;
+import com.a4tech.dao.entity.AvailableTrucksEntity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
@@ -23,7 +23,7 @@ public interface IshippingOrderDao {
   public void saveShippingEntity(ShippingEntity shippingEntity);
   public List<ShippingEntity> getAllShippingOrders(); 
   public List<ShippingEntity> getShippingDetailsByDate(String date);
-  public List<AvailableTrucks> getAllTruckInfo(); 
+  public List<AvailableTrucksEntity> getAllTruckInfo(); 
   public void saveOrderGroup(OrderGroupEntity orderGroupEntity);
   public List<OrderGroupEntity> getALLGroupOrders();
   public List<OrderGroupEntity> getOrderGroupByDate(String date);
@@ -38,7 +38,7 @@ public interface IshippingOrderDao {
   public DistrictWiseNormalLoadCapacity getDistrictTruckLoad(String districtName);
   public void updateDistrictWiseNormalLoad(DistrictWiseNormalLoadCapacity normal);
   public List<TruckHistoryDetailsEntity> getAllTrucksHistoryDetails();
-  public void saveTruckdetailsEntity(AvailableTrucks truckEntity);
+  public void saveTruckdetailsEntity(AvailableTrucksEntity truckEntity);
   public void saveTruckhistory(TruckHistoryDetailsEntity truckHistory);
   public void saveAxleWheelConfiguration(AxleWheelTypeEntity wheelEntity);
   public List<TruckHistoryDetailsEntity> getSearchTrucksHistoryDetails(String value,String type);
@@ -52,7 +52,7 @@ public interface IshippingOrderDao {
   public void saveShippingEntityReOrder(ShippingOrdersReAssign shippingEntity); 
   public List<ShippingOrdersReAssign> getAllReAssignOrdersBasedOnTruckNo(String truck); 
   public TruckHistoryDetailsEntity getDistrictDetails(String districtName,String truckNo);
-  public List<AvailableTrucks> getAllAvailableTrucksByAxleType(String axleType);
+  public List<AvailableTrucksEntity> getAllAvailableTrucksByAxleType(String axleType);
   
   public void saveShippingFinalOrders(ShippingFinalOrders shippingFinalOrders);
   public void deleteOrderByPassDistrict(Integer id);

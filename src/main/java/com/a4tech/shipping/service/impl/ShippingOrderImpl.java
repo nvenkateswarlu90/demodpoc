@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.a4tech.dao.entity.AvailableTrucksEntity;
 import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.ChannelConfigurationEntity;
@@ -21,12 +21,12 @@ import com.a4tech.dao.entity.ShippingDeliveryOrderEntity;
 import com.a4tech.dao.entity.ShippingEntity;
 import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
-import com.a4tech.dao.entity.AvailableTrucks;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.map.model.Address;
 import com.a4tech.shipping.iservice.IShippingOrder;
 import com.a4tech.shipping.ishippingDao.IshippingOrderDao;
+import com.a4tech.shipping.model.AvailableTrucks;
 import com.a4tech.shipping.model.AxleWheelConfiguration;
 import com.a4tech.shipping.model.ChannelConfiguration;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
@@ -36,7 +36,6 @@ import com.a4tech.shipping.model.OrderGroup;
 import com.a4tech.shipping.model.ShippingDeliveryOrder;
 import com.a4tech.shipping.model.ShippingDetails1;
 import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
-import com.a4tech.shipping.model.AvailableTrucksModel;
 import com.a4tech.shipping.model.TruckHistoryDetail;
 import com.a4tech.shipping.model.User;
 
@@ -144,12 +143,12 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 	}
 
 	@Override
-	public List<AvailableTrucksModel> getAllTruckInfo() {
-		List<AvailableTrucks> truckDetailsEntity = shippingOrderDao.listAllData(AvailableTrucks.class);
-		List<AvailableTrucksModel> truckDetailsList = new ArrayList<>();
-		AvailableTrucksModel truckDetailObj = null;
-		for (AvailableTrucks truckDtlsEntity : truckDetailsEntity) {
-			truckDetailObj = new AvailableTrucksModel();
+	public List<AvailableTrucks> getAllTruckInfo() {
+		List<AvailableTrucksEntity> truckDetailsEntity = shippingOrderDao.listAllData(AvailableTrucksEntity.class);
+		List<AvailableTrucks> truckDetailsList = new ArrayList<>();
+		AvailableTrucks truckDetailObj = null;
+		for (AvailableTrucksEntity truckDtlsEntity : truckDetailsEntity) {
+			truckDetailObj = new AvailableTrucks();
 			truckDetailObj.setDelay(truckDtlsEntity.getDelay());
 			truckDetailObj.setDoNo(truckDtlsEntity.getDoNo());
 			truckDetailObj.setEntryType(truckDtlsEntity.getEntryType());
@@ -496,12 +495,12 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 
 
 	@Override
-	public List<AvailableTrucksModel> getAllAvailableTrucksByAxleType(String axleType) {
-		List<AvailableTrucks> truckDetailsEntity = shippingOrderDao.getAllAvailableTrucksByAxleType(axleType);
-		List<AvailableTrucksModel> truckDetailsList = new ArrayList<>();
-		AvailableTrucksModel truckDetailObj = null;
-		for (AvailableTrucks truckDtlsEntity : truckDetailsEntity) {
-			truckDetailObj = new AvailableTrucksModel();
+	public List<AvailableTrucks> getAllAvailableTrucksByAxleType(String axleType) {
+		List<AvailableTrucksEntity> truckDetailsEntity = shippingOrderDao.getAllAvailableTrucksByAxleType(axleType);
+		List<AvailableTrucks> truckDetailsList = new ArrayList<>();
+		AvailableTrucks truckDetailObj = null;
+		for (AvailableTrucksEntity truckDtlsEntity : truckDetailsEntity) {
+			truckDetailObj = new AvailableTrucks();
 			truckDetailObj.setDelay(truckDtlsEntity.getDelay());
 			truckDetailObj.setDoNo(truckDtlsEntity.getDoNo());
 			truckDetailObj.setEntryType(truckDtlsEntity.getEntryType());
