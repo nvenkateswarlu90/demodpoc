@@ -25,7 +25,7 @@ import com.a4tech.shipping.model.User;
 public interface IShippingOrder {
   public List<ShippingDetails1> getAllShippingOrders();
   public List<ShippingDetails1> getShippingDetailsByDate(String date);
-  public List<AvailableTrucks> getAllTruckInfo();
+  public List<AvailableTrucks> getAllAvilableTrucks();
   public void saveOrderGroup(OrderGroup orderGroup);
   public List<OrderGroup> getAllGroupOrderList();
   public List<OrderGroup> getOrderGroupByDate(String date);

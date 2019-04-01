@@ -197,7 +197,7 @@ public class ShippingDetailController {
 
 	@RequestMapping(value = "/getAllTrucksInformation")
 	public ModelAndView getAllTrucksInfo() {
-		List<AvailableTrucks> trucksInfoList = shippingOrderService.getAllTruckInfo();
+		List<AvailableTrucks> trucksInfoList = shippingOrderService.getAllAvilableTrucks();
 		return new ModelAndView("truck_info", "trucksList", trucksInfoList);
 	}
 	  @RequestMapping(value = "/uploadTrucksInfo", method = RequestMethod.GET)

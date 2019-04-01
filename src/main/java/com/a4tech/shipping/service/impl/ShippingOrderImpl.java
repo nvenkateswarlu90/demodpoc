@@ -143,7 +143,7 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 	}
 
 	@Override
-	public List<AvailableTrucks> getAllTruckInfo() {
+	public List<AvailableTrucks> getAllAvilableTrucks() {
 		List<AvailableTrucksEntity> truckDetailsEntity = shippingOrderDao.listAllData(AvailableTrucksEntity.class);
 		List<AvailableTrucks> truckDetailsList = new ArrayList<>();
 		AvailableTrucks truckDetailObj = null;

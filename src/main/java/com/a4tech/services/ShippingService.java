@@ -161,7 +161,7 @@ public class ShippingService {
 
 	private List<AvailableTrucks> getHeavyTruckList(List<AvailableTrucks> groupTruckList, int totOrdQty,
 			List<AvailableTrucks> allAssignedTrucksList) {
-		List<AvailableTrucks> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
+		List<AvailableTrucks> initialTruckInfoList = shippingOrderService.getAllAvilableTrucks();
 		double initialTruckCap = totOrdQty - (totOrdQty * 0.5);
 		AvailableTrucks initialTruckDetails = getTruckDetails(initialTruckInfoList, initialTruckCap);
 
@@ -299,7 +299,7 @@ public class ShippingService {
 
 	private List<AvailableTrucks> getNormalTruckList(List<AvailableTrucks> groupTruckList, int orderQty,
 			List<AvailableTrucks> allAssignedTrucksList) {
-		List<AvailableTrucks> initialTruckInfoList = shippingOrderService.getAllTruckInfo();
+		List<AvailableTrucks> initialTruckInfoList = shippingOrderService.getAllAvilableTrucks();
 		AvailableTrucks maxTruckDetails = initialTruckInfoList.stream()
 				.max(Comparator.comparing(AvailableTrucks::getVehicleType))
 				.orElseThrow(NoSuchElementException::new);
@@ -780,7 +780,7 @@ public class ShippingService {
 		List<ShippingDetails1> unGroupOrderList = new ArrayList<>();
 		List<TruckHistoryDetail> allAssignedTrucksList = new ArrayList<>();
 		Map<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> finalTruckDetails = new HashMap<>();
-		List<AvailableTrucks> availableTruckInfoList = shippingOrderService.getAllTruckInfo();
+		List<AvailableTrucks> availableTruckInfoList = shippingOrderService.getAllAvilableTrucks();
 		/*
 		 * Map<String, TruckDetails> availableTrucksMap =
 		 * availableTruckInfoList.stream()
@@ -1233,22 +1233,28 @@ public class ShippingService {
 	}
    
 	public void getClubbedOrders(String channelSeq) {
-		List<ChannelConfiguration> channelList =  orderService.getChannelsList(channelSeq);
-		List<ShippingDetails1> shippingaOrderList = shippingOrderService.getAllShippingOrders();
-		List<AxleWheelTypeEntity> axleWheelConfiguration = shippingOrderService.getAllAxleWheelTypeEntity();
+		List<ChannelConfiguration> channelList            = orderService.getChannelsList(channelSeq);
+		List<ShippingDetails1> shippingaOrderList         = shippingOrderService.getAllShippingOrders();
+		List<AxleWheelTypeEntity> axleWheelConfiguration  = shippingOrderService.getAllAxleWheelTypeEntity();
+		List<AvailableTrucks> availableTrucksList         = shippingOrderService.getAllAvilableTrucks();
+		List<TruckHistoryDetailsEntity> truckHistoryList   = shippingOrderService.getAllTrucksHistoryDetails();
+		 List<DistrictClubOrdByPass> distByPassList = shippingOrderService.getAllDistrictClubOrdByPass();
 		//List<AvailableTrucksModel>
 		for (ChannelConfiguration channelConfiguration : channelList) {
 			 String channelType = CommonUtility.getChannels(channelConfiguration.getChannel());
 			 String skuType = channelConfiguration.getSkuType();
 			 List<ShippingDetails1> ordersList = getAllOrdersBasedOnDistributionChannel(channelType, shippingaOrderList);
+			 //Map<String, >
 			 if("Same".equalsIgnoreCase(skuType)) {
-				 
+				 for (ShippingDetails1 shippingDetails1 : shippingaOrderList) {
+					 if(orderService.isDistrictByPass(distByPassList, shippingDetails1.getDistrict_name())) {
+							continue;
+						}
+					}
 			 } else {// Multiple SKU's
 				 
 			 }
-			 for (ShippingDetails1 shippingDetails1 : shippingaOrderList) {
-				    
-			}
+			
 		}
 	}
    /*@author Venkat
