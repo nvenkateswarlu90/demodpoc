@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -45,6 +46,7 @@ import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.exceptions.ChannelSequenceException;
 import com.a4tech.map.model.Address;
 import com.a4tech.service.mapper.IOrderDataMapper;
 import com.a4tech.services.OrderService;
@@ -129,7 +131,10 @@ public class ShippingDetailController {
 		
 		 String channelSequence =  shippingOrderService.getChannelSequence();
 		 if(StringUtils.isEmpty(channelSequence)) {
-			 return new ModelAndView("errorPage", "", "");
+			
+			 //return new ModelAndView("errorPage", "", "");
+			throw new ChannelSequenceException(
+					"Channel Sequence should not be empty, Please Configure Channel Sequence in Channel Configuration");
 		 }
 		 shippingService.getClubbedOrders(channelSequence);
 		
@@ -564,6 +569,12 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		System.out.println(sequence);
 		 return "success";
 		
+	}
+	@ExceptionHandler(ChannelSequenceException.class)
+	public ModelAndView channelSequenceException(ChannelSequenceException exce) {
+		ModelAndView mv = new ModelAndView("channelSequenceError");
+		mv.addObject("channelSeqExcp",exce);
+	   return mv;
 	}
    
 	public List<ShippingDetails1> getAllOrdersBasedOnDistributionChannel(String distributionChannel) {

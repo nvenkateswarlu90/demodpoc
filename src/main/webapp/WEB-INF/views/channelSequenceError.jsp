@@ -38,7 +38,7 @@
 
                 </div>
             </div>
-        <div class="wrapper wrapper-content animated fadeInRight">
+        <%-- <div class="wrapper wrapper-content animated fadeInRight">
       
             <div class="row">
                 <div class="col-lg-12">
@@ -48,14 +48,31 @@
                        
                         </div>
                         <div class="ibox-content">
-   <h4 style="color:red">Please choose channel sequence in Channel Configuration  </h4>
+ <!--   <h4 style="color:red">Please choose channel sequence in Channel Configuration  </h4> -->
+             <c:if test="${not empty channelSeqExcp.errorMsg}">
+             <h4 style="color:red">${channelSeqExcp.errorMsg} </h4>
+             </c:if>
                         </div>
                     </div>
                 </div>
         
             </div>
        
-        </div>
+        </div> --%>
+         <div class="wrapper wrapper-content">
+      <div class="row">
+		
+		  	<div class="col-md-4 col-xs-push-4">  <img class="img-responsive" src="resources/img/config.gif"/></div>
+		  <div class="col-md-12 text-center">
+		    <c:if test="${not empty channelSeqExcp.errorMsg}">
+             <h2 class="text-danger font-bold"> ${channelSeqExcp.errorMsg} </h2>
+             </c:if>
+		  
+		 <!--  <h2 class="text-danger font-bold"> Please choose channel sequence in Channel Configuration</h2> -->
+</div>
+      </div>
+    
+    </div>
       <!-- <div id="footer"></div> -->
       <%@include file="footer.html" %>
 
