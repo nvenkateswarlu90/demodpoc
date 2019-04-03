@@ -59,6 +59,10 @@ import com.a4tech.dao.entity.ChannelConfigurationEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.map.model.Address;
+import com.a4tech.map.model.Distance;
+import com.a4tech.map.model.DistancePojo;
+import com.a4tech.map.model.Elements;
+import com.a4tech.map.model.Rows;
 import com.a4tech.map.service.MapService;
 import com.a4tech.service.mapper.IOrderDataMapper;
 import com.a4tech.shipping.iservice.IShippingOrder;
@@ -70,6 +74,7 @@ import com.a4tech.shipping.model.IntellishipModel;
 import com.a4tech.shipping.model.IntellishipModelByMaterial;
 import com.a4tech.shipping.model.NormalLoadConfiguration;
 import com.a4tech.shipping.model.OrderGroup;
+import com.a4tech.shipping.model.OrderMap;
 import com.a4tech.shipping.model.PlantDetails;
 import com.a4tech.shipping.model.ShippingDeliveryOrder;
 import com.a4tech.shipping.model.ShippingDetails;
@@ -102,6 +107,7 @@ public class ShippingDetailController {
 	
 	@Autowired
 	private NormalLoadValidator normalLoadValidatior;
+	
 	
 	@InitBinder("normalLoadConfig")
 	protected void initBinder(WebDataBinder binder){
@@ -166,6 +172,7 @@ public class ShippingDetailController {
 	public ModelAndView pendingOrders() {
 		List<ShippingDetails1> shippingaOrderList = shippingOrderService.getAllShippingOrders();
 		System.out.println("Total Orders: " + shippingaOrderList.size());
+		Collections.sort(shippingaOrderList, Comparator.comparing(ShippingDetails1::getDistrict_name));
 		return new ModelAndView("algorithm_process", "shippingaOrderList", shippingaOrderList);
 	}
 
@@ -183,6 +190,7 @@ public class ShippingDetailController {
 				shippingaOrderListOnChannel);
 		Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap = getAllOrdersBasedOnMaterial(
 				ordersOnDistrictMap);
+		finalMaterialOrdMap = getAllForwordOrders(finalMaterialOrdMap);
 		Map<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> finalTruckDetails = shippingService.getOrdersFitIntoTruck1(finalMaterialOrdMap);
 		shippingService.getFinalOrdersClub1(finalTruckDetails);
 		List<IntellishipModelByMaterial> finalIntelishipModel = shippingService.getFinalGroupOrders();
@@ -779,7 +787,43 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		}
 		return finalMaterialOrdMap;
 	}
-
+ 
+	private Map<String, Map<String, List<ShippingDetails1>>> getAllForwordOrders(Map<String, Map<String, List<ShippingDetails1>>> ordersByMaterial){
+		MapService gmapDist = new MapService();
+		List<PlantDetails> plantDetailsList =  new StoreSpDetails().getAllPlantDetails();
+		PlantDetails plantDetails = plantDetailsList.get(2);
+		String origin = plantDetails.getLatitude()+","+plantDetails.getLongitude();
+		Map<String, Map<String, List<ShippingDetails1>>> orderDistrictList = new HashMap<>();
+		for (Map.Entry<String,Map<String, List<ShippingDetails1>>> ordersList : ordersByMaterial.entrySet()) {
+			String districtName = ordersList.getKey();//DistrictName
+			Map<String, List<ShippingDetails1>> districtOrdersList = ordersList.getValue();
+			Map<String, List<ShippingDetails1>> orderMaterialMap = new HashMap<>();
+			for (Map.Entry<String,List<ShippingDetails1>> materialOrdersList: districtOrdersList.entrySet()) {
+				String materialName = materialOrdersList.getKey();
+				List<ShippingDetails1> finalOrders = materialOrdersList.getValue();
+				if(finalOrders.size() == 1) {// if order contains single order ,no need to club the order 
+					continue;
+				}
+				String allDestinations = allDestinationsLattAndLong(finalOrders);
+				DistancePojo distencePojo = null;
+				try {
+					distencePojo = MapService.getAllDestinationsStore(allDestinations);
+					if(distencePojo == null) {
+						 distencePojo =	gmapDist.getMaxDistenceFromMultipleDestinations(origin, allDestinations);
+						 MapService.saveAllDestinationsStore(allDestinations, distencePojo);
+					}
+					finalOrders = getFinalOrdersList(finalOrders, distencePojo);
+					orderMaterialMap.put(materialName, finalOrders);
+				} catch (IOException e) {
+					System.out.println("unable to calculate all destinations: "+e.getMessage());
+				}
+			}
+			orderDistrictList.put(districtName, orderMaterialMap);
+		}
+		
+		return orderDistrictList;
+	}
+	
 	public Map<String, Map<List<ShippingDetails1>, List<AvailableTrucksModel>>> getOrdersFitIntoTruck1(Map<String, Map<String, List<ShippingDetails1>>> materialOrdGroupMap){
 		//List<TruckDetails> initialTruckInfoList = shippingOrder.getAllTruckInfo();
 		List<ShippingDetails1> unGroupOrderList = new ArrayList<>();
@@ -2143,10 +2187,53 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		}
 	 
 	 
-
-	 
-	 
-	 
-	 
-	 
+ private String allDestinationsLattAndLong(List<ShippingDetails1> ordsList) {
+	StringBuilder allDestinations = new StringBuilder();
+	for (ShippingDetails1 shippingDetails1 : ordsList) {
+			allDestinations.append(shippingDetails1.getShip_to_latt()).append(",")
+					.append(shippingDetails1.getShip_to_long()).append("|");
+	}
+	 return allDestinations.toString();
+ }
+ private List<ShippingDetails1> getFinalOrdersList(List<ShippingDetails1> shippingList,DistancePojo distancePojo) {
+	 String[] destinations = distancePojo.getDestination_addresses();
+	 Elements[] elements = distancePojo.getRows()[0].getElements();
+	 List<OrderMap> orderMapList = new ArrayList<>();
+	 for(int destNo=0;destNo <destinations.length;destNo++) {
+		double orderDistence = getOrderDistance(elements[destNo]);
+		 orderMapList.add(new OrderMap(shippingList.get(destNo), destinations[destNo], orderDistence));
+	 }
+	 Collections.sort(orderMapList, Comparator.comparing(OrderMap::getDistance));
+	 List<ShippingDetails1> finalOrdList = new ArrayList<>();
+	 int listSize = orderMapList.size();
+	 for (int ordNo = 0; ordNo < listSize; ordNo++) {
+		 if(ordNo == 0) {
+			 finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
+			 continue;
+		 }
+		 try {
+			 if(ordNo == listSize - 1) {
+				 finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
+			 } else {
+				 double distanceDiff = orderMapList.get(ordNo).getDistance() - orderMapList.get(ordNo+1).getDistance();
+					if(distanceDiff < 90) {
+						finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
+					}
+			 }
+			
+		} catch (IndexOutOfBoundsException e) {
+			System.out.println("no such data element in list");
+		}
+		
+	}
+	 return finalOrdList;
+//	orderMapList.sort(()->
+ }
+ public static double getOrderDistance(Elements element) {
+	 Distance dist = element.getDistance();
+	 String kiloMeters = dist.getText();
+	 kiloMeters = kiloMeters.replaceAll("[^0-9.]", "").trim();
+		return Double.parseDouble(kiloMeters);
+	}
+	
 }

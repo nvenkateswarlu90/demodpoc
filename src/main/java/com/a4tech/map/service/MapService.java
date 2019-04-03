@@ -24,6 +24,7 @@ public class MapService {
   private RestTemplate restTemplate ;
   private static Map<String, Double> distanceMapStore = new HashMap<>();
   private static Map<String, String> distanceAndHrsMapStore = new HashMap<>();
+  private static Map<String, DistancePojo> allDestinationsStore = new HashMap<>();
   public double getDistence(String originCoordinates,String destinationCoordinates) throws IOException{
 	  URL url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+originCoordinates+"&destinations="+destinationCoordinates+"&mode=driving");
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -46,6 +47,20 @@ public class MapService {
       System.out.println("Distence Value: "+distenceVal);
       return Double.parseDouble(distenceVal);
   }
+  public DistancePojo getMaxDistenceFromMultipleDestinations(String originCoordinates,String destinationCoordinates) throws IOException{
+	  URL url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+originCoordinates+"&destinations="+destinationCoordinates+"&mode=driving&key=AIzaSyAF27UXmyKEQpNmybxxaViJpYWo-yFzkxk");
+      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+      conn.setRequestMethod("GET");
+      String line, outputString = "";
+      BufferedReader reader = new BufferedReader(
+      new InputStreamReader(conn.getInputStream()));
+      while ((line = reader.readLine()) != null) {
+          outputString += line;
+      }
+      System.out.println(outputString);
+      DistancePojo capRes = new Gson().fromJson(outputString, DistancePojo.class);
+      return capRes;
+  }
   public double getMaxDistenceFromMultipleDestination(String originCoordinates,String destinationCoordinates) throws IOException{
 	  URL url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+originCoordinates+"&destinations="+destinationCoordinates+"&mode=driving&key=AIzaSyAF27UXmyKEQpNmybxxaViJpYWo-yFzkxk");
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -61,6 +76,7 @@ public class MapService {
      double maxDist = getFinalDistence(capRes);
       return maxDist;
   }
+  
   public String getMaxDistenceAndHrsFromMultipleDestination(String originCoordinates,String destinationCoordinates) throws IOException{
 	  URL url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+originCoordinates+"&destinations="+destinationCoordinates+"&mode=driving&key=AIzaSyAF27UXmyKEQpNmybxxaViJpYWo-yFzkxk");
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -187,6 +203,12 @@ public static void saveDistanceAndHrsMapStore(String langAndLong,String distance
 
 public static Double getDistanceMapStore(String langAndLong) {
 	return distanceMapStore.get(langAndLong);
+}
+public static DistancePojo getAllDestinationsStore(String destinations) {
+	return allDestinationsStore.get(destinations);
+}
+public static void saveAllDestinationsStore(String destinatios,DistancePojo result) {
+	allDestinationsStore.put(destinatios, result);
 }
 public static  String getDistanceAndHrsMapStore(String langAndLong) {
 	return distanceAndHrsMapStore.get(langAndLong);
