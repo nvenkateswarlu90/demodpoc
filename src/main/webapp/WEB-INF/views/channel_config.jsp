@@ -167,7 +167,19 @@
          
           </tbody>
         </table>
-     
+       <div class="alert alert-info alert-dismissable">
+                               <!--  <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button> -->
+                                Instructions:
+                              <p> Channel Text Field: User provided following channels format only</p>  
+                              <ol>
+                              <li>Channel 1 </li>
+                              <li>Channel 2 </li>
+                             <li> Channel 1+Channel 2 </li></ol>
+                               <p> SKU Text Field: User provided following SKU format only</p>
+                               <ol>
+                              <li>Same</li>
+                             <li> Multiple </li></ol>
+                            </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-white btn-rounded" data-dismiss="modal">Close</button>
         <button type="submit" class="btn btn-primary btn-rounded">Save changes</button>
@@ -204,7 +216,19 @@
          
           </tbody>
         </table>
-     
+        <div class="alert alert-info alert-dismissable">
+                               <!--  <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button> -->
+                                Instructions:
+                              <p> Channel Text Field: User provided following channels format only</p>  
+                              <ol>
+                              <li>Channel 1 </li>
+                              <li>Channel 2 </li>
+                             <li> Channel 1+Channel 2 </li></ol>
+                               <p> SKU Text Field: User provided following SKU format only</p>
+                               <ol>
+                              <li>Same</li>
+                             <li> Multiple </li></ol>
+                            </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-white btn-rounded" data-dismiss="modal">Close</button>
         <button type="submit" class="btn btn-primary btn-rounded">Save changes</button>
