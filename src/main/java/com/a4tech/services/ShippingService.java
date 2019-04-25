@@ -1245,6 +1245,7 @@ public class ShippingService {
 			 String skuType = channelConfiguration.getSkuType();
 			 List<ShippingDetails1> ordersList = getAllOrdersBasedOnDistributionChannel(channelType, shippingaOrderList);
 			 //Map<String, >
+			 Collections.sort(ordersList, Comparator.comparing(ShippingDetails1::getDistrict_name));
 			 if("Same".equalsIgnoreCase(skuType)) {
 				 for (ShippingDetails1 shippingDetails1 : shippingaOrderList) {
 					 if(orderService.isDistrictByPass(distByPassList, shippingDetails1.getDistrict_name())) {
@@ -1284,7 +1285,6 @@ public class ShippingService {
 			.filter(order -> order.getDistribution_channel().contains(distributionChannel))
 			.collect(Collectors.toList());
 		}
-		
 		return ordersList;
 	}
 
