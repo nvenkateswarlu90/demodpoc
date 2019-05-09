@@ -22,6 +22,7 @@ import com.a4tech.dao.entity.ShippingEntity;
 import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.dao.entity.UsedTrucksEntity;
 import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.map.model.Address;
 import com.a4tech.shipping.iservice.IShippingOrder;
@@ -37,6 +38,7 @@ import com.a4tech.shipping.model.ShippingDeliveryOrder;
 import com.a4tech.shipping.model.ShippingDetails1;
 import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
 import com.a4tech.shipping.model.TruckHistoryDetail;
+import com.a4tech.shipping.model.UsedTrucksModel;
 import com.a4tech.shipping.model.User;
 
 @Service
@@ -55,6 +57,7 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 				continue;
 			}*/
 			shippingDetails = new ShippingDetails1();
+			shippingDetails.setId(shippingEntity.getId());
 			shippingDetails.setDelivery(shippingEntity.getDelivery());
 			shippingDetails.setActual_delivery_qty(shippingEntity.getActual_delivery_qty());
 			shippingDetails.setDeference_document(shippingEntity.getDeference_document());
@@ -149,6 +152,7 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 		AvailableTrucks truckDetailObj = null;
 		for (AvailableTrucksEntity truckDtlsEntity : truckDetailsEntity) {
 			truckDetailObj = new AvailableTrucks();
+			truckDetailObj.setTruckId(truckDtlsEntity.getTruckId());
 			truckDetailObj.setDelay(truckDtlsEntity.getDelay());
 			truckDetailObj.setDoNo(truckDtlsEntity.getDoNo());
 			truckDetailObj.setEntryType(truckDtlsEntity.getEntryType());
@@ -160,6 +164,7 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 			truckDetailObj.setTaggedDate(truckDtlsEntity.getTaggedDate());
 			truckDetailObj.setTaggedTime(truckDtlsEntity.getTaggedTime());
 			truckDetailObj.setTaggedTranspoter(truckDtlsEntity.getTaggedTranspoter());
+			truckDetailObj.setDelayTimeInMins(truckDtlsEntity.getDelayTimeInMins());
 			truckDetailsList.add(truckDetailObj);
 		}
 		return truckDetailsList;
@@ -449,7 +454,33 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 		shippingOrderDao.saveShippingEntityReOrder(shippingEntity);
 		
 	}
-
+	@Override
+	public void saveShippingOrderReAssign(List<ShippingOrdersReAssignModel> shippingReOrderList) {
+		ShippingOrdersReAssign shippingEntity = null;
+		for (ShippingOrdersReAssignModel shippingReOrder : shippingReOrderList) {
+			shippingEntity = new ShippingOrdersReAssign();
+			shippingEntity.setActual_delivery_qty(shippingReOrder.getActual_delivery_qty());
+			shippingEntity.setMaterial(shippingReOrder.getMaterial());
+			shippingEntity.setDistrict_name(shippingReOrder.getDistrict_name());
+			shippingEntity.setDistrict_code(shippingReOrder.getDistrict_code());
+			shippingEntity.setDistribution_channel(shippingReOrder.getDistribution_channel());
+			shippingEntity.setDeference_document(shippingReOrder.getDeference_document());
+			shippingEntity.setDeliv_date(shippingReOrder.getDeliv_date());
+			shippingEntity.setDelivery(shippingReOrder.getDelivery());
+			shippingEntity.setDelivery_type(shippingReOrder.getDelivery_type());
+			shippingEntity.setForwarding_agent_name(shippingReOrder.getForwarding_agent_name());
+			shippingEntity.setName_of_sold_to_party(shippingReOrder.getName_of_sold_to_party());
+			shippingEntity.setName_of_the_ship_to_party(shippingReOrder.getName_of_the_ship_to_party());
+			shippingEntity.setPlant(shippingReOrder.getPlant());
+			shippingEntity.setRoute(shippingReOrder.getRoute());
+			shippingEntity.setRoute_description(shippingReOrder.getRoute_description());
+			shippingEntity.setShip_to_latt(shippingReOrder.getShip_to_latt());
+			shippingEntity.setShip_to_long(shippingReOrder.getShip_to_long());
+			shippingEntity.setSold_to_party(shippingReOrder.getSold_to_party());
+			shippingEntity.setTruckNo(shippingReOrder.getTruckNo());
+			shippingOrderDao.saveShippingEntityReOrder(shippingEntity);
+		}
+	}
 
 	@Override
 	public List<ShippingDetails1> getAllReAssignOrdersBasedOnTruckNo(String truck) {
@@ -658,6 +689,60 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 		 }
 		 return "";
 	}
+
+
+	@Override
+	public List<UsedTrucksModel> getAllUsedTrucks() {
+		List<UsedTrucksEntity> usedTrucksList = shippingOrderDao.listAllData(UsedTrucksEntity.class);
+		UsedTrucksModel usedTruckObj = null;
+		List<UsedTrucksModel> usedTruckListModel = new ArrayList<>();
+		for (UsedTrucksEntity usedTrucksEntity : usedTrucksList) {
+			usedTruckObj = new UsedTrucksModel();
+			usedTruckObj.setDistrictName(usedTrucksEntity.getDistrictName());
+			usedTruckObj.setShippedDate(usedTrucksEntity.getShippedDate());
+			usedTruckObj.setTransporterName(usedTrucksEntity.getTransporterName());
+			usedTruckObj.setTruckNo(usedTrucksEntity.getTruckNo());
+			usedTruckObj.setVehicalCapacity(usedTrucksEntity.getVehicalCapacity());
+			usedTruckObj.setVehicalType(usedTrucksEntity.getVehicalType());
+			usedTruckObj.setTaggedTime(usedTrucksEntity.getTaggedTime());
+			usedTruckListModel.add(usedTruckObj);
+		}
+		return usedTruckListModel;
+	}
+
+
+	@Override
+	public void saveUsedTruck(UsedTrucksModel usedTruck) {
+		UsedTrucksEntity usedTruckEntity = new UsedTrucksEntity();
+		usedTruckEntity.setDistrictName(usedTruck.getDistrictName());
+		usedTruckEntity.setShippedDate(usedTruck.getShippedDate());
+		usedTruckEntity.setTransporterName(usedTruck.getTransporterName());
+		usedTruckEntity.setTruckNo(usedTruck.getTruckNo());
+		usedTruckEntity.setVehicalCapacity(usedTruck.getVehicalCapacity());
+		usedTruckEntity.setVehicalType(usedTruck.getVehicalType());
+		usedTruckEntity.setTaggedTime(usedTruck.getTaggedTime());
+		shippingOrderDao.saveUsedTruck(usedTruckEntity);
+	}
+
+
+	@Override
+	public void deleteTruckFromTruckPool(AvailableTrucks availableTruck) {
+	   AvailableTrucksEntity truckEntity = new AvailableTrucksEntity();
+	   truckEntity.setTruckId(availableTruck.getTruckId());
+		shippingOrderDao.deleteTruckFromTruckPool(truckEntity);
+	}
+
+
+	@Override
+	public void deleteOrderFromPendingList(ShippingDetails1 shipping) {
+		ShippingEntity shippingEntity = new ShippingEntity();
+		shippingEntity.setId(shipping.getId());
+		shippingOrderDao.deleteOrderFromPendingList(shippingEntity);
+		
+	}
+
+
+	
 
 
 	

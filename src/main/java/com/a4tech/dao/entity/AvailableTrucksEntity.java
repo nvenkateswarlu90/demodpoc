@@ -37,6 +37,14 @@ public class AvailableTrucksEntity {
 	/*@Column(name="REF_TRUCK_VENDOR_ID")
 	private String refTruckVendorId;
 	*/
+	@Column(name="delayTimeInMins")
+	private Integer delayTimeInMins ;
+	public Integer getDelayTimeInMins() {
+		return delayTimeInMins;
+	}
+	public void setDelayTimeInMins(Integer delayTimeInMins) {
+		this.delayTimeInMins = delayTimeInMins;
+	}
 	public int getTruckId() {
 		return truckId;
 	}

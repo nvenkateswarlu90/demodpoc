@@ -73,6 +73,7 @@
 				<value>com.a4tech.dao.entity.UserEntity</value>
 				<value>com.a4tech.dao.entity.ChannelConfigurationEntity</value>
 				<value>com.a4tech.dao.entity.ChannelSequenceEntity</value>
+				<value>com.a4tech.dao.entity.UsedTrucksEntity</value>
 			</list>
 		</property>
 		

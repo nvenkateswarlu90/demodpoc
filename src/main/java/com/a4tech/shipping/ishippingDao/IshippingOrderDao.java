@@ -16,6 +16,7 @@ import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
 import com.a4tech.dao.entity.AvailableTrucksEntity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.dao.entity.UsedTrucksEntity;
 import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.shipping.model.DistrictClubOrdByPass;
 
@@ -62,6 +63,9 @@ public interface IshippingOrderDao {
   public void deleteChannelConfiguration(Integer id);
   public void saveChannelSequence(ChannelSequenceEntity channelSeq);
   public ChannelSequenceEntity getChannelSequence();
+  public void deleteTruckFromTruckPool(AvailableTrucksEntity availableTruckEntity);
+  public void saveUsedTruck(UsedTrucksEntity usedTruckEntity);
+  public void deleteOrderFromPendingList(ShippingEntity shipping);
  // public void updateDistrictClubOrdByPass(DistrictClubOrdByPassEntity districtByPass);
   public <T> List<T> listAllData(Class<T> clazz); 
   public <T> List<T> listAllDataById(Class<T> clazz,String variableName,String val);

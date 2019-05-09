@@ -34,6 +34,7 @@ import com.a4tech.dao.entity.ShippingEntity;
 import com.a4tech.dao.entity.ShippingFinalOrders;
 import com.a4tech.dao.entity.ShippingOrdersReAssign;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.dao.entity.UsedTrucksEntity;
 import com.a4tech.dao.entity.UserEntity;
 import com.a4tech.shipping.ishippingDao.IshippingOrderDao;
 
@@ -1238,6 +1239,56 @@ public class ShippingDao implements IshippingOrderDao{
 			_LOGGER.error("Unable to fetch channel sequence details:"+e.getMessage());
 		}
 		return new ChannelSequenceEntity();
+	}
+	@Override
+	public void deleteTruckFromTruckPool(AvailableTrucksEntity availableTruckEntity) {
+		Transaction transaction = null;
+		try(Session session = sessionFactory.openSession()) {
+			transaction = session.beginTransaction();
+			session.delete(availableTruckEntity);
+			//session.saveOrUpdate(channelSeq);
+			transaction.commit();
+			_LOGGER.info("Successfully delete truck from truck pool");
+		} catch (Exception ex) {
+			_LOGGER.error("unable to delete truck from truck pool data: "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} 	
+	}
+	@Override
+	public void saveUsedTruck(UsedTrucksEntity usedTruckEntity) {
+		Transaction transaction = null;
+		try(Session session =  sessionFactory.openSession() ) {
+			transaction = session.beginTransaction();
+			session.save(usedTruckEntity);
+			transaction.commit();
+			_LOGGER.info("Used Trucks data has been saved successfully in db");
+		} catch (Exception ex) {
+			_LOGGER.error("unable to save Used Trucks data  in DB: "+ex.getCause());
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} 
+		
+	}
+	@Override
+	public void deleteOrderFromPendingList(ShippingEntity shipping) {
+		Transaction transaction = null;
+		try(Session session = sessionFactory.openSession()) {
+			transaction = session.beginTransaction();
+			ShippingEntity deleteObj = session.load(ShippingEntity.class, shipping.getId());
+			if(deleteObj.getId() != null) {
+				session.delete(deleteObj);
+				transaction.commit();
+				_LOGGER.info("Successfully delete order from pending list");
+			}
+			//session.saveOrUpdate(channelSeq);
+		} catch (Exception ex) {
+			_LOGGER.error("unable to delete order from pending list: "+ex.getCause());
+		
+		} 	
+		
 	}
 
 	

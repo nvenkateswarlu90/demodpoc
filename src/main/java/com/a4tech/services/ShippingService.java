@@ -43,6 +43,8 @@ import saveShipping.StoreSpDetails;
 public class ShippingService {
 	@Autowired
 	private OrderService orderService;
+	@Autowired
+	private TruckService truckService;
 	MapService gmapDist = new MapService();
 	StoreSpDetails sd = new StoreSpDetails();
 	// static Map<String, String> allLongitudeAndLatitudes = new HashMap<>();
@@ -663,15 +665,17 @@ public class ShippingService {
 				/*if (pendingOrder != null) {
 					ordQty = pendingOrder.getTruckOrderQty();
 				}*/
-				truckOrdQty = truckOrdQty + Integer.parseInt(orderGrup.getOriginalOrderQty());
-				totalOrdQty = totalOrdQty + Integer.parseInt(orderGrup.getOriginalOrderQty());
+				if(orderGrup.getOriginalOrderQty() != null) {
+					truckOrdQty = truckOrdQty + Integer.parseInt(orderGrup.getOriginalOrderQty());
+					totalOrdQty = totalOrdQty + Integer.parseInt(orderGrup.getOriginalOrderQty());
+				}
 				intellishModel.setLoadType(TruckTypeInfo.getLoadType(orderGrup.getDistrictName()));
 				intellishModel.setMaterialType(orderGrup.getMaterialType());
 				String truckType = TruckTypeInfo.getTruckLoadType(orderGrup.getDistrictName());
-				String loadType = getTruckLoadType(orderGrup.getDistrictName(), truckNo);
+				//String loadType = getTruckLoadType(orderGrup.getDistrictName(), truckNo);
 				districName = orderGrup.getDistrictName();
 				intellishModel.setTruckCapacity(orderGrup.getTruckCapacity());
-				intellishModel.setLoadType(loadType);
+				//intellishModel.setLoadType(loadType);
 				intellishModel.setShippingOrderId(orderGrup.getShippingDelivaryId());
 				intellishModel.setWheelerType(orderGrup.getWheelerType());
 				/*
@@ -1235,27 +1239,24 @@ public class ShippingService {
 	public void getClubbedOrders(String channelSeq) {
 		List<ChannelConfiguration> channelList            = orderService.getChannelsList(channelSeq);
 		List<ShippingDetails1> shippingaOrderList         = shippingOrderService.getAllShippingOrders();
-		List<AxleWheelTypeEntity> axleWheelConfiguration  = shippingOrderService.getAllAxleWheelTypeEntity();
-		List<AvailableTrucks> availableTrucksList         = shippingOrderService.getAllAvilableTrucks();
-		List<TruckHistoryDetailsEntity> truckHistoryList   = shippingOrderService.getAllTrucksHistoryDetails();
-		 List<DistrictClubOrdByPass> distByPassList = shippingOrderService.getAllDistrictClubOrdByPass();
-		//List<AvailableTrucksModel>
 		for (ChannelConfiguration channelConfiguration : channelList) {
-			 String channelType = CommonUtility.getChannels(channelConfiguration.getChannel());
-			 String skuType = channelConfiguration.getSkuType();
-			 List<ShippingDetails1> ordersList = getAllOrdersBasedOnDistributionChannel(channelType, shippingaOrderList);
-			 //Map<String, >
-			 Collections.sort(ordersList, Comparator.comparing(ShippingDetails1::getDistrict_name));
-			 if("Same".equalsIgnoreCase(skuType)) {
-				 for (ShippingDetails1 shippingDetails1 : shippingaOrderList) {
-					 if(orderService.isDistrictByPass(distByPassList, shippingDetails1.getDistrict_name())) {
-							continue;
-						}
-					}
-			 } else {// Multiple SKU's
-				 
-			 }
-			
+			String channelType = CommonUtility.getChannels(channelConfiguration.getChannel());
+			String skuType = channelConfiguration.getSkuType();
+			List<ShippingDetails1> ordersList = getAllOrdersBasedOnDistributionChannel(channelType, shippingaOrderList);
+			// Map<String, >
+			Collections.sort(ordersList, Comparator.comparing(ShippingDetails1::getDistrict_name));
+			if ("Same".equalsIgnoreCase(skuType)) {
+				Map<String, List<ShippingDetails1>> ordersOnDistrictMap = orderService.getAllOrdersBasedOnDistricts(
+						ordersList);
+				Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap = orderService.getAllOrdersBasedOnMaterial(
+						ordersOnDistrictMap);
+				finalMaterialOrdMap = orderService.getAllForwordOrders(finalMaterialOrdMap);
+				truckService.getOrderAssignTrucks(finalMaterialOrdMap);
+				
+				
+			} else {// Multiple SKU's
+
+			}
 		}
 	}
    /*@author Venkat

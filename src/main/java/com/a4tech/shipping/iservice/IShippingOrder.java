@@ -7,7 +7,9 @@ import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
+import com.a4tech.dao.entity.ShippingEntity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.dao.entity.UsedTrucksEntity;
 import com.a4tech.map.model.Address;
 import com.a4tech.shipping.model.AvailableTrucks;
 import com.a4tech.shipping.model.AxleWheelConfiguration;
@@ -20,6 +22,7 @@ import com.a4tech.shipping.model.ShippingDeliveryOrder;
 import com.a4tech.shipping.model.ShippingDetails1;
 import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
 import com.a4tech.shipping.model.TruckHistoryDetail;
+import com.a4tech.shipping.model.UsedTrucksModel;
 import com.a4tech.shipping.model.User;
 
 public interface IShippingOrder {
@@ -65,4 +68,9 @@ public interface IShippingOrder {
   public void deleteChannelConfiguration(Integer id);
   public void saveChannelSequence(String sequence);
   public String getChannelSequence();
+  public List<UsedTrucksModel> getAllUsedTrucks();
+  public void saveUsedTruck(UsedTrucksModel usedTruck);
+  public void deleteTruckFromTruckPool(AvailableTrucks availableTruck);
+  public void deleteOrderFromPendingList(ShippingDetails1 shipping);
+  public void saveShippingOrderReAssign(List<ShippingOrdersReAssignModel> shippingReOrder);
 }

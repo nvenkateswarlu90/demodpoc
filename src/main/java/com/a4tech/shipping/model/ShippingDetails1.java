@@ -1,6 +1,6 @@
 package com.a4tech.shipping.model;
 
-public class ShippingDetails1 {
+public class ShippingDetails1 implements Cloneable{
 	
 	private Integer id;
 	private String delivery;
@@ -149,8 +149,10 @@ public class ShippingDetails1 {
 	public void setId(Integer id) {
 		this.id = id;
 	}
-	
-	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
 	
 	
 	

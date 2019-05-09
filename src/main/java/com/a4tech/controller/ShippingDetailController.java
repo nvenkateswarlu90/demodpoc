@@ -4,12 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,10 +44,6 @@ import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.exceptions.ChannelSequenceException;
 import com.a4tech.map.model.Address;
-import com.a4tech.map.model.Distance;
-import com.a4tech.map.model.DistancePojo;
-import com.a4tech.map.model.Elements;
-import com.a4tech.map.service.MapService;
 import com.a4tech.service.mapper.IOrderDataMapper;
 import com.a4tech.services.ShippingService;
 import com.a4tech.shipping.iservice.IShippingOrder;
@@ -62,15 +55,12 @@ import com.a4tech.shipping.model.FileUploadBean;
 import com.a4tech.shipping.model.IntellishipModelByMaterial;
 import com.a4tech.shipping.model.NormalLoadConfiguration;
 import com.a4tech.shipping.model.OrderGroup;
-import com.a4tech.shipping.model.OrderMap;
-import com.a4tech.shipping.model.PlantDetails;
 import com.a4tech.shipping.model.ShippingDetails1;
+import com.a4tech.shipping.model.UsedTrucksModel;
 import com.a4tech.shipping.model.User;
 import com.a4tech.shipping.validator.NormalLoadValidator;
 import com.a4tech.util.ApplicationConstants;
 import com.a4tech.util.CommonUtility;
-
-import saveShipping.StoreSpDetails;
 
 @Controller
 @RequestMapping({ "/", "/demoversion" })
@@ -142,6 +132,9 @@ public class ShippingDetailController {
 			throw new ChannelSequenceException(
 					"Channel Sequence should not be empty, Please Configure Channel Sequence in Channel Configuration");
 		 }
+		 shippingOrderService.deleteAllGroupOrders("orderGroup");
+		 shippingOrderService.deleteAllGroupOrders("orderReAssign");
+		 shippingOrderService.deleteAllGroupOrders("shippingFinalOrders");
 		 shippingService.getClubbedOrders(channelSequence);
 		
 		/*//here new map
@@ -150,14 +143,12 @@ public class ShippingDetailController {
 				shippingaOrderListOnChannel);
 		Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap = getAllOrdersBasedOnMaterial(
 				ordersOnDistrictMap);
-		finalMaterialOrdMap = getAllForwordOrders(finalMaterialOrdMap);
-		Map<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> finalTruckDetails = shippingService.getOrdersFitIntoTruck1(finalMaterialOrdMap);
-		shippingService.getFinalOrdersClub1(finalTruckDetails);
+		finalMaterialOrdMap = getAllForwordOrders(finalMaterialOrdMap);*/
+		//Map<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> finalTruckDetails = shippingService.getOrdersFitIntoTruck1(finalMaterialOrdMap);
+		//shippingService.getFinalOrdersClub1(finalTruckDetails);
 		List<IntellishipModelByMaterial> finalIntelishipModel = shippingService.getFinalGroupOrders();
-		
-		
-		Collections.sort(finalIntelishipModel, Comparator.comparing(IntellishipModelByMaterial::getTotalOrderQuantity));*/
-		return new ModelAndView("intellShipProcess", "shippingGroupList", new ArrayList<>());
+		Collections.sort(finalIntelishipModel, Comparator.comparing(IntellishipModelByMaterial::getTotalOrderQuantity));
+		return new ModelAndView("intellShipProcess", "shippingGroupList",finalIntelishipModel);
 		
 	}
 
@@ -210,6 +201,7 @@ public class ShippingDetailController {
 	@RequestMapping(value = "/getAllTrucksInformation")
 	public ModelAndView getAllTrucksInfo() {
 		List<AvailableTrucks> trucksInfoList = shippingOrderService.getAllAvilableTrucks();
+		trucksInfoList.sort(Comparator.comparing(AvailableTrucks::getDelayTimeInMins).reversed());
 		return new ModelAndView("truck_info", "trucksList", trucksInfoList);
 	}
 	  @RequestMapping(value = "/uploadTrucksInfo", method = RequestMethod.GET)
@@ -583,143 +575,12 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 		mv.addObject("channelSeqExcp",exce);
 	   return mv;
 	}
+	@RequestMapping(value="/usedTrucks")
+	public ModelAndView showUsedTrucks() {
+		List<UsedTrucksModel> usedTrucksList = shippingOrderService.getAllUsedTrucks();
+		return new ModelAndView("usedTrucks", "usedTrucksList", usedTrucksList);
+	}
    
-	public List<ShippingDetails1> getAllOrdersBasedOnDistributionChannel(String distributionChannel) {
-		List<ShippingDetails1> shippingaOrderList = shippingOrderService.getAllShippingOrders();
-		List<ShippingDetails1> shippingaOrderListOnChannel = shippingaOrderList.stream()
-				.filter(order -> order.getDistribution_channel().contains(distributionChannel))
-				.collect(Collectors.toList());
-		return shippingaOrderListOnChannel;
-	}
-
-	public Map<String, List<ShippingDetails1>> getAllOrdersBasedOnDistricts(List<ShippingDetails1> shippingOrderList) {
-		Map<String, List<ShippingDetails1>> ordersOnDistrictMap = new HashMap<>();
-        List<DistrictClubOrdByPass> distByPassList = shippingOrderService.getAllDistrictClubOrdByPass();
-		for (ShippingDetails1 shippingDetails1 : shippingOrderList) {
-			String districtName = shippingDetails1.getDistrict_name();
-			if(shippingService.isDistrictByPass(distByPassList, districtName)) {
-				continue;
-			}
-			List<ShippingDetails1> ordersList = ordersOnDistrictMap.get(districtName);
-			if (ordersList != null) {
-				ordersList.add(shippingDetails1);
-				ordersOnDistrictMap.put(districtName, ordersList);
-			} else {
-				List<ShippingDetails1> ordList = new ArrayList<>();
-				ordList.add(shippingDetails1);
-				ordersOnDistrictMap.put(districtName, ordList);
-			}
-		}
-		return ordersOnDistrictMap;
-	}
-
-	public Map<String, Map<String, List<ShippingDetails1>>> getAllOrdersBasedOnMaterial(
-			Map<String, List<ShippingDetails1>> ordersOnDistrictMap) {
-		Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap = new HashMap<>();
-		for (Map.Entry<String, List<ShippingDetails1>> orders : ordersOnDistrictMap.entrySet()) {
-			String districtName = orders.getKey();
-			List<ShippingDetails1> ordersList = orders.getValue();
-			Map<String, List<ShippingDetails1>> ordersOnMaterialsMap = new HashMap<>();
-			for (ShippingDetails1 shippingDetails1 : ordersList) {
-				String materialType = shippingDetails1.getMaterial();
-				List<ShippingDetails1> materialOrdersList = ordersOnMaterialsMap.get(materialType);
-				if (materialOrdersList != null) {
-					materialOrdersList.add(shippingDetails1);
-					ordersOnMaterialsMap.put(materialType, materialOrdersList);
-				} else {
-					List<ShippingDetails1> matrlOrdList = new ArrayList<>();
-					matrlOrdList.add(shippingDetails1);
-					ordersOnMaterialsMap.put(materialType, matrlOrdList);
-				}
-			}
-			finalMaterialOrdMap.put(districtName, ordersOnMaterialsMap);
-		}
-		return finalMaterialOrdMap;
-	}
-	private Map<String, Map<String, List<ShippingDetails1>>> getAllForwordOrders(Map<String, Map<String, List<ShippingDetails1>>> ordersByMaterial){
-		MapService gmapDist = new MapService();
-		List<PlantDetails> plantDetailsList =  new StoreSpDetails().getAllPlantDetails();
-		PlantDetails plantDetails = plantDetailsList.get(2);
-		String origin = plantDetails.getLatitude()+","+plantDetails.getLongitude();
-		Map<String, Map<String, List<ShippingDetails1>>> orderDistrictList = new HashMap<>();
-		for (Map.Entry<String,Map<String, List<ShippingDetails1>>> ordersList : ordersByMaterial.entrySet()) {
-			String districtName = ordersList.getKey();//DistrictName
-			Map<String, List<ShippingDetails1>> districtOrdersList = ordersList.getValue();
-			Map<String, List<ShippingDetails1>> orderMaterialMap = new HashMap<>();
-			for (Map.Entry<String,List<ShippingDetails1>> materialOrdersList: districtOrdersList.entrySet()) {
-				String materialName = materialOrdersList.getKey();
-				List<ShippingDetails1> finalOrders = materialOrdersList.getValue();
-				if(finalOrders.size() == 1) {// if order contains single order ,no need to club the order 
-					continue;
-				}
-				String allDestinations = allDestinationsLattAndLong(finalOrders);
-				DistancePojo distencePojo = null;
-				try {
-					distencePojo = MapService.getAllDestinationsStore(allDestinations);
-					if(distencePojo == null) {
-						 distencePojo =	gmapDist.getMaxDistenceFromMultipleDestinations(origin, allDestinations);
-						 MapService.saveAllDestinationsStore(allDestinations, distencePojo);
-					}
-					finalOrders = getFinalOrdersList(finalOrders, distencePojo);
-					orderMaterialMap.put(materialName, finalOrders);
-				} catch (IOException e) {
-					System.out.println("unable to calculate all destinations: "+e.getMessage());
-				}
-			}
-			orderDistrictList.put(districtName, orderMaterialMap);
-		}
-		
-		return orderDistrictList;
-	}
-	 
-private String allDestinationsLattAndLong(List<ShippingDetails1> ordsList) {
-	StringBuilder allDestinations = new StringBuilder();
-	for (ShippingDetails1 shippingDetails1 : ordsList) {
-			allDestinations.append(shippingDetails1.getShip_to_latt()).append(",")
-					.append(shippingDetails1.getShip_to_long()).append("|");
-	}
-	 return allDestinations.toString();
-}
-private List<ShippingDetails1> getFinalOrdersList(List<ShippingDetails1> shippingList,DistancePojo distancePojo) {
-	 String[] destinations = distancePojo.getDestination_addresses();
-	 Elements[] elements = distancePojo.getRows()[0].getElements();
-	 List<OrderMap> orderMapList = new ArrayList<>();
-	 for(int destNo=0;destNo <destinations.length;destNo++) {
-		double orderDistence = getOrderDistance(elements[destNo]);
-		 orderMapList.add(new OrderMap(shippingList.get(destNo), destinations[destNo], orderDistence));
-	 }
-	 Collections.sort(orderMapList, Comparator.comparing(OrderMap::getDistance));
-	 List<ShippingDetails1> finalOrdList = new ArrayList<>();
-	 int listSize = orderMapList.size();
-	 for (int ordNo = 0; ordNo < listSize; ordNo++) {
-		 if(ordNo == 0) {
-			 finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
-			 continue;
-		 }
-		 try {
-			 if(ordNo == listSize - 1) {
-				 finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
-			 } else {
-				 double distanceDiff = orderMapList.get(ordNo).getDistance() - orderMapList.get(ordNo+1).getDistance();
-					if(distanceDiff < 90) {
-						finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
-					}
-			 }
-			
-		} catch (IndexOutOfBoundsException e) {
-			System.out.println("no such data element in list");
-		}
-		
-	}
-	 return finalOrdList;
-//	orderMapList.sort(()->
-}
-public static double getOrderDistance(Elements element) {
-	 Distance dist = element.getDistance();
-	 String kiloMeters = dist.getText();
-	 kiloMeters = kiloMeters.replaceAll("[^0-9.]", "").trim();
-		return Double.parseDouble(kiloMeters);
-	}
 	private File convertMultiPartFileIntoFile(MultipartFile mfile){
 		File file = null;
 		file = new File(mfile.getOriginalFilename());

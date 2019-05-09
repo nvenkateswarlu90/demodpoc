@@ -13,7 +13,28 @@ public class AvailableTrucks {
 	private String taggedTime;
 	private String delay;
 	private String refTruckVendorId;
+	private Integer ratedLoad;
+	private Integer normalLoad;
+	private Integer delayTimeInMins;
 	
+	public Integer getDelayTimeInMins() {
+		return delayTimeInMins;
+	}
+	public void setDelayTimeInMins(Integer delayTimeInMins) {
+		this.delayTimeInMins = delayTimeInMins;
+	}
+	public Integer getRatedLoad() {
+		return ratedLoad;
+	}
+	public void setRatedLoad(Integer ratedLoad) {
+		this.ratedLoad = ratedLoad;
+	}
+	public Integer getNormalLoad() {
+		return normalLoad;
+	}
+	public void setNormalLoad(Integer normalLoad) {
+		this.normalLoad = normalLoad;
+	}
 	public int getTruckId() {
 		return truckId;
 	}

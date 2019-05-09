@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -33,6 +34,8 @@ public class ShippingMapping implements IOrderDataMapper{
 	//ShippingDao shippingDao;
 	@Autowired
 	private IshippingOrderDao shippingOrderDao;
+	
+	private Logger _LOGGER = Logger.getLogger(ShippingMapping.class);
 	@Override
 	public void pendingOrderMapper(Workbook workbook)
 	{
@@ -423,6 +426,10 @@ public class ShippingMapping implements IOrderDataMapper{
 					case 9:
 						String TAGGED_TIME=cell.getStringCellValue(); 
 						entityObj.setTaggedTime(TAGGED_TIME);
+						Integer delayTimeInMins = getDelayTimeConvertIntoMins(TAGGED_TIME);
+						if(delayTimeInMins !=null) {
+							entityObj.setDelayTimeInMins(delayTimeInMins);
+						}
 						break;
 	
 					case 10:
@@ -760,6 +767,22 @@ public class ShippingMapping implements IOrderDataMapper{
 		String headerName = CommonUtility.getCellValueStrinOrInt(cell2);
 		// columnIndex = ProGolfHeaderMapping.getHeaderIndex(headerName);
 		return headerName;
+	}
+	
+	private Integer getDelayTimeConvertIntoMins(String delayTime) {
+		//8 Day 22 Hr 45 Mn
+		//2 Day 0 Hr 51 Mn
+		try {
+			String [] delayTimes = delayTime.split(" ");
+			int days = Integer.parseInt(delayTimes[0])*24;// days is convert into hrs
+			int hrs = Integer.parseInt(delayTimes[2])+days;
+			hrs = hrs*60; //hrs is convert into mins
+			int mins = Integer.parseInt(delayTimes[4])+hrs;		
+			return mins;
+		} catch (Exception e) {
+			_LOGGER.error("unable to convert Tagged Delay time into mins: "+e.getMessage());
+		}
+	return null;
 	}
 	
 }
