@@ -45,7 +45,7 @@
 		<property name="url" value="jdbc:mysql://localhost:3306/dpoc" />
 		<property name="username" value="root" />
 		<property name="password" value="root" />
-	</bean>      -->
+	</bean>      --> 
 	     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
   		<property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
   		<property name="url" value="jdbc:sqlserver://192.168.1.10;databaseName=DPOC;" />
@@ -80,7 +80,7 @@
 		
 		<property name="hibernateProperties">
 			<props>
-				<!--  <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>  -->
+				<!--  <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> --> 
 			  <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>  
 				<prop key="hibernate.current_session_context_class">thread</prop>
 				<prop key="show_sql">true</prop>

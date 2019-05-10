@@ -29,10 +29,10 @@
    <div id="header"></div>
     <div class="row wrapper border-bottom white-bg page-heading">
       <div class="col-lg-10">
-        <h2>Algorithm Process</h2>
+        <h2>Pending Orders</h2>
         <ol class="breadcrumb">
           <li> <a href="index.html">Home</a> </li>
-          <li> <a>Algorithm Process</a> </li>
+          <li> <a>Pending Orders</a> </li>
         </ol>
       </div>
       <div class="col-lg-2"> </div>
@@ -42,7 +42,7 @@
         <div class="col-lg-12">
           <div class="ibox float-e-margins">
             <div class="ibox-title">
-              <h5>Algorithm Process</h5>
+              <h5>Pending Orders</h5>
             <!--   <div class="ibox-tools"> <a class="collapse-link"> <i class="fa fa-chevron-up"></i> </a> <a class="dropdown-toggle" data-toggle="dropdown" href="#"> <i class="fa fa-wrench"></i> </a>
                 <ul class="dropdown-menu dropdown-user">
                   <li><a href="#">Config option 1</a> </li>
