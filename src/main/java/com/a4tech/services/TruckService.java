@@ -225,8 +225,8 @@ public class TruckService {
 			AvailableTrucks availableTrucks, List<TruckHistoryDetailsEntity> truckHistoryList) {
 		// here we will get truck past history data based on truck no and district name 
 		Optional<TruckHistoryDetailsEntity> optionalTruckHistoryData = truckHistoryList.stream()
-				.filter(truckHistory -> truckHistory.getTruckNo().equals(availableTrucks.getSlNo())
-						&& truckHistory.getDistrictName().equals(districtName)).findFirst();
+				.filter(truckHistory -> availableTrucks.getSlNo().equals(truckHistory.getTruckNo())
+						&& districtName.equals(truckHistory.getDistrictName())).filter(Objects::nonNull).findFirst();
 		if (optionalTruckHistoryData.isPresent()) {
 			return getAvailableTruck(optionalTruckHistoryData.get(), availableTrucks);
 		} else {
