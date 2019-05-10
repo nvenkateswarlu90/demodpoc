@@ -1290,6 +1290,18 @@ public class ShippingDao implements IshippingOrderDao{
 		} 	
 		
 	}
+	@Override
+	public UsedTrucksEntity getUsedTruckByTruckNo(String truckNo) {
+		try(Session session = sessionFactory.openSession()){
+			Criteria cre = session.createCriteria(UsedTrucksEntity.class);
+			cre.add(Restrictions.eq("truckNo", truckNo));
+			return (UsedTrucksEntity)cre.uniqueResult();
+		} catch (Exception e) {
+			_LOGGER.error("Unable to fetch used Truck Details details:"+e.getMessage());
+		}
+		return null;
+	}
+	
 
 	
 	

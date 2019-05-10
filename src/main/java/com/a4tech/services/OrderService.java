@@ -124,11 +124,11 @@ public class OrderService {
 				orderGrpObj.setMaterialType(shippingDetails1.getMaterial());
 				orderGrpObj.setNameShipToParty(shippingDetails1.getName_of_the_ship_to_party());
 				orderGrpObj.setOrderShippingDate(shippingDate);
-				//orderGrpObj.setOriginalOrderQty(originalOrderQty);
+				orderGrpObj.setOriginalOrderQty(shippingDetails1.getActual_delivery_qty());
 				orderGrpObj.setShippingDelivaryId(shippingDelivaryId);
 				orderGrpObj.setTruckCapacity(String.valueOf(avaiableTrucks.getNormalLoad()));
 				orderGrpObj.setTruckNo(avaiableTrucks.getSlNo());
-				orderGrpObj.setWheelerType(avaiableTrucks.getWheels());
+				orderGrpObj.setWheelerType(avaiableTrucks.getVehicleType()+"W");
 				orderGrpObj.setTruckOrderQty(Integer.parseInt(shippingDetails1.getActual_delivery_qty()));
 				shippingOrder.saveOrderGroup(orderGrpObj);
 				shippingOrder.saveShippingOrderReAssign(shippingReorder);
@@ -176,7 +176,7 @@ public class OrderService {
     		 orderGroup.setTruckCapacity(String.valueOf(usedTrucks.getVehicalCapacity()));
     		 orderGroup.setTruckNo(usedTrucks.getTruckNo());
     		 orderGroup.setTruckOrderQty(Integer.parseInt(shippingDetails1.getActual_delivery_qty()));
-    		 orderGroup.setWheelerType(usedTrucks.getWheelerType());
+    		 orderGroup.setWheelerType(usedTrucks.getVehicalType());
     		 shippingOrder.saveOrderGroup(orderGroup);
     		 shippingOrder.updateOrderGroupFlag(orderGroup.getDelivaryNo());
 		}

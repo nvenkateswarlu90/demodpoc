@@ -78,7 +78,7 @@
                                 <tr>
                                     <th>Vehicle Number</th>
                                     <th>Vehicle Type</th>
-                                    <th>Vehicle Capacity(Tonne's)</th>
+                                    <th>Axle/Wheeler Type</th>
                                     <th>Wheels</th>
 									<th>Transporter's Name</th>
                                     <th>Tagged Transport</th>

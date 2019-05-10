@@ -705,6 +705,8 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 			usedTruckObj.setVehicalCapacity(usedTrucksEntity.getVehicalCapacity());
 			usedTruckObj.setVehicalType(usedTrucksEntity.getVehicalType());
 			usedTruckObj.setTaggedTime(usedTrucksEntity.getTaggedTime());
+			usedTruckObj.setNormalLoad(usedTrucksEntity.getNormalLoad());
+			usedTruckObj.setRatedLoad(usedTrucksEntity.getRatedLoad());
 			usedTruckListModel.add(usedTruckObj);
 		}
 		return usedTruckListModel;
@@ -721,6 +723,8 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 		usedTruckEntity.setVehicalCapacity(usedTruck.getVehicalCapacity());
 		usedTruckEntity.setVehicalType(usedTruck.getVehicalType());
 		usedTruckEntity.setTaggedTime(usedTruck.getTaggedTime());
+		usedTruckEntity.setNormalLoad(usedTruck.getNormalLoad());
+		usedTruckEntity.setRatedLoad(usedTruck.getRatedLoad());
 		shippingOrderDao.saveUsedTruck(usedTruckEntity);
 	}
 
@@ -738,6 +742,22 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 		ShippingEntity shippingEntity = new ShippingEntity();
 		shippingEntity.setId(shipping.getId());
 		shippingOrderDao.deleteOrderFromPendingList(shippingEntity);
+		
+	}
+
+
+	@Override
+	public UsedTrucksEntity getUsedTruckByTruckNo(String truckNo) {
+		return shippingOrderDao.getUsedTruckByTruckNo(truckNo);
+	}
+
+
+	@Override
+	public void saveTruckhistory(TruckHistoryDetailsEntity truckHistory,String districtName,String truckNo) {
+		truckHistory.setDistrictName(districtName);
+		truckHistory.setTruckNo(truckNo);
+		truckHistory.setSr_No(null);
+		shippingOrderDao.saveTruckhistory(truckHistory);
 		
 	}
 

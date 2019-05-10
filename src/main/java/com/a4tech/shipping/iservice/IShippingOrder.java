@@ -73,4 +73,6 @@ public interface IShippingOrder {
   public void deleteTruckFromTruckPool(AvailableTrucks availableTruck);
   public void deleteOrderFromPendingList(ShippingDetails1 shipping);
   public void saveShippingOrderReAssign(List<ShippingOrdersReAssignModel> shippingReOrder);
+  public UsedTrucksEntity getUsedTruckByTruckNo(String truckNo);
+  public void saveTruckhistory(TruckHistoryDetailsEntity truckHistory,String districtName,String truckNo);
 }

@@ -11,7 +11,20 @@ public class UsedTrucksModel {
 	private Date    shippedDate;
 	private String  districtName;
 	private String taggedTime;
-	
+	private Integer ratedLoad;
+	private Integer normalLoad;
+	public Integer getRatedLoad() {
+		return ratedLoad;
+	}
+	public void setRatedLoad(Integer ratedLoad) {
+		this.ratedLoad = ratedLoad;
+	}
+	public Integer getNormalLoad() {
+		return normalLoad;
+	}
+	public void setNormalLoad(Integer normalLoad) {
+		this.normalLoad = normalLoad;
+	}
 	public String getTaggedTime() {
 		return taggedTime;
 	}

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
+import com.a4tech.dao.entity.UsedTrucksEntity;
 import com.a4tech.shipping.iservice.IShippingOrder;
 import com.a4tech.shipping.model.AvailableTrucks;
 import com.a4tech.shipping.model.ShippingDeliveryOrder;
@@ -209,6 +210,8 @@ public class TruckService {
 			usedTruck.setVehicalCapacity(truckOriginalCapacity);
 			usedTruck.setVehicalType(String.valueOf(availableTrucks.getVehicleType())+"W");
 			usedTruck.setTaggedTime(availableTrucks.getTaggedTime());
+			usedTruck.setNormalLoad(availableTrucks.getNormalLoad());
+			usedTruck.setRatedLoad(availableTrucks.getRatedLoad());
 		   shippingOrderService.saveUsedTruck(usedTruck);
 		   shippingOrderService.deleteTruckFromTruckPool(availableTrucks);
 		   orderService.saveOrdersBasedOnTrucks(ordListInTrucks, usedTruck, shippingDelivaryId);
@@ -230,6 +233,7 @@ public class TruckService {
 			//We will get truck past history data based on wheeler types
 			TruckHistoryDetailsEntity truckHistory = getHighestNormalLoad(districtName, availableTrucks.getVehicleType(),truckHistoryList);
 			if(truckHistory != null) {
+				shippingOrderService.saveTruckhistory(truckHistory, districtName, availableTrucks.getSlNo());
 				return getAvailableTruck(truckHistory, availableTrucks);
 			}
 		}
@@ -272,5 +276,18 @@ public class TruckService {
 		
 		return false;
 	}
+
+	public String getTruckLoadType(String truckNo) {
+		UsedTrucksEntity usedTruck = shippingOrderService.getUsedTruckByTruckNo(truckNo);
+		if (usedTruck != null) {
+			if (usedTruck.getNormalLoad() == usedTruck.getRatedLoad()) {
+				return "Rated Load";
+			}
+			return "Normal Load";
+		} else {
+			return "Normal Load";
+		}
+	}
+	
 	
 }

@@ -72,7 +72,7 @@
 											<th>Total Order</th>
 											<th>Total Order Quantity</th>
 											<th>Truck Capacity</th>
-											<th>Pending Quantity</th>
+											<th>Truck Available Capacity</th>
 											<th>Plant</th>
 											<th>Total Kilometers</th>
 											<th>Shipping Estimation Time</th>

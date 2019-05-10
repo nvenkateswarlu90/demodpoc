@@ -40,6 +40,26 @@ public class UsedTrucksEntity implements Serializable {
 	private String districtName;
 	@Column(name="tagged_time")
 	private String taggedTime;
+	@Column(name="rated_load")
+	private Integer ratedLoad;
+	@Column(name="normal_load")
+	private Integer normalLoad;
+
+	public Integer getRatedLoad() {
+		return ratedLoad;
+	}
+
+	public void setRatedLoad(Integer ratedLoad) {
+		this.ratedLoad = ratedLoad;
+	}
+
+	public Integer getNormalLoad() {
+		return normalLoad;
+	}
+
+	public void setNormalLoad(Integer normalLoad) {
+		this.normalLoad = normalLoad;
+	}
 
 	public String getTaggedTime() {
 		return taggedTime;

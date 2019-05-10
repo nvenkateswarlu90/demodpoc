@@ -645,10 +645,7 @@ public class ShippingService {
 			double distence = 0.0;
 			String duration = "";
 			int totalOrdQty = 0;
-			int ordQty = 0;
 			int truckCapacity = 0;
-			String districName = "";
-			int truckOrdQty = 0;
 			if(orderGrpList.size() == 1) {
 				continue;
 			}
@@ -656,43 +653,26 @@ public class ShippingService {
 				shippingLatitudeAndLonitude.append(orderGrup.getLatitude()).append(",")
 						.append(orderGrup.getLongitude());
 				shippingLatitudeAndLonitude.append("|");
-				/*
-				 * int pendingQty = getPendingOrderQuantity(orderGrup.getOriginalOrderQty(),
-				 * orderGrup.getTruckCapacity(), orderGrup.getTruckOrderQty()); if(pendingQty !=
-				 * 0){ intellishModel.setPendingQuantity(pendingQty); }
-				 */
-				//OrderGroup pendingOrder = pendingOrderMap.get(orderGrup.getDelivaryNo());
-				/*if (pendingOrder != null) {
-					ordQty = pendingOrder.getTruckOrderQty();
-				}*/
+				
 				if(orderGrup.getOriginalOrderQty() != null) {
-					truckOrdQty = truckOrdQty + Integer.parseInt(orderGrup.getOriginalOrderQty());
+					//truckOrdQty = truckOrdQty + Integer.parseInt(orderGrup.getOriginalOrderQty());
 					totalOrdQty = totalOrdQty + Integer.parseInt(orderGrup.getOriginalOrderQty());
 				}
-				intellishModel.setLoadType(TruckTypeInfo.getLoadType(orderGrup.getDistrictName()));
 				intellishModel.setMaterialType(orderGrup.getMaterialType());
-				String truckType = TruckTypeInfo.getTruckLoadType(orderGrup.getDistrictName());
-				//String loadType = getTruckLoadType(orderGrup.getDistrictName(), truckNo);
-				districName = orderGrup.getDistrictName();
 				intellishModel.setTruckCapacity(orderGrup.getTruckCapacity());
 				//intellishModel.setLoadType(loadType);
 				intellishModel.setShippingOrderId(orderGrup.getShippingDelivaryId());
 				intellishModel.setWheelerType(orderGrup.getWheelerType());
-				/*
-				 * if ("Minimum".equals(truckType)) {
-				 * intellishModel.setTruckCapacity(orderGrup.getTruckCapacity()); } else { int
-				 * truckCap = Integer.parseInt(orderGrup.getTruckCapacity()); int originalTruck
-				 * = 0; if (truckCap == 27) { originalTruck = 18; } else if (truckCap == 18) {
-				 * originalTruck = 12; } else { originalTruck = truckCap; } String finalTruckCap
-				 * = originalTruck + "(" + truckCap + ")";
-				 * intellishModel.setTruckCapacity(finalTruckCap); }
-				 */
+				
 
 				intellishModel.setDistrictName(orderGrup.getDistrictName());
 				truckCapacity = Integer.parseInt(orderGrup.getTruckCapacity());
 				pendingOrderMap.put(orderGrup.getDelivaryNo(), orderGrup);
 			}
 			int pedningQty = totalOrdQty - truckCapacity;
+			if(pedningQty < 0) {// truck capacity is larger than order qty
+				pedningQty = truckCapacity - totalOrdQty;
+			}
 			/*if (ordQty != 0) {
 				pedningQty = pedningQty - ordQty;
 				totalOrdQty = totalOrdQty - ordQty;
@@ -706,12 +686,7 @@ public class ShippingService {
 					distenceAndHrs = gmapDist.getMaxDistenceAndHrsFromMultipleDestination(
 							plantDetails.getLatitude() + "," + plantDetails.getLongitude(),
 							shippingLatitudeAndLonitude.toString());
-					/*
-					 * LangitudeAndLatitudeMap lat = new LangitudeAndLatitudeMap();
-					 * lat.setLatitudeAndLongitude(shippingLatitudeAndLonitude.toString());
-					 * lat.setDistance(distenceAndHrs);
-					 * shippingOrderService.saveLatitudeAndLongitudeVals(lat);
-					 */
+				
 					MapService.saveDistanceAndHrsMapStore(shippingLatitudeAndLonitude.toString(), distenceAndHrs);
 				}
 				String[] data = distenceAndHrs.split("###");
@@ -727,10 +702,11 @@ public class ShippingService {
 			 * if(districName.equals("GODDA")){ distence = 295.2; } else { distence = 342.6;
 			 * }
 			 */
+			intellishModel.setLoadType(truckService.getTruckLoadType(truckNo));
 			intellishModel.setTruckNo(truckNo);
 			intellishModel.setTotalKilometers(String.valueOf(distence));
 			intellishModel.setTotalOrders(orderGrpList.size());
-			intellishModel.setTotalOrderQuantity(truckOrdQty);
+			intellishModel.setTotalOrderQuantity(totalOrdQty);
 			intellishModel.setPlant(plantDetails.getPlantName());
 			intellishModel.setPendingQuantity(pedningQty);
 			intellishModel.setShippingStatus(getShippingStatus(shippingStatusCount));
