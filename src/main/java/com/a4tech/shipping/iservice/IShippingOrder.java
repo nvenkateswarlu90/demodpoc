@@ -7,7 +7,6 @@ import com.a4tech.dao.entity.AxleWheelTypeEntity;
 import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.LangitudeAndLatitudeMap;
-import com.a4tech.dao.entity.ShippingEntity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.dao.entity.UsedTrucksEntity;
 import com.a4tech.map.model.Address;
@@ -75,4 +74,7 @@ public interface IShippingOrder {
   public void saveShippingOrderReAssign(List<ShippingOrdersReAssignModel> shippingReOrder);
   public UsedTrucksEntity getUsedTruckByTruckNo(String truckNo);
   public void saveTruckhistory(TruckHistoryDetailsEntity truckHistory,String districtName,String truckNo);
+  public void updateAxleWheelerInfo(AxleWheelnfoEntity axleWheelerType);
+  public void addAxleWheelerInfo(AxleWheelnfoEntity axleWheelerType);
+  public void deleteAxleWheelerInfo(Integer wheelerId);
 }

@@ -1,12 +1,15 @@
 package com.a4tech.map.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Elements {
+	@JsonProperty("status")
+	 private String status;
+	@JsonProperty("duration")
 	private Duration duration;
-
+	@JsonProperty("distance")
     private Distance distance;
-
-    private String status;
-
     public Duration getDuration ()
     {
         return duration;

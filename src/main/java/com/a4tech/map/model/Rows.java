@@ -1,23 +1,24 @@
 package com.a4tech.map.model;
 
-import java.util.Arrays;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Rows {
-	private Elements[] elements;
+	@JsonProperty("elements")
+	private List<Elements> elements;
 
-    public Elements[] getElements ()
-    {
-        return elements;
-    }
-
-    public void setElements (Elements[] elements)
-    {
-        this.elements = elements;
-    }
-
-	@Override
-	public String toString() {
-		return "Rows [elements=" + Arrays.toString(elements) + "]";
+	public List<Elements> getElements() {
+		return elements;
 	}
+
+	public void setElements(List<Elements> elements) {
+		this.elements = elements;
+	}
+
+
+
+	
     
 }

@@ -27,14 +27,18 @@
 	<!-- <context:property-placeholder
 	location="classpath:application.properties,classpath:sandbox-database.properties
 	                                       ,classpath:sandbox-externalApiEndPoints.properties,classpath:externalApiEndPointsFtp.properties" /> -->
-	<bean id="restTemplate" name="restTemplate"
+	<!-- <bean id="restTemplate" 
+		class="org.springframework.web.client.RestTemplate">
+		
+	</bean>   -->
+		<!-- <bean id="restTemplate" name="restTemplate"
 		class="org.springframework.web.client.RestTemplate">
 		<constructor-arg>
 			<bean
 				class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory"
 				p:readTimeout="90000" p:connectTimeout="90000" />
 		</constructor-arg>
-	</bean>  
+	</bean>   -->
 	 <bean id = "multipartResolver"
       class = "org.springframework.web.multipart.commons.CommonsMultipartResolver" />
 
@@ -85,6 +89,17 @@
 				<prop key="hibernate.current_session_context_class">thread</prop>
 				<prop key="show_sql">true</prop>
 				<prop key="hbm2ddl.auto">update</prop>
+				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</prop>
+		
+		<!-- For singleton factory -->
+		<!-- <property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</property>
+		 -->
+		 
+		 <!-- enable second level cache and query cache -->
+		 <prop key="hibernate.cache.use_second_level_cache">true</prop>
+		 <prop key="hibernate.cache.use_query_cache">true</prop>
+ 		 <prop key="net.sf.ehcache.configurationResourceName">/myehcache.xml</prop>
+				
 			</props>
 		</property>
    </bean> 

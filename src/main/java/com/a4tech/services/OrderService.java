@@ -15,8 +15,10 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.a4tech.exceptions.MapOverLimitException;
+import com.a4tech.exceptions.MapServiceRequestDeniedException;
 import com.a4tech.map.model.Distance;
-import com.a4tech.map.model.DistancePojo;
+import com.a4tech.map.model.DistanceMatrix;
 import com.a4tech.map.model.Elements;
 import com.a4tech.map.service.MapService;
 import com.a4tech.shipping.iservice.IShippingOrder;
@@ -36,9 +38,6 @@ import saveShipping.StoreSpDetails;
 public class OrderService {
 	@Autowired
 	private IShippingOrder shippingOrder;
-	@Autowired
-	private ShippingService shippingService;
-	
   
 	  public List<ChannelConfiguration> getChannelsList(String channelSequence){
 		 List<ChannelConfiguration> allChannels = shippingOrder.getAllChannelConfigurations();
@@ -70,7 +69,7 @@ public class OrderService {
 	        List<DistrictClubOrdByPass> distByPassList = shippingOrder.getAllDistrictClubOrdByPass();
 			for (ShippingDetails1 shippingDetails1 : shippingOrderList) {
 				String districtName = shippingDetails1.getDistrict_name();
-				if(shippingService.isDistrictByPass(distByPassList, districtName)) {
+				if(isDistrictByPass(distByPassList, districtName)) {
 					continue;
 				}
 				List<ShippingDetails1> ordersList = ordersOnDistrictMap.get(districtName);
@@ -86,7 +85,7 @@ public class OrderService {
 			return ordersOnDistrictMap;
 		}
 
-		public Map<String, Map<String, List<ShippingDetails1>>> getAllOrdersBasedOnMaterial(
+		public Map<String, Map<String, List<ShippingDetails1>>> getAllGroupOrdersBasedOnSameMaterial(
 				Map<String, List<ShippingDetails1>> ordersOnDistrictMap) {
 			Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap = new HashMap<>();
 			for (Map.Entry<String, List<ShippingDetails1>> orders : ordersOnDistrictMap.entrySet()) {
@@ -183,7 +182,7 @@ public class OrderService {
     	 
      }
  	public Map<String, Map<String, List<ShippingDetails1>>> getAllForwordOrders(
-			Map<String, Map<String, List<ShippingDetails1>>> ordersByMaterial) {
+			Map<String, Map<String, List<ShippingDetails1>>> ordersByMaterial) throws MapOverLimitException,MapServiceRequestDeniedException  {
 		MapService gmapDist = new MapService();
 		List<PlantDetails> plantDetailsList =  new StoreSpDetails().getAllPlantDetails();
 		PlantDetails plantDetails = plantDetailsList.get(2);
@@ -200,17 +199,22 @@ public class OrderService {
 					continue;
 				}
 				String allDestinations = allDestinationsLattAndLong(finalOrders);
-				DistancePojo distencePojo = null;
+				DistanceMatrix distenceMatrixPojo = null;
 				try {
-					distencePojo = MapService.getAllDestinationsStore(allDestinations);
-					if(distencePojo == null) {
-						 distencePojo =	gmapDist.getMaxDistenceFromMultipleDestinations(origin, allDestinations);
-						 MapService.saveAllDestinationsStore(allDestinations, distencePojo);
+					distenceMatrixPojo = MapService.getAllDestinationsStore(allDestinations);
+					if(distenceMatrixPojo == null) {
+						// distencePojo =	gmapDist.getMaxDistenceFromMultipleDestinations(origin, allDestinations);
+						  distenceMatrixPojo =	gmapDist.getMaxDistenceFromMultipleDestinationsRestTemplate(origin, allDestinations);
+						 MapService.saveAllDestinationsStore(allDestinations, distenceMatrixPojo);
 					}
-					finalOrders = getFinalOrdersList(finalOrders, distencePojo);
+					finalOrders = getFinalOrdersList(finalOrders, distenceMatrixPojo);
 					orderMaterialMap.put(materialName, finalOrders);
-				} catch (IOException e) {
+				//}catch (MapServiceex e) {
+					// TODO: handle exception
+				} 
+				catch (IOException e) {
 					System.out.println("unable to calculate all destinations: "+e.getMessage());
+					throw new MapOverLimitException("Google map daily request quota has been exceeded");
 				}
 			}
 			orderDistrictList.put(districtName, orderMaterialMap);
@@ -226,13 +230,14 @@ public class OrderService {
  		}
  		 return allDestinations.toString();
  	}
- 	private List<ShippingDetails1> getFinalOrdersList(List<ShippingDetails1> shippingList,DistancePojo distancePojo) {
- 		 String[] destinations = distancePojo.getDestination_addresses();
- 		 Elements[] elements = distancePojo.getRows()[0].getElements();
+ 	private List<ShippingDetails1> getFinalOrdersList(List<ShippingDetails1> shippingList,DistanceMatrix distancePojo) {
+ 		 List<String> distAddress = distancePojo.getDestinationAddresses();
+ 		 List<Elements> elementList = distancePojo.getRowsList().get(0).getElements();
+ 		 
  		 List<OrderMap> orderMapList = new ArrayList<>();
- 		 for(int destNo=0;destNo <destinations.length;destNo++) {
- 			double orderDistence = getOrderDistance(elements[destNo]);
- 			 orderMapList.add(new OrderMap(shippingList.get(destNo), destinations[destNo], orderDistence));
+ 		 for(int destNo=0;destNo <distAddress.size();destNo++) {
+ 			double orderDistence = getOrderDistance(elementList.get(destNo));
+ 			 orderMapList.add(new OrderMap(shippingList.get(destNo), distAddress.get(destNo), orderDistence));
  		 }
  		 Collections.sort(orderMapList, Comparator.comparing(OrderMap::getDistance));
  		 List<ShippingDetails1> finalOrdList = new ArrayList<>();
@@ -266,4 +271,24 @@ public class OrderService {
  		 kiloMeters = kiloMeters.replaceAll("[^0-9.]", "").trim();
  			return Double.parseDouble(kiloMeters);
  		}
+ 	/*public boolean isDistrictByPass(List<DistrictClubOrdByPass> distBypassList, String distrciName) {
+		for (DistrictClubOrdByPass districtClubOrdByPass : distBypassList) {
+			if (districtClubOrdByPass.getDistrictName().equalsIgnoreCase(distrciName)) {
+				if (isDistrictOrderByPassDate(districtClubOrdByPass.getStartDate(),
+						districtClubOrdByPass.getEndDate())) {
+					return true;
+				}
+
+			}
+		}
+		return false;
+	}
+
+	private boolean isDistrictOrderByPassDate(LocalDate startDate, LocalDate endDate) {
+		LocalDate now = LocalDate.now();
+		if ((now.isAfter(startDate) && now.isBefore(endDate)) || (now.equals(startDate) || now.equals(endDate))) {
+			return true;
+		}
+		return false;
+	}*/
 }

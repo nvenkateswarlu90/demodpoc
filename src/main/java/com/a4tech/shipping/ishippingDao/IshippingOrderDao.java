@@ -66,6 +66,9 @@ public interface IshippingOrderDao {
   public void deleteTruckFromTruckPool(AvailableTrucksEntity availableTruckEntity);
   public void saveUsedTruck(UsedTrucksEntity usedTruckEntity);
   public void deleteOrderFromPendingList(ShippingEntity shipping);
+  public void updateAxleWheelerInfo(AxleWheelnfoEntity axleWheelerType);
+  public void addAxleWheelerInfo(AxleWheelnfoEntity axleWheelerType);
+  public void deleteAxleWheelerInfo(Integer wheelerId);
  // public void updateDistrictClubOrdByPass(DistrictClubOrdByPassEntity districtByPass);
   public <T> List<T> listAllData(Class<T> clazz); 
   public <T> List<T> listAllDataById(Class<T> clazz,String variableName,String val);

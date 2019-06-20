@@ -762,6 +762,26 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 	}
 
 
+	@Override
+	public void updateAxleWheelerInfo(AxleWheelnfoEntity axleWheelerType) {
+		shippingOrderDao.updateAxleWheelerInfo(axleWheelerType);
+		
+	}
+
+	@Override
+	public void addAxleWheelerInfo(AxleWheelnfoEntity axleWheelerType) {
+		shippingOrderDao.addAxleWheelerInfo(axleWheelerType);
+		
+	}
+
+
+	@Override
+	public void deleteAxleWheelerInfo(Integer wheelerId) {
+		shippingOrderDao.deleteAxleWheelerInfo(wheelerId);
+		
+	}
+
+
 	
 
 

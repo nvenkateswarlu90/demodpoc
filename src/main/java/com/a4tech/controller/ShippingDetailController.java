@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -43,6 +44,8 @@ import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.DistrictWiseNormalLoadCapacity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.exceptions.ChannelSequenceException;
+import com.a4tech.exceptions.MapOverLimitException;
+import com.a4tech.exceptions.MapServiceRequestDeniedException;
 import com.a4tech.map.model.Address;
 import com.a4tech.service.mapper.IOrderDataMapper;
 import com.a4tech.services.ShippingService;
@@ -123,7 +126,7 @@ public class ShippingDetailController {
 
 
 	@RequestMapping(value = "/intellShip")
-	public ModelAndView intellShipPro() {
+	public ModelAndView intellShipPro() throws MapOverLimitException, MapServiceRequestDeniedException {
 		
 		 String channelSequence =  shippingOrderService.getChannelSequence();
 		 if(StringUtils.isEmpty(channelSequence)) {
@@ -135,19 +138,15 @@ public class ShippingDetailController {
 		 shippingOrderService.deleteAllGroupOrders("orderGroup");
 		 shippingOrderService.deleteAllGroupOrders("orderReAssign");
 		 shippingOrderService.deleteAllGroupOrders("shippingFinalOrders");
-		 shippingService.getClubbedOrders(channelSequence);
-		
-		/*//here new map
-		List<ShippingDetails1> shippingaOrderListOnChannel = getAllOrdersBasedOnDistributionChannel("1");
-		Map<String, List<ShippingDetails1>> ordersOnDistrictMap = getAllOrdersBasedOnDistricts(
-				shippingaOrderListOnChannel);
-		Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap = getAllOrdersBasedOnMaterial(
-				ordersOnDistrictMap);
-		finalMaterialOrdMap = getAllForwordOrders(finalMaterialOrdMap);*/
-		//Map<String, Map<List<ShippingDetails1>, List<TruckHistoryDetail>>> finalTruckDetails = shippingService.getOrdersFitIntoTruck1(finalMaterialOrdMap);
-		//shippingService.getFinalOrdersClub1(finalTruckDetails);
+		 try {
+			shippingService.getClubbedOrders(channelSequence);
+		} catch (MapOverLimitException e) {
+			throw new MapOverLimitException(e.getErrorMsg());
+		} catch (MapServiceRequestDeniedException e) {
+			throw new MapServiceRequestDeniedException(e.getErrorMsg());
+		}
 		List<IntellishipModelByMaterial> finalIntelishipModel = shippingService.getFinalGroupOrders();
-		Collections.sort(finalIntelishipModel, Comparator.comparing(IntellishipModelByMaterial::getTotalOrderQuantity));
+		Collections.sort(finalIntelishipModel, Comparator.comparing(IntellishipModelByMaterial::getPendingQuantity));
 		return new ModelAndView("intellShipProcess", "shippingGroupList",finalIntelishipModel);
 		
 	}
@@ -429,7 +428,20 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 	@RequestMapping(value = "/axelWheelConfiguration", method = RequestMethod.GET)
 	public ModelAndView showAxelWheelConfiguration(Model model) {
 		 List<AxleWheelTypeEntity> listOfAxleWheller = shippingOrderService.getAllAxleWheelTypeEntity();
+		 List<AxleWheelnfoEntity> infoList=shippingOrderService.getWheelTypeInfo("6");
 		 model.addAttribute("axleWhllerList", listOfAxleWheller);
+		 model.addAttribute("axleWhllerInfoList", infoList);
+		 model.addAttribute("mySelect", "6");
+		return new ModelAndView("axleWheelConfig", "axelWheelConfig",
+				new NormalLoadConfiguration());
+	}
+	@RequestMapping(value = "/axelWheelConfiguration")
+	public ModelAndView showAxelWheelConfigurationByWheelerType(Model model,@RequestParam("mySelect") String wheelerType)  {
+		 List<AxleWheelTypeEntity> listOfAxleWheller = shippingOrderService.getAllAxleWheelTypeEntity();
+		 List<AxleWheelnfoEntity> infoList=shippingOrderService.getWheelTypeInfo(wheelerType);
+		 model.addAttribute("axleWhllerList", listOfAxleWheller);
+		 model.addAttribute("axleWhllerInfoList", infoList);
+		 model.addAttribute("mySelect", wheelerType);
 		return new ModelAndView("axleWheelConfig", "axelWheelConfig",
 				new NormalLoadConfiguration());
 	}
@@ -556,6 +568,53 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 	       return "redirect:/channelConfiguration";
 	}
 	
+	@RequestMapping(value = "/editAxleWheeler", method = RequestMethod.POST)
+	public ModelAndView editAxleWheelerConfigure(Model model,HttpServletRequest req) {
+		System.out.println("Update configuration");
+	  AxleWheelnfoEntity axleConfiguration = new AxleWheelnfoEntity();
+	  String wheelerType = req.getParameter("wheerlerType");
+	  axleConfiguration.setClub(req.getParameter("club"));
+	  axleConfiguration.setOrder(req.getParameter("leadFrom"));
+	  axleConfiguration.setId(Integer.parseInt(req.getParameter("id")));
+	  axleConfiguration.setNo(Integer.parseInt(wheelerType));
+	  shippingOrderService.updateAxleWheelerInfo(axleConfiguration);
+	  List<AxleWheelTypeEntity> listOfAxleWheller = shippingOrderService.getAllAxleWheelTypeEntity();
+		 List<AxleWheelnfoEntity> infoList=shippingOrderService.getWheelTypeInfo(wheelerType);
+		 model.addAttribute("axleWhllerList", listOfAxleWheller);
+		 model.addAttribute("axleWhllerInfoList", infoList);
+		 model.addAttribute("mySelect", wheelerType);
+		return new ModelAndView("axleWheelConfig", "axelWheelConfig",
+				new NormalLoadConfiguration());
+		//return "configure_districtWise_Normal_load";
+	}
+	
+	@RequestMapping(value = "/addAxleWheeler", method = RequestMethod.POST)
+	public ModelAndView addAxleWheelerConfigure(Model model,HttpServletRequest req) {
+		System.out.println("Update configuration");
+	  AxleWheelnfoEntity axleConfiguration = new AxleWheelnfoEntity();
+	  String wheelerType = req.getParameter("newWheerlerType");
+	  axleConfiguration.setClub(req.getParameter("club"));
+	  axleConfiguration.setOrder(req.getParameter("leadFrom"));
+	  axleConfiguration.setNo(Integer.parseInt(wheelerType));
+	  shippingOrderService.addAxleWheelerInfo(axleConfiguration);
+	  List<AxleWheelTypeEntity> listOfAxleWheller = shippingOrderService.getAllAxleWheelTypeEntity();
+		 List<AxleWheelnfoEntity> infoList=shippingOrderService.getWheelTypeInfo(wheelerType);
+		 model.addAttribute("axleWhllerList", listOfAxleWheller);
+		 model.addAttribute("axleWhllerInfoList", infoList);
+		 model.addAttribute("mySelect", wheelerType);
+		return new ModelAndView("axleWheelConfig", "axelWheelConfig",
+				new NormalLoadConfiguration());
+		//return "configure_districtWise_Normal_load";
+	}
+	
+	@RequestMapping(value = "/deleteAxleWheelerInfo")
+	@ResponseBody
+	public void deleteAxleWheelerInfo(HttpServletRequest req) {
+		String wheelerId = req.getParameter("axleWheelerId");
+		shippingOrderService.deleteAxleWheelerInfo(Integer.parseInt(wheelerId));
+		System.out.println("wheelerId: "+wheelerId);
+		//List<ShippingDetails1> shippingaOrderList = shippingOrderService.getShippingDetailsByDate(orderDate);
+	}
 	public String saveOrderSequence() {
 		
 		return "";
@@ -571,6 +630,18 @@ public String updateHistory(FileUploadBean mfile, ModelMap modelmap,Model model)
 	}
 	@ExceptionHandler(ChannelSequenceException.class)
 	public ModelAndView channelSequenceException(ChannelSequenceException exce) {
+		ModelAndView mv = new ModelAndView("channelSequenceError");
+		mv.addObject("channelSeqExcp",exce);
+	   return mv;
+	}
+	@ExceptionHandler(MapOverLimitException.class)
+	public ModelAndView mapSeriveException(MapOverLimitException exce) {
+		ModelAndView mv = new ModelAndView("channelSequenceError");
+		mv.addObject("channelSeqExcp",exce);
+	   return mv;
+	}
+	@ExceptionHandler(MapServiceRequestDeniedException.class)
+	public ModelAndView mapSeriveRequestDeniedException(MapServiceRequestDeniedException exce) {
 		ModelAndView mv = new ModelAndView("channelSequenceError");
 		mv.addObject("channelSeqExcp",exce);
 	   return mv;

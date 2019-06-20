@@ -1,10 +1,6 @@
 package com.a4tech.map.service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,91 +9,84 @@ import java.util.Map;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import com.a4tech.exceptions.MapOverLimitException;
+import com.a4tech.exceptions.MapServiceRequestDeniedException;
 import com.a4tech.map.model.Distance;
-import com.a4tech.map.model.DistancePojo;
+import com.a4tech.map.model.DistanceMatrix;
 import com.a4tech.map.model.Duration;
 import com.a4tech.map.model.Elements;
 import com.a4tech.map.model.Rows;
-import com.google.gson.Gson;
+import com.a4tech.util.ApplicationConstants;
+
+
 
 public class MapService {
-  private RestTemplate restTemplate ;
+
+
+  private RestTemplate restTemplate = new RestTemplate();
   private static Map<String, Double> distanceMapStore = new HashMap<>();
   private static Map<String, String> distanceAndHrsMapStore = new HashMap<>();
-  private static Map<String, DistancePojo> allDestinationsStore = new HashMap<>();
-  public double getDistence(String originCoordinates,String destinationCoordinates) throws IOException{
-	  URL url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+originCoordinates+"&destinations="+destinationCoordinates+"&mode=driving");
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setRequestMethod("GET");
-      String line, outputString = "";
-      BufferedReader reader = new BufferedReader(
-      new InputStreamReader(conn.getInputStream()));
-      while ((line = reader.readLine()) != null) {
-          outputString += line;
-      }
-      System.out.println(outputString);
-      DistancePojo capRes = new Gson().fromJson(outputString, DistancePojo.class);
-      //capRes.get
-      //capRes.get
-     Rows[] rows = capRes.getRows();
-   Elements[] ele=  rows[0].getElements();
-   Distance dd = ele[0].getDistance();
-   String distenceVal = dd.getText();
-   distenceVal = distenceVal.replaceAll("[^0-9.]", "").trim();
-      System.out.println("Distence Value: "+distenceVal);
-      return Double.parseDouble(distenceVal);
+  private static Map<String, DistanceMatrix> allDestinationsStore = new HashMap<>();
+  private static String GOOLGE_MAP_API_KEY = "AIzaSyAF27UXmyKEQpNmybxxaViJpYWo-yFzkxk";
+ 
+	public DistanceMatrix getMaxDistenceFromMultipleDestinationsRestTemplate(String originCoordinates,
+			String destinationCoordinates) throws IOException, MapServiceRequestDeniedException, MapOverLimitException {
+		String distanceMatrixUrl = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="
+				+ originCoordinates + "&destinations=" + destinationCoordinates
+				+ "&mode=driving&key="+GOOLGE_MAP_API_KEY;
+		String status = "";
+	try {
+		 DistanceMatrix result = restTemplate.getForObject(distanceMatrixUrl, DistanceMatrix.class);
+		 status = result.getStatus();
+			if (ApplicationConstants.CONST_OVER_DAILY_LIMIT.equalsIgnoreCase(status)
+					|| ApplicationConstants.CONST_OVER_QUERY_LIMIT.equalsIgnoreCase(status)) {
+			 throw new MapOverLimitException("Map Service Status: "+status);
+		 } else if(ApplicationConstants.CONST_REQUEST_DENIED.equalsIgnoreCase(status)) {
+			 throw new MapServiceRequestDeniedException("Map Service Status: "+status);
+		 }
+		 return result;
+	} catch (MapOverLimitException e) {
+		 throw new MapOverLimitException(e.getErrorMsg());
+	} catch (MapServiceRequestDeniedException e) {
+		throw new MapServiceRequestDeniedException(e.getErrorMsg());
+	} catch (Exception e) {
+		// TODO: handle exception
+	}
+      return null;
   }
-  public DistancePojo getMaxDistenceFromMultipleDestinations(String originCoordinates,String destinationCoordinates) throws IOException{
-	  URL url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+originCoordinates+"&destinations="+destinationCoordinates+"&mode=driving&key=AIzaSyAF27UXmyKEQpNmybxxaViJpYWo-yFzkxk");
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setRequestMethod("GET");
-      String line, outputString = "";
-      BufferedReader reader = new BufferedReader(
-      new InputStreamReader(conn.getInputStream()));
-      while ((line = reader.readLine()) != null) {
-          outputString += line;
-      }
-      System.out.println(outputString);
-      DistancePojo capRes = new Gson().fromJson(outputString, DistancePojo.class);
-      return capRes;
-  }
-  public double getMaxDistenceFromMultipleDestination(String originCoordinates,String destinationCoordinates) throws IOException{
-	  URL url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+originCoordinates+"&destinations="+destinationCoordinates+"&mode=driving&key=AIzaSyAF27UXmyKEQpNmybxxaViJpYWo-yFzkxk");
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setRequestMethod("GET");
-      String line, outputString = "";
-      BufferedReader reader = new BufferedReader(
-      new InputStreamReader(conn.getInputStream()));
-      while ((line = reader.readLine()) != null) {
-          outputString += line;
-      }
-      System.out.println(outputString);
-      DistancePojo capRes = new Gson().fromJson(outputString, DistancePojo.class);
-     double maxDist = getFinalDistence(capRes);
-      return maxDist;
-  }
-  
+ 
   public String getMaxDistenceAndHrsFromMultipleDestination(String originCoordinates,String destinationCoordinates) throws IOException{
-	  URL url = new URL("https://maps.googleapis.com/maps/api/distancematrix/json?origins="+originCoordinates+"&destinations="+destinationCoordinates+"&mode=driving&key=AIzaSyAF27UXmyKEQpNmybxxaViJpYWo-yFzkxk");
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setRequestMethod("GET");
-      String line, outputString = "";
-      BufferedReader reader = new BufferedReader(
-      new InputStreamReader(conn.getInputStream()));
-      while ((line = reader.readLine()) != null) {
-          outputString += line;
-      }
-      System.out.println(outputString);
-      DistancePojo capRes = new Gson().fromJson(outputString, DistancePojo.class);
-     String maxDistAndHrs = getFinalDistenceAndHrs(capRes);
-      return maxDistAndHrs;
+		String distanceMatrixUrl = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="
+				+ originCoordinates + "&destinations=" + destinationCoordinates
+				+ "&mode=driving&key="+GOOLGE_MAP_API_KEY;
+	  DistanceMatrix result = null;
+	  	try {
+	  		  result = restTemplate.getForObject(distanceMatrixUrl, DistanceMatrix.class);
+	  		String status = result.getStatus();
+			if (ApplicationConstants.CONST_OVER_DAILY_LIMIT.equalsIgnoreCase(status)
+					|| ApplicationConstants.CONST_OVER_QUERY_LIMIT.equalsIgnoreCase(status)) {
+			 throw new MapOverLimitException("Map Service Status: "+status);
+		 } else if(ApplicationConstants.CONST_REQUEST_DENIED.equalsIgnoreCase(status)) {
+			 throw new MapServiceRequestDeniedException("Map Service Status: "+status);
+		 }
+	  		
+	  	} catch (Exception e) {
+	  		
+	  	}
+	  	if(result != null) {
+	  		return getFinalDistenceAndHrs(result);
+	  	}
+	 
+      return "";
+      
+     
   }
-  public static String getFinalDistenceAndHrs(DistancePojo distances) {
-		Rows[] rows = distances.getRows();
+  public static String getFinalDistenceAndHrs(DistanceMatrix distances) {
+	  List<Rows> rowsList = distances.getRowsList();
 		double maxDist = 0.0;
 		StringBuilder finalDistenceAndHrs = new StringBuilder();
-		for (Rows rows2 : rows) {
-			Elements[] elements = rows2.getElements();
+		for (Rows rows2 : rowsList) {
+			List<Elements> elements = rows2.getElements();
 			List<Double> allKiloMeters = new ArrayList<>();
 			List<String> allHrs = new ArrayList<>();
 			for (Elements elements2 : elements) {
@@ -115,22 +104,7 @@ public class MapService {
 		}
 		return finalDistenceAndHrs.toString();
 	}
-  public static double getFinalDistence(DistancePojo distances) {
-		Rows[] rows = distances.getRows();
-		double maxDist = 0.0;
-		for (Rows rows2 : rows) {
-			Elements[] elements = rows2.getElements();
-			List<Double> allKiloMeters = new ArrayList<>();
-			for (Elements elements2 : elements) {
-				  Distance dist = elements2.getDistance();
-				 String kiloMeters = dist.getText();
-				 kiloMeters = kiloMeters.replaceAll("[^0-9.]", "").trim();
-				 allKiloMeters.add(Double.parseDouble(kiloMeters));
-			}
-			maxDist = getMaxKiloMeters(allKiloMeters);
-		}
-		return maxDist;
-	}
+  
 	public static double getMaxKiloMeters(List<Double> allKiloMeters) {
 		double maxKiloMeter = allKiloMeters.get(0);
 		for (Double double1 : allKiloMeters) {
@@ -176,17 +150,7 @@ public static String getMaxHrs(List<String> allHrs){
 			}else {
 				finalTime = hours;
 			}
-		  /*else if(maxHrs == hr){
-				int maxHrsMins = 0;
-				if(initialTime == 1){
-					String maxMins = hours.split("hours")[1].trim();
-					maxMins = maxMins.replaceAll("[^0-9]", "");
-					maxHrsMins = Integer.parseInt(maxMins);
-				} else {
-					
-				}
-				 
-			}*/
+		
 		  tempTime = times;
 	}
 	if(StringUtils.isEmpty(finalTime)){
@@ -204,10 +168,10 @@ public static void saveDistanceAndHrsMapStore(String langAndLong,String distance
 public static Double getDistanceMapStore(String langAndLong) {
 	return distanceMapStore.get(langAndLong);
 }
-public static DistancePojo getAllDestinationsStore(String destinations) {
+public static DistanceMatrix getAllDestinationsStore(String destinations) {
 	return allDestinationsStore.get(destinations);
 }
-public static void saveAllDestinationsStore(String destinatios,DistancePojo result) {
+public static void saveAllDestinationsStore(String destinatios,DistanceMatrix result) {
 	allDestinationsStore.put(destinatios, result);
 }
 public static  String getDistanceAndHrsMapStore(String langAndLong) {

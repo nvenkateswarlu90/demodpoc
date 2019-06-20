@@ -55,7 +55,7 @@ public class TruckService {
 	}
 	
 	
-	public void getOrderAssignTrucks(Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap) {
+	public void getOrderAssignTrucksWithSameMaterial(Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap) {
 		List<AvailableTrucks> availableTrucksList =  shippingOrderService.getAllAvilableTrucks();
 		availableTrucksList.sort(Comparator.comparing(AvailableTrucks::getDelayTimeInMins).reversed());
 		List<TruckHistoryDetailsEntity> truckHistoryList = shippingOrderService.getAllTrucksHistoryDetails();
@@ -72,7 +72,20 @@ public class TruckService {
 			}
 		}
 	}
-	
+	public void getOrderAssignTrucksWithDifferentMaterial(Map<String, List<ShippingDetails1>>  finalMaterialOrdMap) {
+		List<AvailableTrucks> availableTrucksList =  shippingOrderService.getAllAvilableTrucks();
+		availableTrucksList.sort(Comparator.comparing(AvailableTrucks::getDelayTimeInMins).reversed());
+		List<TruckHistoryDetailsEntity> truckHistoryList = shippingOrderService.getAllTrucksHistoryDetails();
+		List<AvailableTrucks> assignTruckList = new ArrayList<>();
+		for (Map.Entry<String, List<ShippingDetails1>> districtWiseGroup : finalMaterialOrdMap.entrySet()) {
+			String districtName = districtWiseGroup.getKey();
+			List<ShippingDetails1> ordersList = districtWiseGroup.getValue();
+				if(ordersList.size() == 1) 
+					continue;
+				assignTruckList = getAssignTrucks(ordersList, availableTrucksList, truckHistoryList,assignTruckList, districtName);
+				//orderService.saveOrdersBasedOnTrucks(assignedTrucks);
+		}
+	}
 
 	private List<AvailableTrucks> getAssignTrucks(List<ShippingDetails1> ordersList, List<AvailableTrucks> availableTrucksList,
 			List<TruckHistoryDetailsEntity> truckHistoryList,List<AvailableTrucks> assignTrucksList, String districtName) {
@@ -138,6 +151,13 @@ public class TruckService {
 					    	  } 
 					     }
 					    Integer ordQty = Integer.parseInt(order.getActual_delivery_qty());
+					    
+					    
+					    
+					    
+					    
+					    
+					    
 					    int qtyDiff = availableTrucks.getNormalLoad() - ordQty;
 					if (qtyDiff > 0) {// if truck capacity is higher than order Qty
 						if (ordersAssignInTrucks.containsKey(truckNo)) {

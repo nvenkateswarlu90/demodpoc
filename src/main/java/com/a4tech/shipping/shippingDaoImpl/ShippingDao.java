@@ -9,6 +9,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -1300,6 +1301,54 @@ public class ShippingDao implements IshippingOrderDao{
 			_LOGGER.error("Unable to fetch used Truck Details details:"+e.getMessage());
 		}
 		return null;
+	}
+	@Override
+	public void updateAxleWheelerInfo(AxleWheelnfoEntity axleWheelerType) {
+		try(Session session = sessionFactory.openSession()){
+			Transaction tranction = session.beginTransaction();
+			session.update(axleWheelerType);
+			tranction.commit();
+		}catch (Exception e) {
+		  _LOGGER.error("unable to update axleWheeler information: "+e.getMessage());
+		}
+		
+	}
+	@Override
+	public void addAxleWheelerInfo(AxleWheelnfoEntity axleWheelerInfoObj) {
+		Transaction tranction = null;
+		try(Session session = sessionFactory.openSession()){
+			 tranction = session.beginTransaction();
+			session.save(axleWheelerInfoObj);
+			tranction.commit();
+		}catch (Exception e) {
+			if(tranction != null) {
+				try {
+					tranction.rollback();
+				} catch (Exception exce) {
+					 _LOGGER.error("unable to rollback axleWheeler information: "+e.getMessage());
+				}
+			}
+		  _LOGGER.error("unable to add newly axleWheeler information: "+e.getMessage());
+		}
+		
+	}
+	@Override
+	public void deleteAxleWheelerInfo(Integer wheelerId) {
+		Transaction transaction = null;
+		try(Session session = sessionFactory.openSession()) {
+			transaction = session.beginTransaction();
+			AxleWheelnfoEntity axleWheelerObj = session.load(AxleWheelnfoEntity.class, wheelerId);
+			if(axleWheelerObj.getId() != null) {
+				session.delete(axleWheelerObj);
+				transaction.commit();
+				_LOGGER.info("axle wheeler info has been Successfully deleted ");
+			}
+			//session.saveOrUpdate(channelSeq);
+		} catch (Exception ex) {
+			_LOGGER.error("unable to delete axle wheeler info: "+ex.getCause());
+		
+		} 	
+		
 	}
 	
 

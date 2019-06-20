@@ -1,9 +1,5 @@
 package com.a4tech.util;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-
 public class ApplicationConstants {
    
 	
@@ -59,6 +55,10 @@ public class ApplicationConstants {
 	public static final String 	CONST_ASI_NUMBER 							= "Asi";
 	public static final String 	CONST_USERNAME 								= "Username";
 	public static final String 	CONST_PASSWORD 								= "Password";
+	public static final String 	CONST_OVER_DAILY_LIMIT						= "OVER_DAILY_LIMIT";
+	public static final String 	CONST_OVER_QUERY_LIMIT						= "OVER_QUERY_LIMIT";
+	public static final String 	CONST_REQUEST_DENIED						= "REQUEST_DENIED";
+	
 	
 	public static final String  CONST_DELIMITER_PIPE                 		= "|";
 	public static final String  CONST_DELIMITER_SPLITTING_PIPE              = "\\|";

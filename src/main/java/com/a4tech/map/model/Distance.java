@@ -1,10 +1,13 @@
 package com.a4tech.map.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Distance {
-	private String text;
-
+	@JsonProperty("value")
     private String value;
-
+	@JsonProperty("text")
+	private String text;
     public String getText ()
     {
         return text;

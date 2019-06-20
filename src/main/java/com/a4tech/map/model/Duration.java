@@ -1,9 +1,13 @@
 package com.a4tech.map.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Duration {
+	@JsonProperty("value")
+	private String value;
+	@JsonProperty("text")
 	private String text;
-
-    private String value;
 
 	public String getText() {
 		return text;
@@ -20,10 +24,10 @@ public class Duration {
 	public void setValue(String value) {
 		this.value = value;
 	}
+
 	@Override
 	public String toString() {
 		return "Duration [text=" + text + ", value=" + value + "]";
 	}
 
-       
 }
