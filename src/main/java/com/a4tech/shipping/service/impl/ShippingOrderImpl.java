@@ -782,6 +782,12 @@ public class ShippingOrderImpl<T> implements IShippingOrder {
 	}
 
 
+	@Override
+	public List<AxleWheelnfoEntity> getWheelTypeInfo() {
+		return shippingOrderDao.listAllData(AxleWheelnfoEntity.class);
+	}
+
+
 	
 
 

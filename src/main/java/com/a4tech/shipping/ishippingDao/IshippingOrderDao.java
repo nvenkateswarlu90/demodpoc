@@ -74,5 +74,4 @@ public interface IshippingOrderDao {
   public <T> List<T> listAllDataById(Class<T> clazz,String variableName,String val);
   public <T> T getDataById(Class<T> clazz,String type,T val);
   public UsedTrucksEntity getUsedTruckByTruckNo(String truckNo);
-
 }

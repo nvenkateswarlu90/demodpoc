@@ -1,5 +1,6 @@
 package com.a4tech.services;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -15,14 +16,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.dao.entity.TruckHistoryDetailsEntity;
 import com.a4tech.dao.entity.UsedTrucksEntity;
+import com.a4tech.exceptions.MapOverLimitException;
+import com.a4tech.exceptions.MapServiceRequestDeniedException;
+import com.a4tech.map.model.DistanceMatrix;
+import com.a4tech.map.service.MapService;
 import com.a4tech.shipping.iservice.IShippingOrder;
 import com.a4tech.shipping.model.AvailableTrucks;
+import com.a4tech.shipping.model.PlantDetails;
 import com.a4tech.shipping.model.ShippingDeliveryOrder;
 import com.a4tech.shipping.model.ShippingDetails1;
 import com.a4tech.shipping.model.ShippingOrdersReAssignModel;
 import com.a4tech.shipping.model.UsedTrucksModel;
+
+import saveShipping.StoreSpDetails;
 
 @Service
 public class TruckService {
@@ -30,6 +39,7 @@ public class TruckService {
 	private IShippingOrder shippingOrderService;
 	@Autowired
 	private OrderService orderService;
+	MapService mapSerice = new MapService();
 	private static Logger _LOGGER = Logger.getLogger(TruckService.class);
 	public AvailableTrucks getAvailableTruck(List<AvailableTrucks> availableTrucksList,
 			List<TruckHistoryDetailsEntity> truckHistoryList,List<String> usedTruckNos, String districtName) {
@@ -55,7 +65,7 @@ public class TruckService {
 	}
 	
 	
-	public void getOrderAssignTrucksWithSameMaterial(Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap) {
+	public void getOrderAssignTrucksWithSameMaterial(Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap,List<AxleWheelnfoEntity> axleWheelerInfoList) throws IOException, MapServiceRequestDeniedException, MapOverLimitException {
 		List<AvailableTrucks> availableTrucksList =  shippingOrderService.getAllAvilableTrucks();
 		availableTrucksList.sort(Comparator.comparing(AvailableTrucks::getDelayTimeInMins).reversed());
 		List<TruckHistoryDetailsEntity> truckHistoryList = shippingOrderService.getAllTrucksHistoryDetails();
@@ -67,12 +77,12 @@ public class TruckService {
 				List<ShippingDetails1> ordersList = matrlGrp.getValue();
 				if(ordersList.size() == 1) 
 					continue;
-				assignTruckList = getAssignTrucks(ordersList, availableTrucksList, truckHistoryList,assignTruckList, districtName);
+				assignTruckList = getAssignTrucks(ordersList, availableTrucksList, truckHistoryList,assignTruckList, districtName,axleWheelerInfoList);
 				//orderService.saveOrdersBasedOnTrucks(assignedTrucks);
 			}
 		}
 	}
-	public void getOrderAssignTrucksWithDifferentMaterial(Map<String, List<ShippingDetails1>>  finalMaterialOrdMap) {
+	public void getOrderAssignTrucksWithDifferentMaterial(Map<String, List<ShippingDetails1>>  finalMaterialOrdMap,List<AxleWheelnfoEntity> axleWheelerInfoList) throws IOException, MapServiceRequestDeniedException, MapOverLimitException {
 		List<AvailableTrucks> availableTrucksList =  shippingOrderService.getAllAvilableTrucks();
 		availableTrucksList.sort(Comparator.comparing(AvailableTrucks::getDelayTimeInMins).reversed());
 		List<TruckHistoryDetailsEntity> truckHistoryList = shippingOrderService.getAllTrucksHistoryDetails();
@@ -82,13 +92,13 @@ public class TruckService {
 			List<ShippingDetails1> ordersList = districtWiseGroup.getValue();
 				if(ordersList.size() == 1) 
 					continue;
-				assignTruckList = getAssignTrucks(ordersList, availableTrucksList, truckHistoryList,assignTruckList, districtName);
+				assignTruckList = getAssignTrucks(ordersList, availableTrucksList, truckHistoryList,assignTruckList, districtName,axleWheelerInfoList);
 				//orderService.saveOrdersBasedOnTrucks(assignedTrucks);
 		}
 	}
 
 	private List<AvailableTrucks> getAssignTrucks(List<ShippingDetails1> ordersList, List<AvailableTrucks> availableTrucksList,
-			List<TruckHistoryDetailsEntity> truckHistoryList,List<AvailableTrucks> assignTrucksList, String districtName) {
+			List<TruckHistoryDetailsEntity> truckHistoryList,List<AvailableTrucks> assignTrucksList, String districtName,List<AxleWheelnfoEntity> axleWheelerInfoList) throws IOException, MapServiceRequestDeniedException, MapOverLimitException {
 		Date shippingDate = new Date();
 		ShippingDeliveryOrder shippingDeliveryOrder = null;
 		Map<String, List<ShippingDetails1>> ordersAssignInTrucks = new HashMap<>();
@@ -98,6 +108,9 @@ public class TruckService {
 		ShippingOrdersReAssignModel shippingReorder = null;
 		int totalOriginalOrderQty = ordersList.stream().map(ShippingDetails1::getActual_delivery_qty).mapToInt(Integer::valueOf).sum();;
 		boolean isFirstTruck = true;
+		List<ShippingDetails1> allOrdersInTruck = null;
+		List<PlantDetails> plantDetailsList =  new StoreSpDetails().getAllPlantDetails();
+		PlantDetails plantDetails = plantDetailsList.get(2);
 		for (AvailableTrucks availableTrucks : availableTrucksList) {
 			shippingDeliveryOrder = new ShippingDeliveryOrder();
 			availableTrucks = getAvailableTruckFromHistory(districtName, availableTrucks, truckHistoryList);
@@ -112,11 +125,15 @@ public class TruckService {
 					 break; 
 				  }
 			}
+			List<AxleWheelnfoEntity> axleInfoList = getAxleWheelerInfoByWheelerType(availableTrucks.getVehicleType(),
+					axleWheelerInfoList);
+			ordersList = getForwardOrders(axleInfoList, ordersList, plantDetails);
 			String truckNo = availableTrucks.getSlNo();
 			Integer truckOriginalCapacity = availableTrucks.getNormalLoad();
 			shippingDeliveryOrder.setTruckNo(truckNo);
 			shippingDeliveryOrder.setShippingDeliveryDate(shippingDate);
 			int shippingDelivaryId = shippingOrderService.generateShippingOrderId(shippingDeliveryOrder);
+			allOrdersInTruck = new ArrayList<>();
 			//Integer truckCapacity = availableTrucks.getNormalLoad();
 			if(!CollectionUtils.isEmpty(ordersAssignList)) {
 				int ordQty;
@@ -140,6 +157,7 @@ public class TruckService {
 			if(availableTrucks.getNormalLoad() == totOrdersQty) {
 				orderService.saveOrder(ordersList, availableTrucks, shippingDate, shippingDelivaryId);
 				 totalOriginalOrderQty = totalOriginalOrderQty - totOrdersQty;
+				 allOrdersInTruck.addAll(ordersList);
 			} else {
 				for (ShippingDetails1 order : ordersList) {
 					     if(availableTrucks.getNormalLoad() == null) { // it means truck is full with orders ,then we need pickup another truck from truck pool
@@ -151,13 +169,7 @@ public class TruckService {
 					    	  } 
 					     }
 					    Integer ordQty = Integer.parseInt(order.getActual_delivery_qty());
-					    
-					    
-					    
-					    
-					    
-					    
-					    
+					   
 					    int qtyDiff = availableTrucks.getNormalLoad() - ordQty;
 					if (qtyDiff > 0) {// if truck capacity is higher than order Qty
 						if (ordersAssignInTrucks.containsKey(truckNo)) {
@@ -219,6 +231,7 @@ public class TruckService {
 						 }
 					}
 					processOrdCount++;
+					allOrdersInTruck.add(order);
 				}
 				shippingOrderService.saveShippingOrderReAssign(shippingReordersList);
 			}
@@ -309,5 +322,102 @@ public class TruckService {
 		}
 	}
 	
+	private List<AxleWheelnfoEntity> getAxleWheelerInfoByWheelerType(Integer wheelerType,List<AxleWheelnfoEntity> axleWheelerInfoList) {
+		return axleWheelerInfoList.stream().filter(axleWheeler -> axleWheeler.getNo() == wheelerType)
+				.collect(Collectors.toList());
+	}
 	
+	private List<ShippingDetails1> getForwardOrders(List<AxleWheelnfoEntity> axleInfoList, List<ShippingDetails1> ordersList,
+			PlantDetails plantDetails) throws IOException, MapServiceRequestDeniedException, MapOverLimitException {
+		 List<ShippingDetails1> finalOrdList = new ArrayList<>();
+		 int listSize = ordersList.size();
+		 double plantToOrderDistance = 0.0;
+		 double ordersNextClubbingDistance = 0.0;
+		 double previousOrderDistance = 0.0;
+		 Double nextOrderDistance = 0.0;
+		 for (int ordNo = 0; ordNo < listSize; ordNo++) {
+			 if(ordNo == 0) {// this is first order
+				 finalOrdList.add(ordersList.get(ordNo));
+				 plantToOrderDistance = getOrderDistanceFromPlant(plantDetails.getLatitude()+","+plantDetails.getLongitude(),
+							ordersList.get(ordNo).getShip_to_latt() + ","
+									+ ordersList.get(ordNo).getShip_to_long()); // this is first dropping point from plant
+				 previousOrderDistance = plantToOrderDistance;
+				  nextOrderDistance = getNextForwardOrderClubDistance(axleInfoList, plantToOrderDistance);
+				 ordersNextClubbingDistance = plantToOrderDistance + nextOrderDistance; // this is used for next order dropping distance
+				 continue;
+			 }
+			 try {
+				 if(ordNo == listSize - 1) {// this is for last order from district
+					 plantToOrderDistance = getOrderDistanceFromPlant(plantDetails.getLatitude()+","+plantDetails.getLongitude(),
+								ordersList.get(ordNo).getShip_to_latt() + ","
+										+ ordersList.get(ordNo).getShip_to_long());// from 2nd order distances
+					  double ordersDistance = plantToOrderDistance - previousOrderDistance;// we are checking the distance difference between the 2 orders
+					  if(nextOrderDistance >= ordersDistance) {//
+							finalOrdList.add(ordersList.get(ordNo));
+							previousOrderDistance = plantToOrderDistance;
+							nextOrderDistance = getNextForwardOrderClubDistance(axleInfoList, plantToOrderDistance);// we will find for next order dropping point distance
+					  } else { // this means system has dropped current order because current order does not meet forward criteria condition
+						  
+					  }
+				 } else {
+					  plantToOrderDistance = getOrderDistanceFromPlant(plantDetails.getLatitude()+","+plantDetails.getLongitude(),
+								ordersList.get(ordNo).getShip_to_latt() + ","
+										+ ordersList.get(ordNo).getShip_to_long());// from 2nd order distances
+					  double ordersDistance = plantToOrderDistance - previousOrderDistance;// we are checking the distance difference between the 2 orders
+					  if(nextOrderDistance >= ordersDistance) {//
+							finalOrdList.add(ordersList.get(ordNo));
+							previousOrderDistance = plantToOrderDistance;
+							nextOrderDistance = getNextForwardOrderClubDistance(axleInfoList, plantToOrderDistance);// we will find for next order dropping point distance
+					  } else { // this means system has dropped current order because current order does not meet forward criteria condition
+						  
+					  }
+					  
+					/* double distanceDiff = getOrderDistance(
+							ordersList.get(ordNo).getShip_to_latt() + "," + ordersList.get(ordNo).getShip_to_long(),
+							ordersList.get(ordNo + 1).getShip_to_latt() + ","
+									+ ordersList.get(ordNo + 1).getShip_to_long());*/
+						/*if(distanceDiff < 90) {
+							finalOrdList.add(ordersList.get(ordNo));
+						}*/
+				 }
+			} catch (IndexOutOfBoundsException e) {
+				_LOGGER.error("no such data element in list");
+			}
+		}
+		return finalOrdList;
+	}
+	
+	private double getOrderDistance(String source, String destination)
+			throws IOException, MapServiceRequestDeniedException, MapOverLimitException {
+		DistanceMatrix distenceMatrixPojo =	mapSerice.getMaxDistenceFromMultipleDestinationsRestTemplate(source, destination);
+		String dist = distenceMatrixPojo.getRowsList().get(0).getElements().get(0).getDistance().getText();
+		return Double.parseDouble(dist);
+	
+	}
+	private double getOrderDistanceFromPlant(String plant, String orderDestination)
+			throws IOException, MapServiceRequestDeniedException, MapOverLimitException {
+		DistanceMatrix distenceMatrixPojo =	mapSerice.getMaxDistenceFromMultipleDestinationsRestTemplate(plant, orderDestination);
+		String dist = distenceMatrixPojo.getRowsList().get(0).getElements().get(0).getDistance().getText();
+		return Double.parseDouble(dist);
+	
+	}
+	private Double getNextForwardOrderClubDistance(List<AxleWheelnfoEntity> axleInfoList,double plantToOrderDistance) {
+		for (AxleWheelnfoEntity axleWheelnfoEntity : axleInfoList) {
+		     if(axleWheelnfoEntity.getOrder().contains("Upto")) {
+		    	 continue;
+		     } else {
+		    	 String distancePeriod = axleWheelnfoEntity.getOrder();
+		    	 String[] distancePeriods = distancePeriod.split("to");
+		    	 int startingDistance = Integer.parseInt(distancePeriods[0].trim());
+		    	 int endingDistance = Integer.parseInt(distancePeriods[1].replaceAll("[^0-9.]", "").trim());
+		    	 if(startingDistance > plantToOrderDistance && endingDistance < plantToOrderDistance) {
+		    		 String nextClubbingDistance = axleWheelnfoEntity.getClub();
+		    		 nextClubbingDistance = nextClubbingDistance.replaceAll("[^0-9.]", "");
+		    		 return Double.parseDouble(nextClubbingDistance);
+		    	 }
+		     }
+		}
+		return 50.0;// default next clubbing order distance if none of case doesn't meet 
+		
+	}
 }

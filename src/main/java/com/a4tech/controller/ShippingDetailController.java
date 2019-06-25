@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
@@ -79,6 +80,7 @@ public class ShippingDetailController {
 	
 	@Autowired
 	private NormalLoadValidator normalLoadValidatior;
+	private Logger _LOGGER = Logger.getLogger(ShippingDetailController.class);
 	
 	@InitBinder("normalLoadConfig")
 	protected void initBinder(WebDataBinder binder){
@@ -107,6 +109,9 @@ public class ShippingDetailController {
 		 }
 	     
 		
+	     
+	     
+	     
 		//return "/redirect:"
 	}
 	@RequestMapping(value = "/algorithmProcess")
@@ -144,6 +149,8 @@ public class ShippingDetailController {
 			throw new MapOverLimitException(e.getErrorMsg());
 		} catch (MapServiceRequestDeniedException e) {
 			throw new MapServiceRequestDeniedException(e.getErrorMsg());
+		} catch (IOException e) {
+			_LOGGER.error("unable to clubbing orders:"+e.getMessage());
 		}
 		List<IntellishipModelByMaterial> finalIntelishipModel = shippingService.getFinalGroupOrders();
 		Collections.sort(finalIntelishipModel, Comparator.comparing(IntellishipModelByMaterial::getPendingQuantity));

@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.exceptions.MapOverLimitException;
 import com.a4tech.exceptions.MapServiceRequestDeniedException;
 import com.a4tech.map.model.Distance;
@@ -38,6 +40,7 @@ import saveShipping.StoreSpDetails;
 public class OrderService {
 	@Autowired
 	private IShippingOrder shippingOrder;
+	private Logger _LOGGER = Logger.getLogger(OrderService.class);
   
 	  public List<ChannelConfiguration> getChannelsList(String channelSequence){
 		 List<ChannelConfiguration> allChannels = shippingOrder.getAllChannelConfigurations();
@@ -195,7 +198,7 @@ public class OrderService {
 			for (Map.Entry<String,List<ShippingDetails1>> materialOrdersList: districtOrdersList.entrySet()) {
 				String materialName = materialOrdersList.getKey();
 				List<ShippingDetails1> finalOrders = materialOrdersList.getValue();
-				if(finalOrders.size() == 1) {// if order contains single order ,no need to club the order 
+				if(finalOrders.size() == 1) {// if order has contains single order ,no need to club the order 
 					continue;
 				}
 				String allDestinations = allDestinationsLattAndLong(finalOrders);
@@ -213,7 +216,7 @@ public class OrderService {
 					// TODO: handle exception
 				} 
 				catch (IOException e) {
-					System.out.println("unable to calculate all destinations: "+e.getMessage());
+					_LOGGER.error("unable to calculate all destinations: "+e.getMessage());
 					throw new MapOverLimitException("Google map daily request quota has been exceeded");
 				}
 			}
@@ -258,13 +261,57 @@ public class OrderService {
  				 }
  				
  			} catch (IndexOutOfBoundsException e) {
- 				System.out.println("no such data element in list");
+ 				_LOGGER.error("no such data element in list");
  			}
  			
  		}
+ 		/*for (int ordNo = 0; ordNo < listSize; ordNo++) {
+ 			 double distanceDiff = orderMapList.get(ordNo).getDistance();
+ 			 if(distanceDiff < 350) {  // if any order exceed 350km from plant then drop those orders from clubbing process
+ 				finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
+ 			 }else {
+ 				 _LOGGER.info("order exceed more than 350KM +: "+orderMapList.get(ordNo).getShippingDetails().getDelivery());
+ 			 }
+ 		}*/
  		 return finalOrdList;
 // 		orderMapList.sort(()->
  	}
+ 	
+	private List<ShippingDetails1> getFinalOrdersList1(List<ShippingDetails1> shippingList, DistanceMatrix distancePojo,
+			List<AxleWheelnfoEntity> axleInfoList) {
+		 List<String> distAddress = distancePojo.getDestinationAddresses();
+		 List<Elements> elementList = distancePojo.getRowsList().get(0).getElements();
+		 
+		 List<OrderMap> orderMapList = new ArrayList<>();
+		 for(int destNo=0;destNo <distAddress.size();destNo++) {
+			double orderDistence = getOrderDistance(elementList.get(destNo));
+			 orderMapList.add(new OrderMap(shippingList.get(destNo), distAddress.get(destNo), orderDistence));
+		 }
+		 Collections.sort(orderMapList, Comparator.comparing(OrderMap::getDistance));
+		 List<ShippingDetails1> finalOrdList = new ArrayList<>();
+		 int listSize = orderMapList.size();
+		 for (int ordNo = 0; ordNo < listSize; ordNo++) {
+			 if(ordNo == 0) {
+				 finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
+				 continue;
+			 }
+			 try {
+				 if(ordNo == listSize - 1) {
+					 finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
+				 } else {
+					 double distanceDiff = orderMapList.get(ordNo).getDistance() - orderMapList.get(ordNo+1).getDistance();
+						if(distanceDiff < 90) {
+							finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
+						}
+				 }
+			} catch (IndexOutOfBoundsException e) {
+				_LOGGER.error("no such data element in list");
+			}
+		}
+		 return finalOrdList;
+	}
+ 	
+ 	
  	public static double getOrderDistance(Elements element) {
  		 Distance dist = element.getDistance();
  		 String kiloMeters = dist.getText();

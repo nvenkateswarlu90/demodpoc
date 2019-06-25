@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.a4tech.dao.entity.AxleWheelnfoEntity;
 import com.a4tech.exceptions.MapOverLimitException;
 import com.a4tech.exceptions.MapServiceRequestDeniedException;
 import com.a4tech.map.service.MapService;
@@ -148,9 +149,10 @@ public class ShippingService {
 
 	}
 	
-	public void getClubbedOrders(String channelSeq) throws MapOverLimitException,MapServiceRequestDeniedException {
+	public void getClubbedOrders(String channelSeq) throws MapOverLimitException,MapServiceRequestDeniedException, IOException {
 		List<ChannelConfiguration> channelList            = orderService.getChannelsList(channelSeq);
 		List<ShippingDetails1> shippingaOrderList         = shippingOrderService.getAllShippingOrders();
+		List<AxleWheelnfoEntity> axleWheelerInfoList      = shippingOrderService.getWheelTypeInfo();
 		for (ChannelConfiguration channelConfiguration : channelList) {
 			String channelType = CommonUtility.getChannels(channelConfiguration.getChannel());
 			String skuType = channelConfiguration.getSkuType();
@@ -163,9 +165,9 @@ public class ShippingService {
 				Map<String, Map<String, List<ShippingDetails1>>> finalMaterialOrdMap = orderService.getAllGroupOrdersBasedOnSameMaterial(
 						ordersOnDistrictMap);
 				finalMaterialOrdMap = orderService.getAllForwordOrders(finalMaterialOrdMap);
-				truckService.getOrderAssignTrucksWithSameMaterial(finalMaterialOrdMap);
+				truckService.getOrderAssignTrucksWithSameMaterial(finalMaterialOrdMap,axleWheelerInfoList);
 			} else {// Multiple SKU's
-				truckService.getOrderAssignTrucksWithDifferentMaterial(ordersOnDistrictMap);
+				truckService.getOrderAssignTrucksWithDifferentMaterial(ordersOnDistrictMap, axleWheelerInfoList);
 			}
 		}
 	}

@@ -1,7 +1,5 @@
 package com.a4tech.shipping.model;
 
-import com.a4tech.map.model.Elements;
-
 public class OrderMap {
 	private ShippingDetails1 shippingDetails;
 	private String destination;

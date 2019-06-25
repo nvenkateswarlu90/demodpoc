@@ -17,6 +17,7 @@ import com.a4tech.map.model.Duration;
 import com.a4tech.map.model.Elements;
 import com.a4tech.map.model.Rows;
 import com.a4tech.util.ApplicationConstants;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 
@@ -35,8 +36,10 @@ public class MapService {
 				+ originCoordinates + "&destinations=" + destinationCoordinates
 				+ "&mode=driving&key="+GOOLGE_MAP_API_KEY;
 		String status = "";
+		ObjectMapper mapper = new ObjectMapper();
 	try {
 		 DistanceMatrix result = restTemplate.getForObject(distanceMatrixUrl, DistanceMatrix.class);
+		 System.out.println("map result: "+ mapper.writeValueAsString(result));
 		 status = result.getStatus();
 			if (ApplicationConstants.CONST_OVER_DAILY_LIMIT.equalsIgnoreCase(status)
 					|| ApplicationConstants.CONST_OVER_QUERY_LIMIT.equalsIgnoreCase(status)) {
