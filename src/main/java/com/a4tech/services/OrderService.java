@@ -246,7 +246,8 @@ public class OrderService {
  		 List<ShippingDetails1> finalOrdList = new ArrayList<>();
  		 int listSize = orderMapList.size();
  		 for (int ordNo = 0; ordNo < listSize; ordNo++) {
- 			 if(ordNo == 0) {
+ 			 finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
+ 			/* if(ordNo == 0) {
  				 finalOrdList.add(orderMapList.get(ordNo).getShippingDetails());
  				 continue;
  			 }
@@ -262,7 +263,7 @@ public class OrderService {
  				
  			} catch (IndexOutOfBoundsException e) {
  				_LOGGER.error("no such data element in list");
- 			}
+ 			}*/
  			
  		}
  		/*for (int ordNo = 0; ordNo < listSize; ordNo++) {
