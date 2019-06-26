@@ -115,7 +115,9 @@ public class ShippingDetailController {
 		//return "/redirect:"
 	}
 	
-	
+	public void tt() {
+		
+	}
 	@RequestMapping(value = "/algorithmProcess")
 	public ModelAndView algorithmProcess() {
 		List<ShippingDetails1> shippingaOrderList = shippingOrderService.getAllShippingOrders();
