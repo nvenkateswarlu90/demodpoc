@@ -77,4 +77,5 @@ public interface IShippingOrder {
   public void updateAxleWheelerInfo(AxleWheelnfoEntity axleWheelerType);
   public void addAxleWheelerInfo(AxleWheelnfoEntity axleWheelerType);
   public void deleteAxleWheelerInfo(Integer wheelerId);
+  public List<AxleWheelnfoEntity> getWheelTypeInfo();
 }
