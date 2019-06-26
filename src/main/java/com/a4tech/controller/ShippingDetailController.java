@@ -114,6 +114,14 @@ public class ShippingDetailController {
 	     
 		//return "/redirect:"
 	}
+	/*
+	 * @author :shekar
+	 * testing purpose
+	 */
+	public void test() {
+		
+	}
+	
 	@RequestMapping(value = "/algorithmProcess")
 	public ModelAndView algorithmProcess() {
 		List<ShippingDetails1> shippingaOrderList = shippingOrderService.getAllShippingOrders();
