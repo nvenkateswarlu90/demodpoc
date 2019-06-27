@@ -28,7 +28,7 @@ public class MapService {
   private static Map<String, Double> distanceMapStore = new HashMap<>();
   private static Map<String, String> distanceAndHrsMapStore = new HashMap<>();
   private static Map<String, DistanceMatrix> allDestinationsStore = new HashMap<>();
-  private static String GOOLGE_MAP_API_KEY = "AIzaSyAF27UXmyKEQpNmybxxaViJpYWo-yFzkxk";
+  private static String GOOLGE_MAP_API_KEY = "hjhiwuenhjsjknskhnf51466454dsdfsdfs";
  
 	public DistanceMatrix getMaxDistenceFromMultipleDestinationsRestTemplate(String originCoordinates,
 			String destinationCoordinates) throws IOException, MapServiceRequestDeniedException, MapOverLimitException {

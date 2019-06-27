@@ -16,7 +16,7 @@
     <link href="resources/css/plugins/iCheck/custom.css" rel="stylesheet">
     <link href="resources/css/animate.css" rel="stylesheet">
     <link href="resources/css/style.css" rel="stylesheet">
- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF27UXmyKEQpNmybxxaViJpYWo-yFzkxk"></script> 
+ <script src="https://maps.googleapis.com/maps/api/js?key=kgkjlkdjfjgdoi0839kmmdflsfmlsfl"></script> 
  <!-- <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAyYtYpllFDH6MlGZzgw4wOZqVPe6vlGwU&callback=initMap"> </script> --><style>
 #map {
