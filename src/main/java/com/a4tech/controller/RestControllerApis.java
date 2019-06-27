@@ -81,7 +81,7 @@ public class RestControllerApis {
                 .body(new InputStreamResource(new FileInputStream(file)));
     }
 
-//VENKAT
+
 	public Resource loadFileAsResource(String fileName) {
 		try {
 			Path filePath = Paths.get(fileName);
